@@ -1,0 +1,2 @@
+class CarExpensesProcessor:
+    pass

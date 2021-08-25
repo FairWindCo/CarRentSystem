@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-from balance.models import Account
+from balance.models import Account, Transaction
 
 
 class CarBrand(models.Model):
@@ -20,19 +20,17 @@ class CarModel(models.Model):
 
 
 class Investor(Account):
-    name = models.CharField(max_length=250, verbose_name='Имя')
     profit = models.FloatField()
 
 
 class Driver(Account):
-    name = models.CharField(max_length=250, verbose_name='Имя')
+    pass
 
 
 class Car(Account):
-    name = models.CharField(max_length=250, verbose_name='Номер')
     model = models.ForeignKey(CarModel, on_delete=models.CASCADE)
-    investor = models.ForeignKey(CarModel, on_delete=models.CASCADE)
-    year = models.PositiveSmallIntegerField(max_length=4)
+    car_investor = models.ForeignKey(Investor, on_delete=models.CASCADE, related_name='cars')
+    year = models.PositiveSmallIntegerField()
     mileage_at_start = models.PositiveIntegerField(verbose_name='')
     date_start = models.DateField(auto_now_add=True, auto_created=True)
     mileage = models.PositiveIntegerField(verbose_name='')
@@ -50,3 +48,18 @@ class Trip(models.Model):
     fuel = models.PositiveIntegerField(verbose_name='')
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
+
+
+class ExpensesTypes(models.Model):
+    name = models.CharField(max_length=250)
+
+
+class Expenses(models.Model):
+    date_mark = models.DateTimeField(auto_now_add=True, auto_created=True)
+    amount = models.PositiveBigIntegerField()
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=True, blank=True)
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True)
+    investor = models.ForeignKey(Investor, on_delete=models.CASCADE, null=True, blank=True)
+    description = models.TextField()
+    expenseType = models.ForeignKey(ExpensesTypes, on_delete=models.CASCADE)
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
