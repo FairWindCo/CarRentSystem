@@ -27,13 +27,26 @@ class Driver(Account):
     pass
 
 
+class Counterpart(Account):
+    pass
+
+
+class Assistant(Account):
+    pass
+
+
+class InvestmentCarBalance(Account):
+    create_date = models.DateField(auto_created=True)
+
+
 class Car(Account):
     model = models.ForeignKey(CarModel, on_delete=models.CASCADE)
     car_investor = models.ForeignKey(Investor, on_delete=models.CASCADE, related_name='cars')
+    investment = models.OneToOneField(InvestmentCarBalance, on_delete=models.CASCADE, related_name='car')
     year = models.PositiveSmallIntegerField()
     mileage_at_start = models.PositiveIntegerField(verbose_name='')
     date_start = models.DateField(auto_now_add=True, auto_created=True)
-    mileage = models.PositiveIntegerField(verbose_name='')
+    control_mileage = models.PositiveIntegerField(verbose_name='')
     last_TO_date = models.DateField(null=True)
     wialon_id = models.CharField(max_length=50, verbose_name='ID в системе WIALON')
 
@@ -41,13 +54,33 @@ class Car(Account):
         return f'{self.model.brand.name} {self.model.name} {self.name}'
 
 
-class Trip(models.Model):
-    start = models.DateTimeField(auto_now_add=True, auto_created=True)
-    end = models.DateTimeField()
-    mileage = models.PositiveIntegerField(verbose_name='')
-    fuel = models.PositiveIntegerField(verbose_name='')
+class CarMileage(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='mileage')
+    mileage_at_start = models.PositiveIntegerField(verbose_name='')
+
+
+class WialonTrip(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
+    start = models.DateTimeField(auto_now_add=True, auto_created=True, verbose_name='Дата начала поездки')
+    end = models.DateTimeField(blank=True, null=True, verbose_name='Дата завершения поездки')
+    mileage = models.PositiveIntegerField(verbose_name='Пробег по трекеру')
+    fuel = models.PositiveIntegerField(verbose_name='Раход по трекеру')
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name='Водитель, если известно')
+
+
+class TaxiTrip(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_created=True, verbose_name='Дата начала поездки')
+    mileage = models.PositiveIntegerField(verbose_name='Пробег по трекеру')
+    fuel = models.PositiveIntegerField(verbose_name='Раход по пробегу')
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,
+                               verbose_name='Водитель, если известно')
+    amount = models.PositiveBigIntegerField(verbose_name='Сумма оплаты')
+    payer = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True,
+                              verbose_name='Плательщик/От кого приняли средства', related_name='trips')
+    cash = models.BooleanField(verbose_name='Оплата наличными')
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
 
 
 class ExpensesTypes(models.Model):
