@@ -31,10 +31,6 @@ class Counterpart(Account):
     pass
 
 
-class Assistant(Account):
-    pass
-
-
 class InvestmentCarBalance(Account):
     create_date = models.DateField(auto_created=True)
 
@@ -48,7 +44,7 @@ class Car(Account):
     date_start = models.DateField(auto_now_add=True, auto_created=True)
     control_mileage = models.PositiveIntegerField(verbose_name='')
     last_TO_date = models.DateField(null=True)
-    wialon_id = models.CharField(max_length=50, verbose_name='ID в системе WIALON')
+    wialon_id = models.CharField(max_length=50, verbose_name='ID в системе WIALON', null=True, blank=True)
 
     def __str__(self):
         return f'{self.model.brand.name} {self.model.name} {self.name}'
@@ -90,9 +86,8 @@ class ExpensesTypes(models.Model):
 class Expenses(models.Model):
     date_mark = models.DateTimeField(auto_now_add=True, auto_created=True)
     amount = models.PositiveBigIntegerField()
-    car = models.ForeignKey(Car, on_delete=models.CASCADE, null=True, blank=True)
-    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True)
-    investor = models.ForeignKey(Investor, on_delete=models.CASCADE, null=True, blank=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_expenses')
+    counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, related_name='counterpart_expenses')
     description = models.TextField()
     expenseType = models.ForeignKey(ExpensesTypes, on_delete=models.CASCADE)
-    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+    transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, related_name='expense')

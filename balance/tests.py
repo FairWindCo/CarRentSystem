@@ -3,7 +3,7 @@ import datetime
 from django.test import TestCase
 
 # Create your tests here.
-from balance.models import Account, TransactionType, AccountStatement
+from balance.models import Account, AccountStatement, Transaction
 from balance.services import Balance
 
 
@@ -13,7 +13,7 @@ class CheckBalance(TestCase):
         self.test_account_2 = Account.objects.create(name='Test 2')
         self.test_account_3 = Account.objects.create(name='Test 3')
         self.test_account_4 = Account.objects.create(name='Test 4')
-        self.transaction_type = TransactionType.objects.create(name='Test Transaction')
+        self.transaction_type = Transaction.TransactionType.EXPENSE
 
     def test_balance_with_no_operation(self):
         self.assertEquals(Balance.get_current_balance(self.test_account_1), 0)

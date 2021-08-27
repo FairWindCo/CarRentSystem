@@ -5,13 +5,19 @@ from django.db import transaction
 from django.db.models import Sum
 from django.utils.timezone import now
 
-from balance.models import Account, AccountTransaction, AccountStatement, TransactionType, Transaction
+from balance.models import Account, AccountTransaction, AccountStatement, Transaction
 
 
 class Balance:
+    EXPENSE = Transaction.TransactionType.EXPENSE
+    RECEIPT = Transaction.TransactionType.RECEIPT
+    TRANSFER = Transaction.TransactionType.TRANSFER
+    DEPOSIT = Transaction.TransactionType.DEPOSIT
+    WITHDRAWAL = Transaction.TransactionType.WITHDRAWAL
+
     @staticmethod
     # Create one transaction with list of account operation (from_account, to_account, amount)
-    def form_transaction(transaction_type: TransactionType,
+    def form_transaction(transaction_type: Transaction.TransactionType,
                          operations: list[tuple[Account, Account, int]],
                          ) -> Optional[Transaction]:
         with transaction.atomic():

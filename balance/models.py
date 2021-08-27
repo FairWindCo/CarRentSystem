@@ -5,7 +5,20 @@ from django.db import models
 class Account(models.Model):
     name = models.CharField(max_length=250)
     last_period_balance = models.ForeignKey('AccountStatement', null=True, on_delete=models.SET_NULL,
-                                            related_name='for_account')
+                                            related_name='for_account', blank=True,
+                                            verbose_name='Последний зафиксированный баланс'
+                                            )
+
+    def __str__(self):
+        account_str = f'{self.last_period_balance.closingBalance} ' \
+                      f'{self.last_period_balance.statementDate.strftime("%d.%m.%Y")}' \
+            if self.last_period_balance else '--'
+        return f'{self.name} ({account_str})'
+
+    class Meta:
+        verbose_name = 'Баланс'
+        verbose_name_plural = 'Балансы'
+        ordering = ('name',)
 
 
 class AccountStatement(models.Model):
@@ -18,14 +31,30 @@ class AccountStatement(models.Model):
     def __str__(self):
         return f'S[{self.statementDate.strftime("%Y.%m.%d")}:{self.account.name}] = {self.closingBalance},{self.totalDebit},{self.totalCredit}'
 
-
-class TransactionType(models.Model):
-    name = models.CharField(max_length=255)
+    class Meta:
+        verbose_name = 'Состояния баланса за дату'
+        verbose_name_plural = 'Переодические состояния балансов'
+        ordering = ('account', 'statementDate')
+        unique_together = ('account', 'statementDate')
 
 
 class Transaction(models.Model):
-    transactionTime = models.DateTimeField(auto_now_add=True)
-    transactionType = models.ForeignKey(TransactionType, on_delete=models.PROTECT)
+    class TransactionType(models.IntegerChoices):
+        EXPENSE = 0, 'Расход'
+        RECEIPT = 1, 'Приход'
+        TRANSFER = 3, 'Перевод средств между счетами'
+        DEPOSIT = 4, 'Внесение денежных средств '
+        WITHDRAWAL = 5, 'Вывод денежных средств'
+
+    transactionTime = models.DateTimeField(auto_now_add=True, verbose_name='Время транзакции')
+    transactionType = models.IntegerField(choices=TransactionType.choices, verbose_name='Тип')
+
+    class Meta:
+        verbose_name = 'Транзакция'
+        verbose_name_plural = 'транзакции'
+
+    def __str__(self):
+        return f'{self.transactionTime.strftime("%d.%m.%Y %h:%M:%S.%s")} - {self.transactionType}'
 
 
 class AccountTransaction(models.Model):
@@ -35,3 +64,7 @@ class AccountTransaction(models.Model):
 
     def __str__(self):
         return f'T[{self.transaction.id}] {self.account.name} {self.amount}'
+
+    class Meta:
+        verbose_name = 'Операция в транзакция'
+        verbose_name_plural = 'Транзакционные операции'
