@@ -6,7 +6,7 @@ from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
 from carmanagment.models import *
 
 
-class AddDynamicFieldMixin:
+class AddDynamicFieldMixin(admin.ModelAdmin):
     def get_fieldsets(self, request, obj=None):
         fs = super().get_fieldsets(request, obj)
         new_dynamic_fieldsets = getattr(self, 'dynamic_fieldsets', {})
@@ -50,10 +50,6 @@ class CarAdmin(AddDynamicFieldMixin, admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
-
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change, **kwargs)
-        return form
 
 
 class InvestorAdmin(ReadOnlyModelAdmin):
