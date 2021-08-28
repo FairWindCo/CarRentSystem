@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 # Create your models here.
@@ -39,8 +40,13 @@ class Car(Account):
     model = models.ForeignKey(CarModel, on_delete=models.CASCADE)
     car_investor = models.ForeignKey(Investor, on_delete=models.CASCADE, related_name='cars')
     investment = models.OneToOneField(InvestmentCarBalance, on_delete=models.CASCADE, related_name='car')
-    year = models.PositiveSmallIntegerField()
-    mileage_at_start = models.PositiveIntegerField(verbose_name='')
+    year = models.PositiveSmallIntegerField(verbose_name='Год выпуска', validators=[
+            MaxValueValidator(2100),
+            MinValueValidator(1900)
+        ])
+    mileage_at_start = models.PositiveIntegerField(verbose_name='Пробег при поступлении', validators=[
+            MinValueValidator(0)
+        ])
     date_start = models.DateField(auto_now_add=True, auto_created=True)
     control_mileage = models.PositiveIntegerField(verbose_name='')
     last_TO_date = models.DateField(null=True)
