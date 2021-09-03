@@ -3,22 +3,31 @@ from django.db import models
 
 # Create your models here.
 class Account(models.Model):
-    name = models.CharField(max_length=250)
+    class AccountCurrency(models.IntegerChoices):
+        GRIVNA = 0, 'грн'
+        DOLLAR = 1, '$'
+
+    name = models.CharField(max_length=250, verbose_name='имя/название/гос номер')
     last_period_balance = models.ForeignKey('AccountStatement', null=True, on_delete=models.SET_NULL,
                                             related_name='for_account', blank=True,
                                             verbose_name='Последний зафиксированный баланс'
                                             )
+    currency = models.PositiveSmallIntegerField(choices=AccountCurrency.choices, default=AccountCurrency.GRIVNA,
+                                                verbose_name='валюта')
 
     def __str__(self):
         account_str = f'{self.last_period_balance.closingBalance} ' \
                       f'{self.last_period_balance.statementDate.strftime("%d.%m.%Y")}' \
             if self.last_period_balance else '--'
-        return f'{self.name} ({account_str})'
+        return f'{self.name} ({account_str}){self.get_currency()}'
 
     class Meta:
         verbose_name = 'Баланс'
         verbose_name_plural = 'Балансы'
         ordering = ('name',)
+
+    def get_currency(self):
+        return Account.AccountCurrency.labels[self.currency]
 
 
 class AccountStatement(models.Model):
@@ -29,7 +38,9 @@ class AccountStatement(models.Model):
     totalDebit = models.BigIntegerField()
 
     def __str__(self):
-        return f'S[{self.statementDate.strftime("%Y.%m.%d")}:{self.account.name}] = {self.closingBalance},{self.totalDebit},{self.totalCredit}'
+        return f'S[{self.statementDate.strftime("%Y.%m.%d")}:' \
+               f'{self.account.name}] = {self.closingBalance},{self.totalDebit},{self.totalCredit} ' \
+               f'{Account.AccountCurrency.labels[self.account.currency]}'
 
     class Meta:
         verbose_name = 'Состояния баланса за дату'
@@ -45,6 +56,7 @@ class Transaction(models.Model):
         TRANSFER = 3, 'Перевод средств между счетами'
         DEPOSIT = 4, 'Внесение денежных средств '
         WITHDRAWAL = 5, 'Вывод денежных средств'
+        INVESTMENT = 6, 'Инвестиция'
 
     transactionTime = models.DateTimeField(auto_now_add=True, verbose_name='Время транзакции')
     transactionType = models.IntegerField(choices=TransactionType.choices, verbose_name='Тип')
@@ -54,7 +66,7 @@ class Transaction(models.Model):
         verbose_name_plural = 'транзакции'
 
     def __str__(self):
-        return f'{self.transactionTime.strftime("%d.%m.%Y %h:%M:%S.%s")} - {self.transactionType}'
+        return f'{self.pk} [{self.transactionTime.strftime("%d.%m.%Y %H:%M:%S")}] - {self.TransactionType.choices[self.transactionType][1]}'
 
 
 class AccountTransaction(models.Model):
@@ -63,7 +75,7 @@ class AccountTransaction(models.Model):
     amount = models.BigIntegerField()
 
     def __str__(self):
-        return f'T[{self.transaction.id}] {self.account.name} {self.amount}'
+        return f'T[{self.transaction.id}] {self.account.name} {self.amount}{Account.AccountCurrency.labels[self.account.currency]}'
 
     class Meta:
         verbose_name = 'Операция в транзакция'

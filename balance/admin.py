@@ -20,6 +20,8 @@ class ReadOnlyModelAdmin(admin.ModelAdmin):
 
 class BalanceReadOnlyField(admin.ModelAdmin):
     readonly_fields = ['last_period_balance']
+    ordering = ['name']
+    search_fields = ['name']
 
 
 class BalanceModel(BalanceReadOnlyField, ReadOnlyModelAdmin):
