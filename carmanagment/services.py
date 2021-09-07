@@ -78,7 +78,7 @@ class ExpensesProcessor:
     @staticmethod
     def form_car_capital_expense(car: Car,
                                  amount: int, course: float,
-                                 expense_type: TypeError,
+                                 expense_type: ExpensesTypes,
                                  counterpart: Counterpart,
                                  description: str) -> Expenses:
         if expense_type.type_class != ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE:
@@ -101,9 +101,34 @@ class ExpensesProcessor:
 class TripProcessor:
     @staticmethod
     def manual_create_taxi_trip(car: Car, driver: Driver, start: datetime, payer: Counterpart, millage: int,
-                                amount: int, gas_price: int):
-        taxitrip = TaxiTrip(car=car, timestamp=start, driver=driver, payer=payer, mileage=millage, amount=amount)
-        fuel_trip = (millage + car.additional_miilage)/100 * car.fuel_consumption
-        fuel_price = fuel_trip * gas_price
-        taxitrip.fuel = math.ceil(fuel_price)
-        pass
+                                amount: int, gas_price: int, cash: bool = False):
+        if not isinstance(car, Car) or car is None:
+            raise TypeError('Need car account')
+        if not isinstance(driver, Driver) or driver is None:
+            raise TypeError('Need Driver account')
+        if not isinstance(payer, Counterpart) or payer is None:
+            raise TypeError('Need Counterpart account')
+        with transaction.atomic():
+            taxitrip = TaxiTrip(car=car, timestamp=start, driver=driver, payer=payer, mileage=millage, amount=amount,
+                                cash=cash)
+            fuel_trip = (millage + car.additional_miilage) / 100 * car.fuel_consumption
+            fuel_price = fuel_trip * gas_price
+            taxitrip.fuel = math.ceil(fuel_price)
+            real_amount = amount - taxitrip.fuel
+            driver_money = math.trunc(real_amount * driver.profit / 100)
+
+            operations = [
+                (payer, car, amount),
+                (car, driver, taxitrip.fuel),
+                (car, driver, driver_money),
+            ]
+            if cash:
+                operations.append((driver, None, amount))
+            # print(operations)
+            # print(fuel_trip, taxitrip.fuel, driver_money)
+            transaction_record = Balance.form_transaction(Balance.DEPOSIT, operations)
+
+            taxitrip.car_amount = amount - taxitrip.fuel - driver_money
+            taxitrip.transaction = transaction_record
+            taxitrip.save()
+            return True

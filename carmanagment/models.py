@@ -29,7 +29,7 @@ class CarModel(models.Model):
 
 
 class Investor(Account):
-    profit = models.FloatField()
+    profit = models.FloatField(verbose_name='Коифициент распределения прибыли')
 
     class Meta:
         verbose_name = 'Инвестор'
@@ -37,6 +37,8 @@ class Investor(Account):
 
 
 class Driver(Account):
+    profit = models.FloatField(default=0.5, verbose_name='Коифициент распределения прибыли')
+
     class Meta:
         verbose_name = 'Водитель'
         verbose_name_plural = 'Водители'
@@ -68,8 +70,8 @@ class Car(Account):
         MinValueValidator(0)
     ])
     date_start = models.DateField(auto_now_add=True, auto_created=True)
-    control_mileage = models.PositiveIntegerField(verbose_name='')
-    last_TO_date = models.DateField(null=True)
+    control_mileage = models.PositiveIntegerField(verbose_name='Контрольное значени пробега')
+    last_TO_date = models.DateField(null=True, blank=True)
     wialon_id = models.CharField(max_length=50, verbose_name='ID в системе WIALON', null=True, blank=True)
     fuel_consumption = models.FloatField(verbose_name='Расход топлива', default=14)
     additional_miilage = models.PositiveIntegerField(verbose_name='Дополнительный километраж на поездку', default=0)
@@ -101,10 +103,11 @@ class TaxiTrip(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True, auto_created=True, verbose_name='Дата начала поездки')
     mileage = models.PositiveIntegerField(verbose_name='Пробег по трекеру')
-    fuel = models.PositiveIntegerField(verbose_name='Раход по пробегу')
+    fuel = models.PositiveIntegerField(verbose_name='Затраты на топливо')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,
                                verbose_name='Водитель, если известно')
     amount = models.PositiveBigIntegerField(verbose_name='Сумма оплаты')
+    car_amount = models.PositiveBigIntegerField(verbose_name='Сумма прибыли по машине')
     payer = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True,
                               verbose_name='Плательщик/От кого приняли средства', related_name='trips')
     cash = models.BooleanField(verbose_name='Оплата наличными')

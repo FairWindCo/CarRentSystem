@@ -69,7 +69,7 @@ class Balance:
         if account.last_period_balance is not None and account.last_period_balance.statementDate <= on_date:
             last_balance = account.last_period_balance
         else:
-            last_balance = AccountStatement.objects.filter(account=account, statementDate__lte=on_date).order_by(
+            last_balance = AccountStatement.objects.filter(account_id=account.pk, statementDate__lte=on_date).order_by(
                 '-statementDate').first()
 
         if last_balance is None:
