@@ -1,9 +1,11 @@
+from constance import config
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from carmanagment.custom_admin import CustomModelPage
 from carmanagment.models import *
 from carmanagment.services import ExpensesProcessor, CarCreator, TripProcessor
+from external_services.fresh_contants import get_special_fuel_help_text
 
 
 class CarAddPage(CustomModelPage):
@@ -39,7 +41,7 @@ class ExpensePage(CustomModelPage):
     amount = models.PositiveIntegerField(verbose_name='Сумма')
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, verbose_name='Контрагент')
     comment = models.TextField(verbose_name='Коментарий')
-    currency_rate = models.FloatField(verbose_name='Курс', null=True, blank=True)
+    currency_rate = models.FloatField(verbose_name='Курс', null=True, blank=True, default=config.USD_CURRENCY)
 
     def clean(self):
         if not hasattr(self, 'expense_type') or self.expense_type is None:
@@ -110,7 +112,7 @@ class TaxiTripPage(CustomModelPage):
                                     related_name='taxi_service')
     amount = models.PositiveIntegerField(verbose_name='Сумма')
     millage = models.PositiveIntegerField(verbose_name='Растояние')
-    gas_price = models.PositiveIntegerField(verbose_name='Цена газа')
+    gas_price = models.PositiveIntegerField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
     cash = models.BooleanField(verbose_name='Оплата наличными', default=False)
     start_time = models.DateTimeField(verbose_name='Дата и время начала поездки')
 
@@ -128,3 +130,7 @@ class TaxiTripPage(CustomModelPage):
                                                  self.counterpart, self.millage, self.amount,
                                                  self.gas_price, self.cash):
             self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
+
+
+class EmptyModel(CustomModelPage):
+    pass

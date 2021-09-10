@@ -17,8 +17,16 @@ class CarBrand(models.Model):
 
 
 class CarModel(models.Model):
+    class FuelType(models.IntegerChoices):
+        A92 = (1, 'Бензин А95')
+        A95 = (2, 'Бензин А95')
+        DISEL = (3, 'Дизельное топливо')
+        GAS = (4, 'Сжиженный газ')
     name = models.CharField(max_length=120, verbose_name='Модель')
     brand = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
+    type_class = models.PositiveSmallIntegerField(choices=FuelType.choices,
+                                                  verbose_name='Тип топлива',
+                                                  default=FuelType.GAS)
 
     def __str__(self):
         return f'{self.brand.name} {self.name}'

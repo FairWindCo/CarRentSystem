@@ -3,11 +3,14 @@ from typing import Optional
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin.decorators import register
+from django.contrib.admin.views.main import ChangeList
 from django.db import models
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.translation import gettext_lazy as _
+
+from utils.custom_ import ChangeListSpecial
 
 
 class EtcAdmin(admin.ModelAdmin):
@@ -51,6 +54,7 @@ class ReadonlyAdmin(EtcAdmin):
             'show_save': False,
         })
         return super().changeform_view(request, object_id, extra_context=extra_context)
+
 
 class CustomPageModelAdmin(ReadonlyAdmin):
     """Base for admin pages with contents based on custom models."""
@@ -158,17 +162,32 @@ class AddDynamicFieldMixin(admin.ModelAdmin):
         return gf
 
 
-
-class Opts:
-    pass
-
-
-class Cl:
-    pass
-
-
 class ListAdmin(EtcAdmin):
+    class Opts:
+        pass
+
+    class Cl:
+        pass
+
+    class AppConfig:
+        def __init__(self, verbose_name):
+            self.verbose_name = verbose_name
+
     actions = None
+    model_field_sets = {}
+    model_title = f'Custom View Page'
+    use_custom_view_template = True
+    use_change_list = False
+
+    @classmethod
+    def register(cls):
+        if not hasattr(cls, 'model_query'):
+            empty_model = type(f'{cls.__name__}_model', (CustomModelPage,),
+                               {'__module__': __name__, **cls.model_field_sets, 'title': cls.model_title})
+        else:
+            empty_model = type(f'{cls.__name__}_model', (cls.model_query,),
+                               {'__module__': __name__, 'title': cls.model_title})
+        register(empty_model)(cls)
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         return False
@@ -189,24 +208,63 @@ class ListAdmin(EtcAdmin):
         meta = self.model._meta
         patterns = [path(
             '',
-            self.admin_site.admin_view(self.view_custom),
+            self.admin_site.admin_view(self.view_custom if self.use_custom_view_template else self.changelist_view),
             name=f'{meta.app_label}_{meta.model_name}_changelist'
         )]
         return patterns
 
+    def get_title(self):
+        return 'Custom View Page'
+
     def view_custom(self, request: HttpRequest) -> HttpResponse:
-        opts = Opts()
-        cl = Cl()
+        title = self.get_title()
+        cl = self.Cl()
+        opts = self.Opts()
+        config = self.AppConfig(title)
+        list_display = self.get_list_display(request)
+        list_display_links = self.get_list_display_links(request, list_display)
+        # Add the action checkboxes if any actions are available.
+        if self.get_actions(request):
+            list_display = ['action_checkbox', *list_display]
+        sortable_by = self.get_sortable_by(request)
+        if self.use_change_list:
+            cl = ChangeListSpecial(
+                request,
+                self.model,
+                list_display,
+                list_display_links,
+                self.get_list_filter(request),
+                self.date_hierarchy,
+                self.get_search_fields(request),
+                self.get_list_select_related(request),
+                self.list_per_page,
+                self.list_max_show_all,
+                self.list_editable,
+                self,
+                sortable_by,
+            )
+
         setattr(cl, 'opts', opts)
         setattr(cl, 'result_count', 0)
         setattr(cl, 'full_result_count', 0)
         setattr(cl, 'get_ordering_field_columns', '')
-        setattr(opts, 'app_label', self.model._meta.app_label)
-        setattr(opts, 'object_name', self.model._meta.app_label)
+        setattr(opts, 'app_label', 'admin')
+        setattr(opts, 'app_config', config)
+        # cl.opts.app_config.verbose_name
+        setattr(opts, 'object_name', title)
         context: dict = {
-
-            'title': self.model._meta.verbose_name,
+            **self.admin_site.each_context(request),
+            'title': title,
             'opts': opts,
             'cl': cl,
+
         }
         return TemplateResponse(request, 'test.html', context)
+
+
+def get_model_fields(model):
+    fields = {}
+    options = model._meta
+    for field in sorted(options.concrete_fields + options.many_to_many):
+        fields[field.name] = field
+    return fields

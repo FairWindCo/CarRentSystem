@@ -1,10 +1,9 @@
-from django.contrib import admin
-from django.db.models import Q
-
 from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
-from carmanagment.custom_admin import CustomPageModelAdmin
+from carmanagment.custom_admin import CustomPageModelAdmin, ListAdmin
 from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage
 from carmanagment.models import *
+from django.contrib import admin
+from django.db.models import Q
 
 
 class CarAdmin(admin.ModelAdmin):
@@ -73,10 +72,36 @@ class TaxiTripPageAdmin(CustomPageModelAdmin):
     autocomplete_fields = ('car', 'driver', 'counterpart')
 
 
+def get_model_fields(model):
+    fields = {}
+    options = model._meta
+    for field in sorted(options.concrete_fields):
+        fields[field.name] = field
+    return fields
+
+
+class MyList(ListAdmin):
+    model_field_sets = {
+        'name': models.CharField(max_length=250, verbose_name='Номерной знак'),
+    }
+    model_query = Car
+    list_display = ('name',)
+    search_fields = ('name', )
+    list_filter = ('name', )
+    use_custom_view_template = True
+    use_change_list = True
+
+    def get_queryset(self, request):
+        return Car.objects.all()
+
+
 ExpensePage.register(admin_model=CarExpenseBase)
 OtherExpensePage.register(admin_model=OtherExpenseBase)
 CarAddPage.register(admin_model=CarAddPageAdmin)
 TaxiTripPage.register(admin_model=TaxiTripPageAdmin)
+# EmptyModel.register(admin_model=ListAdmin)
+ListAdmin.register()
+MyList.register()
 admin.site.register(Car, CarAdmin)
 admin.site.register(Expenses, ReadOnlyModelAdmin)
 admin.site.register(Driver, BalanceReadOnlyField)
