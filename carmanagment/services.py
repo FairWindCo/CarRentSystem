@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from balance.models import Account
 from balance.services import Balance
 from carmanagment.models import Expenses, ExpensesTypes, Counterpart, Car, CarModel, InvestmentCarBalance, Investor, \
-    TaxiTrip, Driver
+    TaxiTrip, Driver, TaxiOperator
 
 
 class CarCreator:
@@ -100,7 +100,7 @@ class ExpensesProcessor:
 
 class TripProcessor:
     @staticmethod
-    def manual_create_taxi_trip(car: Car, driver: Driver, start: datetime, payer: Counterpart, millage: int,
+    def manual_create_taxi_trip(car: Car, driver: Driver, start: datetime, payer: TaxiOperator, millage: int,
                                 amount: int, gas_price: int, cash: bool = False):
         if not isinstance(car, Car) or car is None:
             raise TypeError('Need car account')
@@ -116,9 +116,9 @@ class TripProcessor:
             taxitrip.fuel = math.ceil(fuel_price)
             real_amount = amount - taxitrip.fuel
             driver_money = math.trunc(real_amount * driver.profit / 100)
-
+            real_pay = math.trunc(amount * (1 - (payer.cash_profit if cash else payer.profit)))
             operations = [
-                (payer, car, amount),
+                (payer, car, real_pay),
                 (car, driver, taxitrip.fuel),
                 (car, driver, driver_money),
             ]

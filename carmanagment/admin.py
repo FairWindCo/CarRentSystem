@@ -1,9 +1,10 @@
+from django.contrib import admin
+from django.db.models import Q
+
 from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
 from carmanagment.custom_admin import CustomPageModelAdmin, ListAdmin
 from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage
 from carmanagment.models import *
-from django.contrib import admin
-from django.db.models import Q
 
 
 class CarAdmin(admin.ModelAdmin):
@@ -23,7 +24,12 @@ class CarAdmin(admin.ModelAdmin):
         return False
 
 
-class InvestorAdmin(ReadOnlyModelAdmin):
+class InvestorAdmin(admin.ModelAdmin):
+    ordering = ['name']
+    search_fields = ['name']
+
+
+class TaxiOperatorAdmin(admin.ModelAdmin):
     ordering = ['name']
     search_fields = ['name']
 
@@ -58,6 +64,10 @@ class OtherExpenseBase(CustomPageModelAdmin):
     autocomplete_fields = ('account', 'expense_type', 'counterpart')
 
 
+class CarInTaxiAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('car', 'driver', 'operator')
+
+
 # Register my page within Django admin.
 class CounterpartAdmin(admin.ModelAdmin):
     ordering = ['name']
@@ -86,8 +96,8 @@ class MyList(ListAdmin):
     }
     model_query = Car
     list_display = ('name',)
-    search_fields = ('name', )
-    list_filter = ('name', )
+    search_fields = ('name',)
+    list_filter = ('name',)
     use_custom_view_template = True
     use_change_list = True
 
@@ -109,4 +119,6 @@ admin.site.register(ExpensesTypes, ExpensesTypesAdmin)
 admin.site.register(Investor, InvestorAdmin)
 admin.site.register(CarModel, CarModelAdmin)
 admin.site.register(Counterpart, CounterpartAdmin)
+admin.site.register(TaxiOperator, TaxiOperatorAdmin)
+admin.site.register(CarsInOperator, CarInTaxiAdmin)
 admin.site.register(CarBrand)

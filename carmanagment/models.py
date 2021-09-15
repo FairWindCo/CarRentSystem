@@ -22,6 +22,7 @@ class CarModel(models.Model):
         A95 = (2, 'Бензин А95')
         DISEL = (3, 'Дизельное топливо')
         GAS = (4, 'Сжиженный газ')
+
     name = models.CharField(max_length=120, verbose_name='Модель')
     brand = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
     type_class = models.PositiveSmallIntegerField(choices=FuelType.choices,
@@ -56,6 +57,30 @@ class Counterpart(Account):
     class Meta:
         verbose_name = 'Контрагент'
         verbose_name_plural = 'Контрагенты'
+
+
+class TaxiOperator(Counterpart):
+    cash_profit = models.FloatField(default=0.15, verbose_name='Коифициент прибили с поезди оператора (нал)')
+    profit = models.FloatField(default=0.17, verbose_name='Коифициент прибили с поезди оператора (без нал)')
+
+    class Meta:
+        verbose_name = 'Оператор такси'
+        verbose_name_plural = 'Оператор такси'
+
+
+class CarsInOperator(models.Model):
+    car = models.ForeignKey("Car", on_delete=models.CASCADE, related_name='cars_in_taxi', verbose_name='Машина')
+    driver = models.ForeignKey("Driver", on_delete=models.CASCADE, related_name='driver_in_taxi', verbose_name='Машина')
+    operator = models.ForeignKey(TaxiOperator, on_delete=models.CASCADE, related_name='taxi_park',
+                                 verbose_name='Таксопарк')
+    car_uid = models.CharField(max_length=255, blank=True, null=True, verbose_name='Идентификатор машины')
+
+    def __str__(self):
+        return f'{self.operator.name} {self.car.name} {self.driver.name}'
+
+    class Meta:
+        verbose_name = 'Машины в таксопарках'
+        verbose_name_plural = 'Машины в таксопарках'
 
 
 class InvestmentCarBalance(Account):
@@ -120,6 +145,9 @@ class TaxiTrip(models.Model):
                               verbose_name='Плательщик/От кого приняли средства', related_name='trips')
     cash = models.BooleanField(verbose_name='Оплата наличными')
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('car', 'timestamp'),)
 
 
 class ExpensesTypes(models.Model):
