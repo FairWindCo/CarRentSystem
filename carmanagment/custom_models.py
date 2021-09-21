@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from carmanagment.custom_admin import CustomModelPage
 from carmanagment.models import *
-from carmanagment.services import ExpensesProcessor, CarCreator, TripProcessor
+from carmanagment.services import ExpensesProcessor, CarCreator
 from external_services.fresh_contants import get_special_fuel_help_text
 
 
@@ -108,7 +108,7 @@ class TaxiTripPage(CustomModelPage):
     # Define some fields.
     car = models.ForeignKey(Car, on_delete=models.CASCADE, verbose_name='Авто', related_name='taxi_car')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Водитель', related_name='taxi_driver')
-    counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, verbose_name='Контрагент',
+    counterpart = models.ForeignKey(TaxiOperator, on_delete=models.CASCADE, verbose_name='Контрагент',
                                     related_name='taxi_service')
     amount = models.PositiveIntegerField(verbose_name='Сумма')
     millage = models.PositiveIntegerField(verbose_name='Растояние')
@@ -126,9 +126,9 @@ class TaxiTripPage(CustomModelPage):
         super().clean()
 
     def save(self):
-        if TripProcessor.manual_create_taxi_trip(self.car, self.driver, self.start_time,
-                                                 self.counterpart, self.millage, self.amount,
-                                                 self.gas_price, self.cash):
+        if TaxiTrip.manual_create_taxi_trip(self.car, self.driver, self.start_time,
+                                            self.counterpart, self.millage, self.amount,
+                                            self.gas_price, self.cash):
             self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
 
 

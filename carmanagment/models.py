@@ -1,8 +1,12 @@
+import math
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 
 # Create your models here.
+from django.utils.datetime_safe import datetime
+
 from balance.models import Account, Transaction
+from balance.services import Balance
 
 
 class CarBrand(models.Model):
@@ -35,6 +39,19 @@ class CarModel(models.Model):
     class Meta:
         verbose_name = 'Модель'
         verbose_name_plural = 'Модели'
+
+
+def get_fuel_price_for_type(fuel_type, fuel_price):
+    if fuel_type == CarModel.FuelType.A92:
+        return fuel_price['a95']
+    elif fuel_type == CarModel.FuelType.A95:
+        return fuel_price['a92']
+    elif fuel_type == CarModel.FuelType.DISEL:
+        return fuel_price['disel']
+    elif fuel_type == CarModel.FuelType.GAS:
+        return fuel_price['gas']
+    else:
+        return 1
 
 
 class Investor(Account):
@@ -135,12 +152,12 @@ class WialonTrip(models.Model):
 class TaxiTrip(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True, auto_created=True, verbose_name='Дата начала поездки')
-    mileage = models.PositiveIntegerField(verbose_name='Пробег по трекеру')
-    fuel = models.PositiveIntegerField(verbose_name='Затраты на топливо')
+    mileage = models.FloatField(verbose_name='Пробег по трекеру')
+    fuel = models.FloatField(verbose_name='Затраты на топливо')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,
                                verbose_name='Водитель, если известно')
-    amount = models.PositiveBigIntegerField(verbose_name='Сумма оплаты')
-    car_amount = models.PositiveBigIntegerField(verbose_name='Сумма прибыли по машине')
+    amount = models.FloatField(verbose_name='Сумма оплаты')
+    car_amount = models.FloatField(verbose_name='Сумма прибыли по машине')
     payer = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True,
                               verbose_name='Плательщик/От кого приняли средства', related_name='trips')
     cash = models.BooleanField(verbose_name='Оплата наличными')
@@ -148,6 +165,42 @@ class TaxiTrip(models.Model):
 
     class Meta:
         unique_together = (('car', 'timestamp'),)
+
+    @staticmethod
+    def manual_create_taxi_trip(car: Car, driver: Driver, start: datetime, payer: TaxiOperator, millage: float,
+                                amount: float, gas_price: int, cash: bool = False, comment: str = ''):
+        if not isinstance(car, Car) or car is None:
+            raise TypeError('Need car account')
+        if not isinstance(driver, Driver) or driver is None:
+            raise TypeError('Need Driver account')
+        if not isinstance(payer, Counterpart) or payer is None:
+            raise TypeError('Need Counterpart account')
+        with transaction.atomic():
+            taxitrip = TaxiTrip(car=car, timestamp=start, driver=driver, payer=payer, mileage=millage, amount=amount,
+                                cash=cash)
+
+            fuel_trip = (millage + car.additional_miilage) / 100 * car.fuel_consumption
+            fuel_price = round(fuel_trip * gas_price, 2)
+            real_amount = round(amount - fuel_price, 2)
+            driver_money = round(real_amount * (driver.profit / 100), 2)
+            real_pay = math.trunc(amount * (1 - (payer.cash_profit if cash else payer.profit)) * 100)
+            operations = [
+                (payer, car, real_pay, 'Платеж от оператора'),
+                (car, driver, math.trunc(fuel_price * 100), 'Компенсация топлива'),
+                (car, driver, math.trunc(driver_money * 100), 'Зарплата водителя'),
+            ]
+            if cash:
+                operations.append((driver, None, math.trunc(amount * 100), 'Вывод галичных'))
+            # print(operations)
+            # print(fuel_trip, taxitrip.fuel, driver_money)
+            transaction_record = Balance.form_transaction(Balance.DEPOSIT, operations, comment if comment
+            else f'Поездка {start} {car.name} {driver.name}')
+
+            taxitrip.fuel = fuel_price
+            taxitrip.car_amount = real_pay/100 - fuel_price - driver_money
+            taxitrip.transaction = transaction_record
+            taxitrip.save()
+            return True
 
 
 class ExpensesTypes(models.Model):
@@ -171,7 +224,7 @@ class ExpensesTypes(models.Model):
 
 class Expenses(models.Model):
     date_mark = models.DateTimeField(auto_now_add=True, auto_created=True)
-    amount = models.PositiveBigIntegerField()
+    amount = models.FloatField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_expenses')
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, related_name='counterpart_expenses')
     description = models.TextField()

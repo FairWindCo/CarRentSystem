@@ -19,23 +19,27 @@ class Balance:
     @staticmethod
     # Create one transaction with list of account operation (from_account, to_account, amount)
     def form_transaction(transaction_type: Transaction.TransactionType,
-                         operations: list[tuple[Account, Account, int]],
-                         ) -> Optional[Transaction]:
-        with transaction.atomic():
-            transaction_obj = Transaction()
-            transaction_obj.transactionType = transaction_type
-            if operations:
+                         operations: list[tuple[Optional[Account], Optional[Account], int, Optional[str]]],
+                         comment: Optional[str] = None) -> Optional[Transaction]:
+        if operations:
+            with transaction.atomic():
+                transaction_obj = Transaction()
+                transaction_obj.transactionType = transaction_type
+                transaction_obj.comment = comment
                 transaction_obj.save()
                 for operation in operations:
+                    operation_comment = operation[3] if len(operation) >= 4 else None
                     if operation[0] is not None:
                         operation_left = AccountTransaction(transaction=transaction_obj,
                                                             account=operation[0],
-                                                            amount=-operation[2])
+                                                            amount=-operation[2],
+                                                            comment=operation_comment)
                         operation_left.save()
                     if operation[1] is not None:
                         operation_right = AccountTransaction(transaction=transaction_obj,
                                                              account=operation[1],
-                                                             amount=operation[2])
+                                                             amount=operation[2],
+                                                             comment=operation_comment)
                         operation_right.save()
                 return transaction_obj
         return None

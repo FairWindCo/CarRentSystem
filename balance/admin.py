@@ -28,7 +28,14 @@ class BalanceModel(BalanceReadOnlyField, ReadOnlyModelAdmin):
     pass
 
 
+class TransactionOperation(ReadOnlyModelAdmin):
+    list_display = ('transaction', 'account', 'cents_amount', 'comment')
+    list_filter = ('account__name',)
+    ordering = ['transaction__transactionTime', ]
+    search_fields = ['account__name', ]
+
+
 admin.site.register(Account, BalanceModel)
 admin.site.register(AccountStatement, ReadOnlyModelAdmin)
 admin.site.register(Transaction, ReadOnlyModelAdmin)
-admin.site.register(AccountTransaction, ReadOnlyModelAdmin)
+admin.site.register(AccountTransaction, TransactionOperation)

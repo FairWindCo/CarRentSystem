@@ -26,6 +26,8 @@ environ.Env.read_env()  # reading .env file
 
 DEBUG = env.bool('DEBUG')
 SECRET_KEY = env.str('SECRET_KEY')
+UKLON_USER = env.str('UKLON_USER')
+UKLON_PASS = env.str('UKLON_PASS')
 
 ALLOWED_HOSTS = []
 

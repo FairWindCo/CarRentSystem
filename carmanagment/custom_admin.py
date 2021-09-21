@@ -3,7 +3,6 @@ from typing import Optional
 from django.contrib import admin
 from django.contrib import messages
 from django.contrib.admin.decorators import register
-from django.contrib.admin.views.main import ChangeList
 from django.db import models
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -153,7 +152,9 @@ class AddDynamicFieldMixin(admin.ModelAdmin):
         gf = super().get_fields(request, obj)
         new_dynamic_fields = getattr(self, 'dynamic_fields', [])
         # without updating get_fields, the admin form will display w/o any new fields
-        # without updating base_fields or declared_fields, django will throw an error: django.core.exceptions.FieldError: Unknown field(s) (test) specified for MyModel. Check fields/fieldsets/exclude attributes of class MyModelAdmin.
+        # without updating base_fields or declared_fields, django will throw an error:
+        # django.core.exceptions.FieldError: Unknown field(s) (test) specified for MyModel.
+        # Check fields/fieldsets/exclude attributes of class MyModelAdmin.
         for field_name, field_def in new_dynamic_fields:
             # `gf.append(field_name)` results in multiple instances of the new fields
             gf = gf + [field_name]
@@ -208,7 +209,8 @@ class ListAdmin(EtcAdmin):
         meta = self.model._meta
         patterns = [path(
             '',
-            self.admin_site.admin_view(self.view_custom if self.use_custom_view_template else self.changelist_view),
+            self.admin_site.admin_view(self.view_custom if self.use_custom_view_template
+                                       else self.changelist_view),
             name=f'{meta.app_label}_{meta.model_name}_changelist'
         )]
         return patterns

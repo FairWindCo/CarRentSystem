@@ -60,6 +60,7 @@ class Transaction(models.Model):
 
     transactionTime = models.DateTimeField(auto_now_add=True, verbose_name='Время транзакции')
     transactionType = models.IntegerField(choices=TransactionType.choices, verbose_name='Тип')
+    comment = models.TextField(max_length=1000, default='', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Транзакция'
@@ -73,6 +74,7 @@ class AccountTransaction(models.Model):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.BigIntegerField()
+    comment = models.CharField(max_length=100, default='', blank=True, null=True)
 
     def __str__(self):
         return f'T[{self.transaction.id}] {self.account.name} {self.amount}{Account.AccountCurrency.labels[self.account.currency]}'
@@ -80,3 +82,6 @@ class AccountTransaction(models.Model):
     class Meta:
         verbose_name = 'Операция в транзакция'
         verbose_name_plural = 'Транзакционные операции'
+
+    def cents_amount(self):
+        return f'{self.amount/100:.2f}'

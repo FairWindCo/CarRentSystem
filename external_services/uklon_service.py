@@ -14,7 +14,8 @@ class UklonTaxiService:
     api = 'api/v1/'
     partner_api = ''
     headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36'}
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                      '(KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36'}
 
     def __init__(self, user: str, password: str):
         self.user = user
@@ -25,11 +26,13 @@ class UklonTaxiService:
         self.cars = {}
         self.car_driver_datas = None
         self.uid = None
-        self.use_silenium = False
+        self.balance = 0
+        self.use_selenium = None
 
-    def wait_page(self, browser, element_id):
+    @staticmethod
+    def wait_page(browser, element_id):
         try:
-            myElem = WebDriverWait(browser, 10).until(
+            WebDriverWait(browser, 10).until(
                 expected_conditions.presence_of_element_located((By.ID, element_id)))
             print("Page is ready!")
             return True
@@ -37,16 +40,16 @@ class UklonTaxiService:
             print("Loading took too much time!")
             return False
 
-    def connect(self, silenium=True):
+    def connect(self, selenium=True):
         session = requests.Session()
 
-        if silenium:
+        if selenium:
             from selenium import webdriver
 
-            browser = webdriver.Firefox(executable_path='E:\Downloads\geckodriver-v0.30.0-win64\geckodriver.exe',
+            browser = webdriver.Firefox(executable_path=r'E:\Downloads\geckodriver-v0.30.0-win64\geckodriver.exe',
                                         firefox_profile='./profile')
             browser.get('https://partner.uklon.com.ua')
-            self.use_silenium = browser
+            self.use_selenium = browser
             user_field = browser.find_element_by_name('login')
             if user_field:
                 user_field.send_keys(self.user)
@@ -77,7 +80,7 @@ class UklonTaxiService:
                         self.session = session
                         return True
             # session.cookies = cookies
-        self.use_silenium = False
+        self.use_selenium = False
         json = {
             'login': self.user,
             'password': self.password,
@@ -198,7 +201,7 @@ class UklonTaxiService:
                     trips = result['collection']
                     page = page + 1
                     for trip in trips:
-                        if trip['pickup_time'] <= end_time and trip['pickup_time'] >= start_time:
+                        if end_time >= trip['pickup_time'] >= start_time:
                             response.append(trip)
                         else:
                             next_iteration = False
@@ -244,8 +247,8 @@ class UklonTaxiService:
 
     def logout(self):
         res, _, _ = self._send_request(f'{self.base_url}account/logout', return_json=False)
-        if self.use_silenium:
-            self.use_silenium.close()
+        if self.use_selenium:
+            self.use_selenium.close()
         return res
 
 
@@ -261,15 +264,15 @@ if __name__ == '__main__':
     uklon = UklonTaxiService(user_name, user_pass)
     print(uklon.connect())
     print((uklon.get_my_info()))
-    print((uklon.get_self_driver_info()))
-    print((uklon.get_balance()))
-    print((uklon.driver_cars()))
-    print((uklon.get_partner_rating()))
-    print(uklon.rating)
-    print(uklon.get_partner_drivers_and_cars())
-    print(uklon.cars)
-    print(uklon.drivers)
-    print(uklon.get_rides())
+    # print((uklon.get_self_driver_info()))
+    # print((uklon.get_balance()))
+    # print((uklon.driver_cars()))
+    # print((uklon.get_partner_rating()))
+    # print(uklon.rating)
+    # print(uklon.get_partner_drivers_and_cars())
+    # print(uklon.cars)
+    # print(uklon.drivers)
+    # print(uklon.get_rides())
     print(uklon.get_day_rides())
     print(uklon.logout())
 

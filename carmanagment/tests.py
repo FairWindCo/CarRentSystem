@@ -3,8 +3,8 @@ from django.test import TestCase
 from django.utils.timezone import now
 
 from balance.services import Balance
-from carmanagment.models import ExpensesTypes, Investor, CarBrand, CarModel, Counterpart, Driver
-from carmanagment.services import ExpensesProcessor, CarCreator, TripProcessor
+from carmanagment.models import ExpensesTypes, Investor, CarBrand, CarModel, Counterpart, Driver, TaxiOperator, TaxiTrip
+from carmanagment.services import ExpensesProcessor, CarCreator
 
 
 class CheckExpense(TestCase):
@@ -27,14 +27,14 @@ class CheckExpense(TestCase):
 
     def test_expense_account_modification(self):
         # Car investment before capital repair
-        self.assertEquals(Balance.get_current_balance(self.car.investment), -10000)
+        self.assertEquals(Balance.get_current_balance(self.car.investment), -1000000)
         expense = ExpensesProcessor.form_car_capital_expense(
             self.car, 27200, 27.2, self.expense_type, self.counterpart, 'REPAIR CAR ON STO'
         )
         self.assertEquals(expense.amount, 27200)
         # Car investment after capital repair
-        self.assertEquals(Balance.get_current_balance(self.car.investment), -11000)
-        self.assertEquals(Balance.get_current_balance(self.car.car_investor), -27200)
+        self.assertEquals(Balance.get_current_balance(self.car.investment), -1100000)
+        self.assertEquals(Balance.get_current_balance(self.car.car_investor), -2720000)
         self.assertEquals(Balance.get_current_balance(self.car), 0)
 
     def test_correct_expense_type(self):
@@ -54,7 +54,7 @@ class CheckTaxiTrip(TestCase):
         self.investor.save()
         self.driver = Driver(name='Taxi Driver', profit=50)
         self.driver.save()
-        self.counterpart = Counterpart(name='Taxi service')
+        self.counterpart = TaxiOperator(name='Taxi service', profit=0, cash_profit=0)
         self.counterpart.save()
         self.car = CarCreator.add_new_car(self.investor, self.model, 'AA1919OO', 2013, 100000, 10000)
         self.car.fuel_consumption = 10
@@ -64,20 +64,20 @@ class CheckTaxiTrip(TestCase):
         current_date = now()
         self.assertEquals(Balance.get_current_balance(self.driver), 0)
         self.assertEquals(Balance.get_current_balance(self.counterpart), 0)
-        TripProcessor.manual_create_taxi_trip(self.car, self.driver, current_date, self.counterpart, 100, 280, 12, False)
+        TaxiTrip.manual_create_taxi_trip(self.car, self.driver, current_date, self.counterpart, 100, 280, 12, False)
         fuel_price = 100*self.car.fuel_consumption/100*12
         driver_profit = (280 - fuel_price) * self.driver.profit / 100
-        self.assertEquals(Balance.get_current_balance(self.counterpart), -280)
-        self.assertEquals(Balance.get_current_balance(self.driver), fuel_price + driver_profit)
-        self.assertEquals(Balance.get_current_balance(self.car), 280 - (fuel_price + driver_profit))
+        self.assertEquals(Balance.get_current_balance(self.counterpart), -28000)
+        self.assertEquals(Balance.get_current_balance(self.driver), (fuel_price + driver_profit)*100)
+        self.assertEquals(Balance.get_current_balance(self.car), 28000 - (fuel_price + driver_profit)*100)
 
     def test_correct_cash_taxi_trip(self):
         current_date = now()
         self.assertEquals(Balance.get_current_balance(self.driver), 0)
         self.assertEquals(Balance.get_current_balance(self.counterpart), 0)
-        TripProcessor.manual_create_taxi_trip(self.car, self.driver, current_date, self.counterpart, 100, 280, 12, True)
+        TaxiTrip.manual_create_taxi_trip(self.car, self.driver, current_date, self.counterpart, 100, 280, 12, True)
         fuel_price = 100*self.car.fuel_consumption/100*12
         driver_profit = (280 - fuel_price) * self.driver.profit / 100
-        self.assertEquals(Balance.get_current_balance(self.counterpart), -280)
-        self.assertEquals(Balance.get_current_balance(self.driver), -280 + fuel_price + driver_profit)
-        self.assertEquals(Balance.get_current_balance(self.car), 280 - (fuel_price + driver_profit))
+        self.assertEquals(Balance.get_current_balance(self.counterpart), -28000)
+        self.assertEquals(Balance.get_current_balance(self.driver), -28000 + fuel_price*100 + driver_profit*100)
+        self.assertEquals(Balance.get_current_balance(self.car), 28000 - (fuel_price + driver_profit)*100)
