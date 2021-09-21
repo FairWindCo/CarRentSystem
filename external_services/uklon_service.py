@@ -103,12 +103,20 @@ class UklonTaxiService:
             print(url)
             print(self.headers)
             print(self.session.cookies)
-
+        kwargs = {
+            'headers': self.headers
+        }
+        if json:
+            kwargs['json'] = json
+        if data:
+            kwargs['data'] = data
+        if params:
+            kwargs['params'] = params
         if self.session is not None:
             method = getattr(self.session, method.lower(), None)
             if method:
-                response = method(url, data=data, json=json, params=params,
-                                  headers=self.headers)
+                response = method(url, **kwargs)
+
                 if response.status_code == 200:
                     if return_json:
                         return True, response.status_code, response.json()
@@ -188,8 +196,8 @@ class UklonTaxiService:
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
         if day is None:
             day = datetime.now()
-        start_time = time.mktime(day.date().timetuple())
-        end_time = time.mktime((day + timedelta(days=1)).timetuple())
+        start_time = int(time.mktime(day.date().timetuple()))
+        end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
         count = 0
         page = 1
         response = []
@@ -274,6 +282,14 @@ if __name__ == '__main__':
     # print(uklon.drivers)
     # print(uklon.get_rides())
     print(uklon.get_day_rides())
+
+    current_date = datetime.now()
+    yesterday = current_date - timedelta(days=2)
+    rides = uklon.get_day_rides(yesterday)
+
+    for ride in rides:
+        print(datetime.fromtimestamp(ride['pickup_time']))
+
     print(uklon.logout())
 
 # https://partner.uklon.com.ua/partner/finances/search?page=1&pageSize=20&startDate=1631480400&endDate=1631739600

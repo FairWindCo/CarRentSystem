@@ -33,7 +33,7 @@ def get_uklon_taxi_trip(fuel_prices):
     if uklon.connect():
         if uklon.get_my_info():
             current_date = datetime.datetime.now()
-            yesterday = current_date - datetime.timedelta(days=1)
+            yesterday = current_date - datetime.timedelta(days=2)
             rides = uklon.get_day_rides(yesterday)
             uklon.logout()
             ulon_cars = CarsInOperator.objects
@@ -42,6 +42,7 @@ def get_uklon_taxi_trip(fuel_prices):
                 if ride['status'] == 'completed':
                     uklon_car_id = ride['vehicle_id']
                     try:
+                        start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
                         taxi_car_driver = ulon_cars.get(car_uid=uklon_car_id)
                         car = taxi_car_driver.car
                         driver = taxi_car_driver.driver

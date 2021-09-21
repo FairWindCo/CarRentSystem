@@ -181,11 +181,11 @@ class TaxiTrip(models.Model):
 
             fuel_trip = (millage + car.additional_miilage) / 100 * car.fuel_consumption
             fuel_price = round(fuel_trip * gas_price, 2)
-            real_amount = round(amount - fuel_price, 2)
+            real_pay = round(amount * (1 - (payer.cash_profit if cash else payer.profit)), 2)
+            real_amount = round(real_pay - fuel_price, 2)
             driver_money = round(real_amount * (driver.profit / 100), 2)
-            real_pay = math.trunc(amount * (1 - (payer.cash_profit if cash else payer.profit)) * 100)
             operations = [
-                (payer, car, real_pay, 'Платеж от оператора'),
+                (payer, car, math.trunc(real_pay * 100), 'Платеж от оператора'),
                 (car, driver, math.trunc(fuel_price * 100), 'Компенсация топлива'),
                 (car, driver, math.trunc(driver_money * 100), 'Зарплата водителя'),
             ]

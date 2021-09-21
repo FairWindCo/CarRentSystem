@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from external_services.fuel_price_request import get_fuel_price, parse_html
+from external_services.fuel_price_request import get_fuel_price, parse_liga_html
 
 
 class FuelRequest(TestCase):
@@ -78,6 +78,6 @@ class FuelRequest(TestCase):
 </tbody></table>
 </div>
         '''
-        res, fuel = parse_html(html)
+        res, fuel = parse_liga_html(html)
         self.assertTrue(res)
         self.assertEqual(fuel, {'disel': 22.43, 'gas': 12.18, 'a95': 23.02, 'a92': 21.96})
