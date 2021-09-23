@@ -42,7 +42,6 @@ def get_uklon_taxi_trip(fuel_prices):
                 if ride['status'] == 'completed':
                     uklon_car_id = ride['vehicle_id']
                     try:
-                        start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
                         taxi_car_driver = ulon_cars.get(car_uid=uklon_car_id)
                         car = taxi_car_driver.car
                         driver = taxi_car_driver.driver
