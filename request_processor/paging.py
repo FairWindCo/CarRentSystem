@@ -30,7 +30,10 @@ class PageProcessor:
             'count': count,
             'page': page_data,
             'paging': self.use_paging
-        }
+        }.update(self.get_aditional_fields())
+
+    def get_aditional_fields(self):
+        return {}
 
     def get_parameters_from_request(self, request):
         self.page_request.get_value_from_request(request)
