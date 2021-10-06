@@ -1,13 +1,13 @@
-from typing import Iterable, Union
+from typing import Iterable
 
 from request_processor.request_utility import RequestValue
 from request_processor.value_utility import PrototypedValueAccessor
 
 
 class SortProcessor:
+    sort_field_name_default: str = 'id'
+
     def __init__(self,
-                 data_fields_for_sorting: Union[str, Iterable, dict] = "",
-                 sort_field_name_default: str = 'id',
                  sort_field_name: str = 'sort_by',
                  multi_sort_field_name: str = 'multi_sort_by',
                  use_sorting=True,
@@ -16,7 +16,7 @@ class SortProcessor:
                  request_methods: Iterable[str] = ('GET', 'POST', 'body'),
                  convert_bytes_to_str: bool = True,
                  convert_bytes_to_json: bool = True):
-        self.sorting_value = RequestValue(sort_field_name, sort_field_name_default,
+        self.sorting_value = RequestValue(sort_field_name, self.sort_field_name_default,
                                           'str',
                                           raise_exception,
                                           request_methods,
@@ -45,5 +45,8 @@ class SortProcessor:
 
     def process_sorting(self, data: Iterable) -> Iterable:
         for accessor in self.access_fields:
-            data = sorted(data, key=lambda obj: accessor.get_result_value(obj))
+            data = self.process_one_sorting(data, accessor)
         return data
+
+    def process_one_sorting(self, data: Iterable, accessor) -> Iterable:
+        return sorted(data, key=lambda obj: accessor.get_result_value(obj))

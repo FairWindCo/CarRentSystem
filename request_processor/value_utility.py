@@ -107,6 +107,8 @@ def simple_value_to_str(value: Any, converter: Union[str, Callable]) -> str:
         if converter.startswith('format_'):
             format_str: str = converter[len('format_'):]
             return format_str.format(value)
+        elif converter == 'any':
+            return value
         elif converter == 'bool_1':
             return '1' if value else '0'
         elif converter == 'bool_T':
@@ -288,7 +290,13 @@ class ComplexValueAccessor(ValueAccessor):
                     value = str_to_value_without_exception(value, self.convertor, self.default_value)
             elif TypeValueProcessor.is_primitive(value) or TypeValueProcessor.is_datetime(
                     value) or self.convertor == 'json':
-                value = simple_value_to_str(value, self.convertor)
+                if self.convertor == 'str':
+                    value = simple_value_to_str(value, self.convertor)
+                else:
+                    if self.raise_exception_of_not_exist:
+                        value = str_to_value(value, self.convertor, self.default_value)
+                    else:
+                        value = str_to_value_without_exception(value, self.convertor, self.default_value)
             else:
                 value = simplify_value(value)
         return value
@@ -332,7 +340,7 @@ class PrototypedAccessor:
         return field_path, suffix
 
     @classmethod
-    def parse_one(cls, description: Union[dict, iter, str], name=None):
+    def parse_one(cls, description: Union[dict, iter, str], name=None, *args, **kwargs):
         if isinstance(description, str):
             if description.find(cls.description_field_separator) > 0:
                 description_elem = [el.strip() for el in description.split(cls.description_field_separator)]
@@ -355,21 +363,38 @@ class PrototypedAccessor:
             return None
 
     @classmethod
-    def from_description(cls, description: Union[dict, iter, str, Callable]) -> iter:
+    def from_description(cls, description: Union[dict, iter, str, Callable], *args, **kwargs) -> iter:
         if isinstance(description, str):
             if description.find(cls.description_separator) > 0:
-                return [cls.parse_one(string_description.strip()) for string_description in
+                return [cls.parse_one(string_description.strip() , *args, **kwargs) for string_description in
                         description.split(cls.description_separator)]
             else:
-                return [cls.parse_one(description)]
+                return [cls.parse_one(description, *args, **kwargs)]
         elif isinstance(description, int):
-            return cls(description)
+            return cls.parse_one(description, *args, **kwargs)
         elif TypeValueProcessor.is_dict(description):
-            return [cls.parse_one(attributes, field_name) for field_name, attributes in description.items()]
+            return [cls.parse_one(attributes, field_name, *args, **kwargs) for field_name, attributes in description.items()]
         elif TypeValueProcessor.is_sequence(description):
-            return [cls.parse_one(description_element) for description_element in description]
+            return [cls.parse_one(description_element, *args, **kwargs) for description_element in description]
         elif isinstance(description, Callable):
             return description()
+        else:
+            return []
+
+    @classmethod
+    def only_names(cls, description: Union[dict, iter, str], *args, **kwargs) -> iter:
+        if isinstance(description, str):
+            if description.find(cls.description_separator) > 0:
+                return [cls(string_description.strip() , *args, **kwargs) for string_description in
+                        description.split(cls.description_separator)]
+            else:
+                return [cls(description, *args, **kwargs)]
+        elif isinstance(description, int):
+            return cls(description, *args, **kwargs)
+        elif TypeValueProcessor.is_dict(description):
+            return [cls(field_name, *args, **kwargs) for field_name, attributes in description.items()]
+        elif TypeValueProcessor.is_sequence(description):
+            return [cls(description_element, *args, **kwargs) for description_element in description]
         else:
             return []
 
@@ -386,7 +411,10 @@ class PrototypedValueAccessor(ComplexValueAccessor, PrototypedAccessor):
         field_path, self.field_suffix = self.convert_field_name_to_field_path(name, remove_suffix)
         super().__init__(field_path, default_value, convertor, can_execute_callable, can_execute_method, ignore_hidden,
                          *args, **kwargs)
+        self.original_field_name = name
 
     def get_result_value(self, obj):
         value = self.get_value(obj)
         return self.result_field_name, value
+
+
