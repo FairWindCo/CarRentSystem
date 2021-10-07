@@ -14,9 +14,10 @@ class DjangoFiltering(FilterProcessor):
 
     def process_one_filter(self, data: Iterable, accessor) -> Iterable:
         if isinstance(data, QuerySet):
-            form_value = accessor.get_form_value()
-            return data.filter({
-                accessor.object_accessor.original_field_name: form_value
-            })
+            filter_ = accessor.get_filed_name_and_form_value_pair()
+            if filter_ is not None:
+                return data.filter(**filter_)
+            else:
+                return data
         else:
             return super().process_one_filter(data, accessor)

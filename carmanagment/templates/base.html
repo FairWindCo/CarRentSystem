@@ -13,28 +13,32 @@
 <body>
 
 <div id="layout" class="content pure-g">
+    {% block NAV_CONTENT %}
     <div id="nav" class="pure-u">
         <a href="#" id="menuLink" class="nav-menu-button">Menu</a>
 
         <div class="nav-inner">
-            <button class="primary-button pure-button">Compose</button>
+            <button class="primary-button pure-button">DashBoard</button>
 
             <div class="pure-menu">
-                <ul class="pure-menu-list">
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Inbox <span class="email-count">(2)</span></a></li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Important</a></li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Sent</a></li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Drafts</a></li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Trash</a></li>
-                    <li class="pure-menu-heading">Labels</li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-personal"></span>Personal</a></li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-work"></span>Work</a></li>
-                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-travel"></span>Travel</a></li>
+                <ul class="pure-menu-list" style="overflow-scrolling: auto">
+                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Акаунт <span class="email-count">(2)</span></a></li>
+                    <li class="pure-menu-item"><a href="{% url 'all_expenses' %}" class="pure-menu-link">Затраты</a></li>
+                    <li class="pure-menu-item"><a href="{% url 'all_trips' %}" class="pure-menu-link">Поездки</a></li>
+                    <li class="pure-menu-item"><a href="#" class="pure-menu-link">Расходы</a></li>
+                    <li class="pure-menu-item"><a href="{% url 'all_operations' %}" class="pure-menu-link">Операции</a></li>
+                    <li class="pure-menu-item"><a href="{% url 'all_transactions' %}" class="pure-menu-link">Транзакции</a></li>
+                    <li class="pure-menu-heading">Балансы</li>
+                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-personal"></span>Машин</a></li>
+                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-travel"></span>Инвест.</a></li>
+                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-work"></span>Водители</a></li>
+                    <li class="pure-menu-item"><a href="#" class="pure-menu-link"><span class="email-label-work"></span>Партнер</a></li>
                 </ul>
             </div>
         </div>
     </div>
-
+    {% endblock %}
+    {% block SUB_MENU_CONTENT %}
     <div id="list" class="pure-u-1">
         <div class="email-item email-item-selected pure-g">
             <div class="pure-u">
@@ -134,6 +138,7 @@
             </div>
         </div>
     </div>
+    {% endblock %}
     {% block CONTENT %}
     <div id="main" class="pure-u-1">
         <div class="email-content">

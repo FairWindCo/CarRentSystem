@@ -80,7 +80,7 @@ def str_to_value(value: str, input_converter: Union[str, Callable],
             return datetime.strptime(value, format_str)
         elif input_converter == 'json':
             return json.loads(value)
-    raise ValueError(f'type {input_converter} not supported')
+    return value
 
 
 def str_to_value_without_exception(value: str, input_converter: Union[str, Callable],
@@ -292,6 +292,8 @@ class ComplexValueAccessor(ValueAccessor):
                     value) or self.convertor == 'json':
                 if self.convertor == 'str':
                     value = simple_value_to_str(value, self.convertor)
+                elif self.convertor.startswith('str_'):
+                    value = simple_value_to_str(value, self.convertor[4:])
                 else:
                     if self.raise_exception_of_not_exist:
                         value = str_to_value(value, self.convertor, self.default_value)
@@ -313,6 +315,8 @@ class PrototypedAccessor:
                         '__iso_week_day', '__quarter', '__time', '__hour', '__minute', '__second', '__regex',
                         '__iregex')
 
+    OPERATORS_PREFIX = ()
+
     description_field_separator = '::'
     description_separator = ','
     field_separator = '__'
@@ -321,8 +325,9 @@ class PrototypedAccessor:
         pass
 
     @classmethod
-    def convert_field_name_to_field_path(cls, field_name: str, remove_suffix: bool = True):
+    def convert_field_name_to_field_path(cls, field_name: str, remove_suffix: bool = True, remove_prefix: bool = True):
         suffix = None
+        prefix = None
         if remove_suffix:
             suffix_position = -1
             for suffix_ in cls.OPERATORS_SUFFIX:
@@ -332,12 +337,21 @@ class PrototypedAccessor:
                     break
             if suffix:
                 field_name = field_name[:suffix_position]
+        if remove_prefix:
+            prefix_position = -1
+            for prefix_ in cls.OPERATORS_SUFFIX:
+                if field_name.endswith(prefix_):
+                    prefix = prefix_
+                    prefix_position = len(prefix_) + 1
+                    break
+            if prefix:
+                field_name = field_name[prefix_position:]
 
         if field_name.find(cls.field_separator) > 0:
             field_path = field_name.split(cls.field_separator)
         else:
             field_path = [field_name]
-        return field_path, suffix
+        return field_path, suffix, prefix
 
     @classmethod
     def parse_one(cls, description: Union[dict, iter, str], name=None, *args, **kwargs):
@@ -366,14 +380,15 @@ class PrototypedAccessor:
     def from_description(cls, description: Union[dict, iter, str, Callable], *args, **kwargs) -> iter:
         if isinstance(description, str):
             if description.find(cls.description_separator) > 0:
-                return [cls.parse_one(string_description.strip() , *args, **kwargs) for string_description in
+                return [cls.parse_one(string_description.strip(), *args, **kwargs) for string_description in
                         description.split(cls.description_separator)]
             else:
                 return [cls.parse_one(description, *args, **kwargs)]
         elif isinstance(description, int):
             return cls.parse_one(description, *args, **kwargs)
         elif TypeValueProcessor.is_dict(description):
-            return [cls.parse_one(attributes, field_name, *args, **kwargs) for field_name, attributes in description.items()]
+            return [cls.parse_one(attributes, field_name, *args, **kwargs) for field_name, attributes in
+                    description.items()]
         elif TypeValueProcessor.is_sequence(description):
             return [cls.parse_one(description_element, *args, **kwargs) for description_element in description]
         elif isinstance(description, Callable):
@@ -385,7 +400,7 @@ class PrototypedAccessor:
     def only_names(cls, description: Union[dict, iter, str], *args, **kwargs) -> iter:
         if isinstance(description, str):
             if description.find(cls.description_separator) > 0:
-                return [cls(string_description.strip() , *args, **kwargs) for string_description in
+                return [cls(string_description.strip(), *args, **kwargs) for string_description in
                         description.split(cls.description_separator)]
             else:
                 return [cls(description, *args, **kwargs)]
@@ -403,12 +418,13 @@ class PrototypedValueAccessor(ComplexValueAccessor, PrototypedAccessor):
 
     def __init__(self, name: Union[str, int], default_value: Any = None, convertor: Union[str, Callable] = 'any',
                  result_field_name: str = None, can_execute_callable: bool = True, can_execute_method: bool = True,
-                 ignore_hidden: bool = False, remove_suffix: bool = True, *args, **kwargs):
+                 ignore_hidden: bool = False, remove_suffix: bool = True, remove_prefix: bool = True, *args, **kwargs):
         self.field_name = name
         self.result_field_name = result_field_name if result_field_name else name
         self.remove_suffix = remove_suffix
 
-        field_path, self.field_suffix = self.convert_field_name_to_field_path(name, remove_suffix)
+        field_path, self.field_suffix, self.field_prefix = self.convert_field_name_to_field_path(name, remove_suffix,
+                                                                                                 remove_prefix)
         super().__init__(field_path, default_value, convertor, can_execute_callable, can_execute_method, ignore_hidden,
                          *args, **kwargs)
         self.original_field_name = name
@@ -416,5 +432,3 @@ class PrototypedValueAccessor(ComplexValueAccessor, PrototypedAccessor):
     def get_result_value(self, obj):
         value = self.get_value(obj)
         return self.result_field_name, value
-
-

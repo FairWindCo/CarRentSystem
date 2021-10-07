@@ -24,6 +24,7 @@ class RequestValue(ComplexValueAccessor, PrototypedAccessor):
         self.convert_bytes_to_json = convert_bytes_to_json
         self.value = None
         self.is_real_value = False
+        self.original_field_name = parameter_name
 
     def get_value_from_request(self, request):
         value, self.is_real_value = self.get_from_request(request, self.field_path[0], self.default_value,
@@ -82,19 +83,31 @@ class RequestValue(ComplexValueAccessor, PrototypedAccessor):
 class BiDirectionalForm(PrototypedAccessor):
     request_methods = ('GET', 'POST', 'body')
 
-    def __init__(self, field_name: Union[str, int], default_value: Any = None,
-                 value_convertor: Union[str, Callable] = 'any', form_field_name: str = None,
-                 form_convertor: Union[str, Callable] = 'any', can_execute_callable: bool = True,
-                 can_execute_method: bool = True, ignore_hidden: bool = False, remove_suffix: bool = True,
-                 raise_exception: bool = False, convert_bytes_to_str: bool = True, convert_bytes_to_json: bool = True,
+    def __init__(self,
+                 field_name: Union[str, int],
+                 form_field_name: str = None,
+                 default_value: Any = None,
+                 value_convertor: Union[str, Callable] = 'any',
+                 form_convertor: Union[str, Callable] = 'any',
+                 skip_none_filters: bool = True,
+                 can_execute_callable: bool = True,
+                 can_execute_method: bool = True,
+                 ignore_hidden: bool = False,
+                 remove_suffix: bool = True,
+                 raise_exception: bool = False,
+                 convert_bytes_to_str: bool = True,
+                 convert_bytes_to_json: bool = True,
                  request_methods: Iterable[str] = request_methods, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if form_field_name is None:
+            form_field_name = field_name
         self.object_accessor = PrototypedValueAccessor(field_name, default_value, value_convertor, form_field_name,
                                                        can_execute_callable, can_execute_method, ignore_hidden,
                                                        remove_suffix)
         self.form_accessor = RequestValue(form_field_name, default_value, form_convertor, raise_exception,
                                           request_methods,
                                           convert_bytes_to_str, convert_bytes_to_json)
+        self.skip_none_filters = skip_none_filters
 
     def process_request(self, request):
         self.form_accessor.get_value_from_request(request)
@@ -107,3 +120,16 @@ class BiDirectionalForm(PrototypedAccessor):
 
     def get_form_value(self):
         return self.form_accessor.value
+
+    def get_form_key_value(self):
+        value = self.form_accessor.value
+        return self.form_accessor.original_field_name, value if value is not None else ''
+
+    def get_filed_name_and_form_value_pair(self):
+        value = self.form_accessor.value
+        is_exist_in_request = self.form_accessor.is_real_value
+        if not is_exist_in_request:
+            return None
+        if (value is None or value == '') and self.skip_none_filters:
+            return None
+        return {self.object_accessor.original_field_name: self.form_accessor.value}

@@ -4,6 +4,10 @@ from request_processor.request_utility import RequestValue
 from request_processor.value_utility import PrototypedValueAccessor
 
 
+class SortValueAccessor(PrototypedValueAccessor):
+    OPERATORS_PREFIX = ('-', '+')
+
+
 class SortProcessor:
     sort_field_name_default: str = 'id'
 
@@ -28,18 +32,18 @@ class SortProcessor:
                                                 convert_bytes_to_str, convert_bytes_to_json)
         self.use_sorting = use_sorting
         self.use_multi_sorting = use_multi_sorting
-        self.access_fields = ()
+        self.access_fields: Iterable[SortValueAccessor] = ()
 
     def read_sorting_parameters_from_request(self, request):
         sorter_fields = []
         if self.use_sorting:
             self.sorting_value.get_value_from_request(request)
-            sorter_fields.append(PrototypedValueAccessor.parse_one(self.sorting_value.value))
+            sorter_fields.extend(SortValueAccessor.only_names(self.sorting_value.value))
 
         if self.use_multi_sorting:
             self.sorting_multi_value.get_value_from_request(request)
             if self.sorting_multi_value.is_real_value:
-                sorter_fields.extend(PrototypedValueAccessor.from_description(self.sorting_multi_value.value))
+                sorter_fields.extend(SortValueAccessor.only_names(self.sorting_multi_value.value))
 
         self.access_fields = sorter_fields
 
@@ -49,4 +53,8 @@ class SortProcessor:
         return data
 
     def process_one_sorting(self, data: Iterable, accessor) -> Iterable:
-        return sorted(data, key=lambda obj: accessor.get_result_value(obj))
+        reverse_sort = True if accessor.field_prefix == '-' else False
+        return sorted(data, key=lambda obj: accessor.get_result_value(obj), reverse=reverse_sort)
+
+    def get_sort_names(self):
+        return [accessor.field_name for accessor in self.access_fields]

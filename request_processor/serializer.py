@@ -1,6 +1,6 @@
 from typing import Union, Callable, Iterable, Any
 
-from request_processor.value_utility import PrototypedValueAccessor
+from request_processor.value_utility import PrototypedValueAccessor, simplify_value
 
 
 class SerializeProcessor:
@@ -14,6 +14,8 @@ class SerializeProcessor:
         if isinstance(self.descriptions, Callable):
             return self.descriptions(element)
 
+        if not self.field_serializer:
+            return simplify_value(element)
         result_dict = {}
         for serializer in self.field_serializer:
             key, value = serializer.get_result_value(element)

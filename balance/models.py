@@ -66,8 +66,11 @@ class Transaction(models.Model):
         verbose_name = 'Транзакция'
         verbose_name_plural = 'транзакции'
 
+    def get_transaction_type(self):
+        return Transaction.TransactionType.labels[self.transactionType]
+
     def __str__(self):
-        return f'{self.pk} [{self.transactionTime.strftime("%d.%m.%Y %H:%M:%S")}] - {self.TransactionType.choices[self.transactionType][1]}'
+        return f'{self.pk} [{self.transactionTime.strftime("%d.%m.%Y %H:%M:%S")}] - {self.get_transaction_type()}'
 
 
 class AccountTransaction(models.Model):
