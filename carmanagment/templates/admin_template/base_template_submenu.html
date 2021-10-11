@@ -1,0 +1,22 @@
+{% extends 'admin_template/base_template.html' %}
+
+{% block PAGE_CONTENT %}
+    <section class="section">
+        <div class="row">
+            <div class="col-10">
+                <div class="card">
+                {% block MAIN_CONTENT_BLK %}
+                {% endblock %}
+                </div>
+                <div class="card">
+                    {% block MAIN_FOOTER_BLK %}
+                    {% endblock %}
+                </div>
+            </div>
+            <div class="col-2">
+                {% block MAIN_SUB_MENU_BLK %}
+                {% endblock %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

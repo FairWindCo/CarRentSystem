@@ -1,9 +1,10 @@
 # Create your views here.
+from django.shortcuts import render
 from django.views.generic import ListView
 from vue_utils.views import FilterListView
 
 from balance.models import AccountTransaction, Transaction
-from carmanagment.models import TaxiTrip, Car, Expenses
+from carmanagment.models import TaxiTrip, Car, Expenses, Investor, Driver, TaxiOperator, Counterpart
 from django_request_processor.django_list_view import UniversalFilterListView
 
 
@@ -41,7 +42,7 @@ class ByCarView(ListView):
 
 
 class ViewCarTrips(UniversalFilterListView, ByCarView):
-    model=TaxiTrip
+    model = TaxiTrip
     template_name = 'carmanagment/cars_trip_list.html'
     paginate_by = 20
     filtering = (
@@ -56,8 +57,42 @@ class ViewCarTrips(UniversalFilterListView, ByCarView):
         return super().get_queryset()
 
 
+class ViewCarAccount(UniversalFilterListView):
+    model = Car
+    template_name = 'carmanagment/acccount_list.html'
+    paginate_by = 20
+    filtering = (
+        ('name',),
+    )
+
+
+class ViewCarInvestmentAccount(ViewCarAccount):
+    model = Car
+    template_name = 'carmanagment/inest_list.html'
+    paginate_by = 20
+    filtering = (
+        ('name',),
+    )
+
+
+class ViewInvestorAccount(ViewCarAccount):
+    model = Investor
+
+
+class ViewDriverAccount(ViewCarAccount):
+    model = Driver
+
+
+class ViewCounterpartAccount(ViewCarAccount):
+    model = Counterpart
+
+
+class ViewTaxiOperatorAccount(ViewCarAccount):
+    model = TaxiOperator
+
+
 class ViewCarExpenses(UniversalFilterListView, ByCarView):
-    model=Expenses
+    model = Expenses
     template_name = 'carmanagment/cars_expenses_list.html'
     paginate_by = 20
     filtering = (
@@ -75,24 +110,25 @@ class ViewCarExpenses(UniversalFilterListView, ByCarView):
 
 
 class OperationsView(UniversalFilterListView):
-    model=AccountTransaction
+    model = AccountTransaction
     template_name = 'carmanagment/operation_list.html'
     paginate_by = 20
     filtering = (
-            ('account__name__icontains', 'name'),
-            ('transaction__transactionTime__gte', 'start_interval'),
-            ('transaction__transactionTime__lte', 'end_interval'),
-        )
+        ('account__name__icontains', 'name'),
+        ('transaction__transactionTime__gte', 'start_interval'),
+        ('transaction__transactionTime__lte', 'end_interval'),
+    )
 
 
 class TransactionView(UniversalFilterListView):
-    model=Transaction
+    model = Transaction
     template_name = 'carmanagment/transaction_list.html'
     paginate_by = 20
     filtering = (
-            ('transactionTime__gte', 'start_interval'),
-            ('transactionTime__lte', 'end_interval'),
-        )
+        ('transactionTime__gte', 'start_interval'),
+        ('transactionTime__lte', 'end_interval'),
+    )
+
 
 class ViewTripsNew(UniversalFilterListView):
     model = TaxiTrip
@@ -120,3 +156,7 @@ class ViewTripsNew2(UniversalFilterListView):
         ('timestamp__gte', 'start_interval'),
         ('timestamp__lte', 'end_interval'),
     )
+
+
+def test_view(request):
+    return render(request, 'admin_template/base_template.html', {})

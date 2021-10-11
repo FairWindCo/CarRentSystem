@@ -159,6 +159,8 @@ class TaxiTrip(models.Model):
                                verbose_name='Водитель, если известно')
     amount = models.FloatField(verbose_name='Сумма оплаты')
     car_amount = models.FloatField(verbose_name='Сумма прибыли по машине')
+    payer_amount = models.FloatField(verbose_name='Прибыль сервиса', default=0)
+    driver_amount = models.FloatField(verbose_name='Зарплата водителя', default=0)
     payer = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True,
                               verbose_name='Плательщик/От кого приняли средства', related_name='trips')
     cash = models.BooleanField(verbose_name='Оплата наличными')
@@ -187,7 +189,9 @@ class TaxiTrip(models.Model):
                 fuel_price = round(fuel_trip * gas_price, 2)
                 real_pay = round(amount * (1 - (payer.cash_profit if cash else payer.profit)), 2)
                 real_amount = round(real_pay - fuel_price, 2)
+                taxitrip.payer_amount =round(amount - real_pay, 2)
                 driver_money = round(real_amount * (driver.profit / 100), 2)
+                taxitrip.driver_amount = driver_money
                 operations = [
                     (payer, car, math.trunc(real_pay * 100), 'Платеж от оператора'),
                     (car, driver, math.trunc(fuel_price * 100), 'Компенсация топлива'),

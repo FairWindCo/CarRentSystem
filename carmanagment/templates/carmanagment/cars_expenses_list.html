@@ -1,80 +1,100 @@
-{% extends 'base.html' %}
+{% extends 'admin_template/base_template_submenu.html' %}
 {% load fw_paginator %}
-{% block SUB_MENU_CONTENT %}
-    <div id="list" class="pure-u-1">
-        {% for car in cars %}
-            {% if car == current_car %}
-                <div class="email-item email-item-selected pure-g">
-            {% else %}
-                <div class="email-item email-item-unread pure-g">
-            {% endif %}
-                    <a href="{% url 'expenses_by_car' car.name  %}">
-                    <div class="pure-u-3-4">
-                        <h5 class="email-name">{{ car.model }}</h5>
-                        <h4 class="email-subject">{{ car.name }}</h4>
-                    </div>
-                    </a>
-                </div>
-        {% endfor %}
+{% block MAIN_SUB_MENU_BLK %}
+    <div id="list" class="card">
+        <div class="card-header">
+            ФИЛТЕР
+        </div>
+        <div class="card-content">
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                {% for car in cars %}
+                    {% if car == current_car %}
+                        <a href="{% url 'expenses_by_car' car.name %}" class="nav-link active">
+                    {% else %}
+                        <a href="{% url 'expenses_by_car' car.name %}" class="nav-link">
+                    {% endif %}
+
+
+                {{ car.model }}
+                <span>{{ car.name }}</span>
+                </a>
+
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
 {% endblock %}
-{% block CONTENT %}
-    <div id="main" class="pure-u-1">
-        <div class="email-content">
-            <div class="email-content-header pure-g">
-                <div class="pure-u-1-2">
-                    <h1 class="email-content-title">Список Затрат</h1>
-                    <p class="email-content-subtitle">
-                        {% if current_car.name %}
-                        Авто <a>{{ current_car.name }}</a>
-                        {% endif %}
-                        {% if filter_form_values.start_interval %}
-                        c <span>{{ filter_form_values.start_interval }}</span>
-                        {% endif %}
-                        {% if filter_form_values.end_interval %}
-                        по <span>{{ filter_form_values.end_interval }}</span>
-                        {% endif %}
-                    </p>
+{% block MAIN_CONTENT_BLK %}
+    <div class="card-header">
+        <h4 class="card-title">Список поездок</h4>
+    </div>
+    <div class="card-content">
+        <div class="card-body">
+            <p class="email-content-subtitle">
+                {% if current_car.name %}
+                    Авто <a>{{ current_car.name }}</a>
+                {% endif %}
+                {% if filter_form_values.start_interval %}
+                    c <span>{{ filter_form_values.start_interval }}</span>
+                {% endif %}
+                {% if filter_form_values.end_interval %}
+                    по <span>{{ filter_form_values.end_interval }}</span>
+                {% endif %}
+            </p>
+            <form method="get" class="form form-horizontal">
+                <div class="form-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="date" name="start_interval" placeholder="from"
+                                   class="form-control round"
+                                   value="{{ filter_form_values.start_interval }}"/>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" name="end_interval" placeholder="to" class="form-control round"
+                                   value="{{ filter_form_values.end_interval }}"/>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="name" placeholder="car plate" class="form-control round"
+                                   value="{{ filter_form_values.name }}"/>
+                        </div>
+                        <div class="col-md-3 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary me-1 mb-1">Submit</button>
+                            <button type="reset" class="btn btn-light-secondary me-1 mb-1">Reset
+                            </button>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="email-content-controls pure-u-1-2">
-                    <form method="get">
-                        <input type="date" name="start_interval" placeholder="from"
-                               value="{{ filter_form_values.start_interval }}"/>
-                        <input type="date" name="end_interval" placeholder="to"
-                               value="{{ filter_form_values.end_interval }}"/>
-                        <input type="text" name="name" placeholder="car plate"
-                               value="{{ filter_form_values.name }}"/>
-                        <button type="submit" class="secondary-button pure-button">filter</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="email-content-body">
-                <div class="pure-g center">
-                    <table class="pure-table pure-u-1 pure-table-bordered">
-                        <tr>
+            </form>
+        </div>
+        <!-- table head dark -->
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead class="thead-dark">
+                <tr>
                             <th>Дата</th>
                             <th>Машина</th>
                             <th>Тип затраты</th>
                             <th>Сумма</th>
                             <th>Описание</th>
-                        </tr>
-                        {% for obj in object_list %}
-                            <tr>
+                </tr>
+                </thead>
+                <tbody>
+                {% for obj in object_list %}
+                    <tr>
                                 <td>{{ obj.date_mark|date:'d-m-Y H:i:s' }}</td>
                                 <td>{{ obj.account.name }}</td>
                                 <td>{{ obj.expenseType.name }}</td>
                                 <td>{{ obj.amount|floatformat:2 }} грн</td>
                                 <td>{{ obj.description }}</td>
-
-                            </tr>
-                        {% endfor %}
-
-                    </table>
-                    {% paging_navigation page_obj %}
-                </div>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="row align-self-end">
+            <div class="col-12 d-flex justify-content-center">
+                {% paging_navigation page_obj %}
             </div>
         </div>
     </div>

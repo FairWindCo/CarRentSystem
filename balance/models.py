@@ -1,7 +1,11 @@
+from datetime import datetime, date
+
 from django.db import models
-
-
 # Create your models here.
+from django.db.models import Sum
+from django.utils.timezone import now
+
+
 class Account(models.Model):
     class AccountCurrency(models.IntegerChoices):
         GRIVNA = 0, 'грн'
@@ -28,6 +32,68 @@ class Account(models.Model):
 
     def get_currency(self):
         return Account.AccountCurrency.labels[self.currency]
+
+    # return last statement balance for account on date
+    def get_statement_balance(self, on_date: date):
+        if on_date is None:
+            on_date = now().date()
+        else:
+            if isinstance(on_date, datetime):
+                on_date = on_date.date()
+        if self.last_period_balance is not None and self.last_period_balance.statementDate <= on_date:
+            last_balance = self.last_period_balance
+        else:
+            last_balance = AccountStatement.objects.filter(account_id=self.pk, statementDate__lte=on_date).order_by(
+                '-statementDate').first()
+
+        if last_balance is None:
+            return 0, None, None
+        return last_balance.closingBalance, last_balance.statementDate, last_balance
+
+    def get_current_balance(self, on_date=None) -> int:
+
+        if on_date is None:
+            on_date = now()
+        balance, from_date, _ = self.get_statement_balance(on_date)
+        if from_date is not None:
+            total = AccountTransaction.objects.filter(account=self,
+                                                      transaction__transactionTime__gt=from_date,
+                                                      transaction__transactionTime__lte=on_date).aggregate(
+                Sum('amount'))
+            balance = balance + total['amount__sum']
+        else:
+            balance = AccountTransaction.objects.filter(account=self,
+                                                        transaction__transactionTime__lte=on_date).aggregate(
+                Sum('amount'))['amount__sum']
+        return balance
+
+    def current_balance(self):
+        balance = self.get_current_balance()
+        return balance / 100 if balance else 0
+
+    def last_statemnet_balance(self):
+        if self.last_period_balance:
+            return self.last_period_balance.closingBalance / 100
+        else:
+            return 0
+
+    def last_statemnet_debit(self):
+        if self.last_period_balance:
+            return self.last_period_balance.totalDebit / 100
+        else:
+            return 0
+
+    def last_statemnet_credit(self):
+        if self.last_period_balance:
+            return self.last_period_balance.totalCredit / 100
+        else:
+            return 0
+
+    def last_statemnet_date(self):
+        if self.last_period_balance:
+            return self.last_period_balance.statementDate.strftime('%d.%m.%Y')
+        else:
+            return '---'
 
 
 class AccountStatement(models.Model):
@@ -87,4 +153,4 @@ class AccountTransaction(models.Model):
         verbose_name_plural = 'Транзакционные операции'
 
     def cents_amount(self):
-        return f'{self.amount/100:.2f}'
+        return f'{self.amount / 100:.2f}'
