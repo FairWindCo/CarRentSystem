@@ -1,0 +1,39 @@
+{% load fw_main_menu %}
+{% if is_sub_menu %}
+    <ul class="submenu"
+            {% if open %}
+        style="display: block;"
+            {% endif %}
+    >
+{% else %}
+    <ul class="menu"
+            {% if open %}
+        style="display: block;"
+            {% endif %}
+    >
+{% endif %}
+{% for menu_item in menu %}
+    {% if menu_item.visible %}
+        {% if menu_item.url or menu_item.active or menu_item.is_has_submenu %}
+            <li class="{% if is_sub_menu %} submenu-item{% else %}sidebar-item{% endif %}
+                   {% if menu_item.is_has_submenu %} has-sub{% endif %}
+                   {% if menu_item.active %} active{% endif %}"
+            >
+                <a href="{{ menu_item.url|default_if_none:'#' }}"
+                   class='{% if menu_item.is_has_submenu or menu_item.active or not is_sub_menu %} sidebar-link{% endif %}'>
+
+                    {% if menu_item.icon %}
+                        <i class="bi bi-{{ menu_item.icon }}"></i>
+                    {% endif %}
+                    <span>{{ menu_item.name }}</span>
+                </a>
+                {% if menu_item.submenu %}
+                    {% fw_main_menu menu_item.submenu True %}
+                {% endif %}
+            </li>
+        {% else %}
+            <li class="sidebar-title">{{ menu_item.name }}</li>
+        {% endif %}
+    {% endif %}
+{% endfor %}
+</ul>

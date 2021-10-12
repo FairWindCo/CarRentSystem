@@ -6,6 +6,7 @@ from vue_utils.views import FilterListView
 from balance.models import AccountTransaction, Transaction
 from carmanagment.models import TaxiTrip, Car, Expenses, Investor, Driver, TaxiOperator, Counterpart
 from django_request_processor.django_list_view import UniversalFilterListView
+from main_menu.views import MainMenuView
 
 
 class ViewTrips(FilterListView):
@@ -41,7 +42,63 @@ class ByCarView(ListView):
         return super().get(request, *args, **kwargs)
 
 
-class ViewCarTrips(UniversalFilterListView, ByCarView):
+class GlobalMainMenu(MainMenuView):
+    main_menu = {
+        'DashBoard': {
+            'icon': 'grid-fill',
+            'url': '#',
+            'user': 'admin'
+        },
+        'Финансы': {
+            'group': 'anon'
+        },
+        'Балансы': {
+            'icon': 'grid-fill',
+            'submenu': {
+                'Машин': {
+                    'view': 'cars',
+                    'icon': 'card',
+                },
+                'Ивест.': {
+                    'view': 'invest',
+                },
+                'Водители': {
+                    'view': 'drivers',
+                },
+                'Патнеры': {
+                    'view': 'investors',
+                },
+                'Контрагенты': {
+                    'view': 'counterparts',
+                },
+                'Операторы': {
+                    'view': 'taxi_operators',
+                },
+            }
+        },
+        'Поездки': {
+            'view': 'all_trips',
+            'icon': 'map',
+        },
+        'Затраты': {
+            'view': 'all_expenses',
+            'icon': 'bag',
+        },
+        'Средства': {
+            'icon': 'credit-card',
+            'submenu': {
+                'Транзакции': {
+                    'view': 'all_transactions',
+                },
+                'Операции': {
+                    'view': 'all_operations',
+                },
+            },
+        },
+    }
+
+
+class ViewCarTrips(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = TaxiTrip
     template_name = 'carmanagment/cars_trip_list.html'
     paginate_by = 20
@@ -57,7 +114,7 @@ class ViewCarTrips(UniversalFilterListView, ByCarView):
         return super().get_queryset()
 
 
-class ViewCarAccount(UniversalFilterListView):
+class ViewCarAccount(UniversalFilterListView, GlobalMainMenu):
     model = Car
     template_name = 'carmanagment/acccount_list.html'
     paginate_by = 20
@@ -66,7 +123,7 @@ class ViewCarAccount(UniversalFilterListView):
     )
 
 
-class ViewCarInvestmentAccount(ViewCarAccount):
+class ViewCarInvestmentAccount(ViewCarAccount, GlobalMainMenu):
     model = Car
     template_name = 'carmanagment/inest_list.html'
     paginate_by = 20
@@ -75,23 +132,23 @@ class ViewCarInvestmentAccount(ViewCarAccount):
     )
 
 
-class ViewInvestorAccount(ViewCarAccount):
+class ViewInvestorAccount(ViewCarAccount, GlobalMainMenu):
     model = Investor
 
 
-class ViewDriverAccount(ViewCarAccount):
+class ViewDriverAccount(ViewCarAccount, GlobalMainMenu):
     model = Driver
 
 
-class ViewCounterpartAccount(ViewCarAccount):
+class ViewCounterpartAccount(ViewCarAccount, GlobalMainMenu):
     model = Counterpart
 
 
-class ViewTaxiOperatorAccount(ViewCarAccount):
+class ViewTaxiOperatorAccount(ViewCarAccount, GlobalMainMenu):
     model = TaxiOperator
 
 
-class ViewCarExpenses(UniversalFilterListView, ByCarView):
+class ViewCarExpenses(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = Expenses
     template_name = 'carmanagment/cars_expenses_list.html'
     paginate_by = 20
@@ -109,7 +166,7 @@ class ViewCarExpenses(UniversalFilterListView, ByCarView):
         return super().get_queryset()
 
 
-class OperationsView(UniversalFilterListView):
+class OperationsView(UniversalFilterListView, GlobalMainMenu):
     model = AccountTransaction
     template_name = 'carmanagment/operation_list.html'
     paginate_by = 20
@@ -120,7 +177,7 @@ class OperationsView(UniversalFilterListView):
     )
 
 
-class TransactionView(UniversalFilterListView):
+class TransactionView(UniversalFilterListView, GlobalMainMenu):
     model = Transaction
     template_name = 'carmanagment/transaction_list.html'
     paginate_by = 20
@@ -130,7 +187,7 @@ class TransactionView(UniversalFilterListView):
     )
 
 
-class ViewTripsNew(UniversalFilterListView):
+class ViewTripsNew(UniversalFilterListView, GlobalMainMenu):
     model = TaxiTrip
     template_name = 'carmanagment/trip_list.html'
     paginate_by = 20
@@ -146,7 +203,7 @@ class ViewTripsNew(UniversalFilterListView):
     )
 
 
-class ViewTripsNew2(UniversalFilterListView):
+class ViewTripsNew2(UniversalFilterListView, GlobalMainMenu):
     model = TaxiTrip
     template_name = 'carmanagment/trip_list.html'
     use_custom_paging = False

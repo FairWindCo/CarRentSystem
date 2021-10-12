@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'ajax_select',
     'balance',
     'carmanagment',
+    'main_menu',
     'vue_utils'
 ]
 

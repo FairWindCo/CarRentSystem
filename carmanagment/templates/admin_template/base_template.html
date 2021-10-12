@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load static %}
+{% load fw_main_menu %}
 <html lang="en">
 
 <head>
@@ -41,57 +42,7 @@
             </div>
             <div class="sidebar-menu">
                 {% block SIDERBAR_MENU %}
-                    <ul class="menu">
-                        <li
-                                class="sidebar-item active ">
-                            <a href="index.html" class='sidebar-link'>
-                                <i class="bi bi-grid-fill"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-title">Финансы</li>
-                        <li
-                                class="sidebar-item  has-sub">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-cash"></i>
-                                <span>Балансы</span>
-                            </a>
-                            <ul class="submenu ">
-                                <li class="submenu-item"><a href="{% url 'cars' %}">Машин</a></li>
-                                <li class="submenu-item"><a href="{% url 'invest' %}">Инвест.</a></li>
-                                <li class="submenu-item"><a href="{% url 'drivers' %}">Водители</a></li>
-                                <li class="submenu-item"><a href="{% url 'investors' %}">Партнер</a></li>
-                                <li class="submenu-item"><a href="{% url 'counterparts' %}">Контрагент</a></li>
-                                <li class="submenu-item"><a href="{% url 'taxi_operators' %}">Оператор</a></li>
-                            </ul>
-                        </li>
-                        <li
-                                class="sidebar-item">
-                            <a href="{% url 'all_trips' %}" class='sidebar-link'>
-                                <i class="bi bi-map"></i>
-                                <span>Поездки</span>
-                            </a>
-                        </li>
-                        <li
-                                class="sidebar-item">
-                            <a href="{% url 'all_expenses' %}" class='sidebar-link'>
-                                <i class="bi bi-bag"></i>
-                                <span>Затраты</span>
-                            </a>
-                        </li>
-<li
-                                class="sidebar-item  has-sub">
-                            <a href="#" class='sidebar-link'>
-                                <i class="bi bi-credit-card"></i>
-                                <span>Средства</span>
-                            </a>
-                            <ul class="submenu ">
-                                <li class="submenu-item"><a href="{% url 'all_transactions' %}">Транзакции</a></li>
-                                <li class="submenu-item"><a href="{% url 'all_operations' %}">Операции</a></li>
-                            </ul>
-                        </li>
-
-                    </ul>
+                    {% fw_main_menu main_menu %}
                 {% endblock %}
             </div>
             <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
