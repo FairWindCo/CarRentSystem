@@ -270,7 +270,8 @@ if __name__ == '__main__':
     user_pass = env('UKLON_PASS')
     # print(user_name, user_pass)
     uklon = UklonTaxiService(user_name, user_pass)
-    print(uklon.connect())
+    uklon.use_selenium = False
+    print(uklon.connect(selenium=False))
     print((uklon.get_my_info()))
     # print((uklon.get_self_driver_info()))
     # print((uklon.get_balance()))

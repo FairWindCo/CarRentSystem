@@ -102,6 +102,7 @@ class ViewCarTrips(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = TaxiTrip
     template_name = 'carmanagment/cars_trip_list.html'
     paginate_by = 20
+    ordering = ('-timestamp', )
     filtering = (
         ('car__name',),
         ('timestamp__gte', 'start_interval'),
@@ -152,6 +153,7 @@ class ViewCarExpenses(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = Expenses
     template_name = 'carmanagment/cars_expenses_list.html'
     paginate_by = 20
+    ordering = ('-date_mark', )
     filtering = (
         ('account__name__icontains', 'name'),
         ('date_mark__gte', 'start_interval'),

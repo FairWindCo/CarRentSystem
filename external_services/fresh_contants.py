@@ -19,7 +19,7 @@ def get_special_fuel_help_text(field_id='id_gas_price'):
     return fuels_strings
 
 
-def get_uklon_taxi_trip(fuel_prices):
+def get_uklon_taxi_trip(fuel_prices, use_silenuim=False):
     from CarRentSystem import settings
     from carmanagment.models import CarsInOperator
     from external_services.uklon_service import UklonTaxiService
@@ -30,7 +30,7 @@ def get_uklon_taxi_trip(fuel_prices):
 
     # print(user_name, user_pass)
     uklon = UklonTaxiService(user_name, user_pass)
-    if uklon.connect():
+    if uklon.connect(selenium=use_silenuim):
         if uklon.get_my_info():
             current_date = datetime.datetime.now()
             yesterday = current_date - datetime.timedelta(days=2)

@@ -36,20 +36,20 @@ class MeniItem:
                 for item in self.submenu:
                     active |= item.check_active(request)
             self.active |= active
-            print(self.name, self.url, self.active, request.path)
+            # print(self.name, self.url, self.active, request.path)
             return active
         return self.active
 
     def is_active_submenu(self):
         if self.submenu:
             for item in self.submenu:
-                print(item.name, item.url, item.active)
+                # print(item.name, item.url, item.active)
                 if item.active:
                     return True
         return False
 
     def is_active_element(self):
-        print(self.name, self.active)
+        # print(self.name, self.active)
         return self.active
 
     def is_active(self):

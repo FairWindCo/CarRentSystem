@@ -10,6 +10,7 @@ class SortValueAccessor(PrototypedValueAccessor):
 
 class SortProcessor:
     sort_field_name_default: str = 'id'
+    use_default_sorting = True
 
     def __init__(self,
                  sort_field_name: str = 'sort_by',
@@ -48,8 +49,9 @@ class SortProcessor:
         self.access_fields = sorter_fields
 
     def process_sorting(self, data: Iterable) -> Iterable:
-        for accessor in self.access_fields:
-            data = self.process_one_sorting(data, accessor)
+        if self.is_in_request() or self.use_default_sorting:
+            for accessor in self.access_fields:
+                data = self.process_one_sorting(data, accessor)
         return data
 
     def process_one_sorting(self, data: Iterable, accessor) -> Iterable:
@@ -58,3 +60,6 @@ class SortProcessor:
 
     def get_sort_names(self):
         return [accessor.field_name for accessor in self.access_fields]
+
+    def is_in_request(self):
+        return self.sorting_value.is_real_value | self.sorting_multi_value.is_real_value

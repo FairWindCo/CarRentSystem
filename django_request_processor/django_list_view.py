@@ -28,6 +28,7 @@ class UniversalFilterListView(ListView):
     field_name_for_template = 'filter_form_values'
     request_methods = ('GET', 'POST', 'body')
     return_json_as_response = False
+    use_django_sorting = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -83,8 +84,9 @@ class UniversalFilterListView(ListView):
     def get_ordering(self):
         if self.use_custom_order:
             return None
-        if self.sort_processor:
-            return self.sort_processor.get_sort_names()
+        if self.sort_processor and (self.use_sorting and self.use_multi_sorting):
+            if self.sort_processor.is_in_request() or not self.use_django_sorting:
+                return self.sort_processor.get_sort_names()
         return super().get_ordering()
 
     def paginate_queryset(self, queryset, page_size):
