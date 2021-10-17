@@ -166,13 +166,14 @@
 
     </div>
 </div>
+{% block body_script %}
 <script src="{% static 'assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js' %}"></script>
 <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
 
-<script src="{% static 'assets/vendors/apexcharts/apexcharts.js' %}"></script>
-<script src="{% static 'assets/js/pages/dashboard.js' %}"></script>
-
+    {% block body_script_addons %}
+    {% endblock %}
 <script src="{% static 'assets/js/mazer.js' %}"></script>
+{% endblock %}
 </body>
 
 </html>

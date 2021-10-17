@@ -1,0 +1,113 @@
+{% extends 'admin_template/base_template.html' %}
+{% load static %}
+
+{% block PAGE_CONTENT %}
+    <div class="card">
+        <div class="card-header">
+            <h4>Количество поездок</h4>
+        </div>
+        <div class="card-body" style="position: relative;">
+            <div id="chart-profile-visit">
+
+            </div>
+            <div class="resize-triggers">
+                <div class="expand-trigger">
+                    <div style="width: 436px; height: 340px;"></div>
+                </div>
+                <div class="contract-trigger"></div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h4>Сумма поездок</h4>
+        </div>
+        <div class="card-body" style="position: relative;">
+            <div id="chart-sum-amount">
+
+            </div>
+            <div class="resize-triggers">
+                <div class="expand-trigger">
+                    <div style="width: 436px; height: 340px;"></div>
+                </div>
+                <div class="contract-trigger"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body_script_addons %}
+    <script src="{% static 'assets/vendors/apexcharts/apexcharts.js' %}"></script>
+    {{ trips_data|json_script:"trips_data" }}
+    <script>
+        const trips_data = JSON.parse(document.getElementById('trips_data').textContent);
+    </script>
+    {{ trips_sum|json_script:"trips_sum" }}
+    <script>
+        const trips_sum = JSON.parse(document.getElementById('trips_sum').textContent);
+    </script>
+
+    <script>
+        let optionsProfileVisit = {
+            annotations: {
+                position: 'back'
+            },
+            dataLabels: {
+                enabled: false
+            },
+            chart: {
+                type: 'bar',
+                height: 300
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                },
+            },
+            fill: {
+                opacity: 1
+            },
+            plotOptions: {},
+            series: trips_data,
+            colors: {{ colors | safe }},
+            xaxis: {
+                categories: {{ cars | safe }},
+            },
+        }
+        let chartProfileVisit = new ApexCharts(document.querySelector("#chart-profile-visit"), optionsProfileVisit);
+        chartProfileVisit.render();
+
+        let optionsSumAmount = {
+            annotations: {
+                position: 'back'
+            },
+            dataLabels: {
+                enabled: false
+            },
+            chart: {
+                type: 'bar',
+                height: 300
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                },
+            },
+            fill: {
+                opacity: 1
+            },
+            plotOptions: {},
+            series: trips_sum,
+            colors: {{ colors | safe }},
+            xaxis: {
+                categories: {{ cars | safe }},
+            },
+        }
+        let chartSumAmount = new ApexCharts(document.querySelector("#chart-sum-amount"), optionsSumAmount);
+        chartSumAmount.render();
+    </script>
+{% endblock %}

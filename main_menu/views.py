@@ -27,10 +27,13 @@ class MeniItem:
         if self.active is None:
             if hasattr(request, 'user'):
                 if self.user_name is not None and self.user_name:
-                    self.visible = getattr(request.user, request.user.USERNAME_FIELD) == self.user_name
+                    if not hasattr(request.user, 'USERNAME_FIELD'):
+                        self.visible = self.user_name == 'anonymous'
+                    else:
+                        self.visible = getattr(request.user, request.user.USERNAME_FIELD) == self.user_name
                 elif self.group_name is not None and self.group_name:
                     self.visible = self.group_name in request.user.groups.all() if hasattr(request.user, 'groups') else False
-            self.active = True if self.url == request.path else False
+            self.active = True if self.url == request.path else str(request.path).startswith(str(self.url)) if self.url else False
             active = self.active
             if self.submenu:
                 for item in self.submenu:
@@ -128,3 +131,10 @@ class MainMenuView(ContextMixin):
 
     def form_main_menu(self):
         return self.main_menu
+
+    @classmethod
+    def form_menu_context(cls, request):
+        menu = cls()
+        return {
+            menu.main_menu_variable_name: menu.form_main_menu()
+        }

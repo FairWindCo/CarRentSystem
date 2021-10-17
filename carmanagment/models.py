@@ -249,3 +249,19 @@ class Expenses(models.Model):
     class Meta:
         verbose_name = 'Затрата'
         verbose_name_plural = 'Затраты'
+
+
+class TripStatistics(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    stat_date = models.DateField(auto_created=True, verbose_name='Дата')
+    trip_count = models.PositiveIntegerField(verbose_name='Кол-во поездок', default=0)
+    mileage = models.FloatField(verbose_name='Пробег по трекеру', default=0)
+    fuel = models.FloatField(verbose_name='Затраты на топливо', default=0)
+    amount = models.FloatField(verbose_name='Сумма оплаты', default=0)
+    car_amount = models.FloatField(verbose_name='Сумма прибыли по машине', default=0)
+    payer_amount = models.FloatField(verbose_name='Прибыль сервиса', default=0)
+    driver_amount = models.FloatField(verbose_name='Зарплата водителя', default=0)
+    expanse_amount = models.FloatField(verbose_name='Затраты по машине', default=0)
+
+    class Meta:
+        unique_together = (('car', 'stat_date'),)

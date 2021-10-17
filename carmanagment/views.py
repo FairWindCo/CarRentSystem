@@ -1,10 +1,13 @@
 # Create your views here.
+import json
+
 from django.shortcuts import render
 from django.views.generic import ListView
 from vue_utils.views import FilterListView
 
 from balance.models import AccountTransaction, Transaction
-from carmanagment.models import TaxiTrip, Car, Expenses, Investor, Driver, TaxiOperator, Counterpart
+from carmanagment.models import TaxiTrip, Car, Expenses, Investor, Driver, TaxiOperator, Counterpart, TripStatistics
+from carmanagment.services import Statistics
 from django_request_processor.django_list_view import UniversalFilterListView
 from main_menu.views import MainMenuView
 
@@ -46,8 +49,8 @@ class GlobalMainMenu(MainMenuView):
     main_menu = {
         'DashBoard': {
             'icon': 'grid-fill',
-            'url': '#',
-            'user': 'admin'
+            'view': 'dashboard',
+            # 'user': 'admin'
         },
         'Финансы': {
             'group': 'anon'
@@ -95,6 +98,13 @@ class GlobalMainMenu(MainMenuView):
                 },
             },
         },
+        'Статистика': {
+            'submenu': {
+                'Статистика': {
+                    'view': 'trip_stat',
+                },
+            }
+        },
     }
 
 
@@ -102,7 +112,7 @@ class ViewCarTrips(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = TaxiTrip
     template_name = 'carmanagment/cars_trip_list.html'
     paginate_by = 20
-    ordering = ('-timestamp', )
+    ordering = ('-timestamp',)
     filtering = (
         ('car__name',),
         ('timestamp__gte', 'start_interval'),
@@ -153,7 +163,7 @@ class ViewCarExpenses(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = Expenses
     template_name = 'carmanagment/cars_expenses_list.html'
     paginate_by = 20
-    ordering = ('-date_mark', )
+    ordering = ('-date_mark',)
     filtering = (
         ('account__name__icontains', 'name'),
         ('date_mark__gte', 'start_interval'),
@@ -219,3 +229,57 @@ class ViewTripsNew2(UniversalFilterListView, GlobalMainMenu):
 
 def test_view(request):
     return render(request, 'admin_template/base_template.html', {})
+
+
+class ViewCarStatistic(UniversalFilterListView, ByCarView, GlobalMainMenu):
+    model = TripStatistics
+    template_name = 'carmanagment/cars_stat_list.html'
+    paginate_by = 20
+    ordering = ('-stat_date',)
+    filtering = (
+        ('car__name',),
+        ('stat_date__gte', 'start_interval'),
+        ('stat_date__lte', 'end_interval'),
+    )
+
+    def get_queryset(self):
+        if self.current_car:
+            self.queryset = TripStatistics.objects.filter(car=self.current_car).all()
+        return super().get_queryset()
+
+
+def dashboard(request):
+    import random
+
+    def getRandomCol():
+
+        r = hex(random.randrange(0, 16))[2:]+hex(random.randrange(0, 16))[2:]
+        g = hex(random.randrange(0, 255))[2:]+hex(random.randrange(0, 16))[2:]
+        b = hex(random.randrange(0, 255))[2:]+hex(random.randrange(0, 16))[2:]
+
+        random_col = '#' + r[:2] + g[:2] + b[:2]
+        return random_col
+
+    context = GlobalMainMenu.form_menu_context(request)
+    trip_stat = Statistics.get_last_statistics()
+    context['page_header'] = 'DashBoard'
+    trip_data = []
+    trip_sum = []
+    trip_label = []
+    trip_color = []
+    for index, (name, stats) in enumerate(trip_stat.items()):
+        trip_data.append(
+            {'name': name,
+             'data': [el.trip_count for el in stats]})
+        trip_sum.append(
+            {'name': name,
+             'data': [el.amount for el in stats]})
+        trip_color.append(getRandomCol())
+        if index == 0:
+            trip_label = [el.stat_date.strftime('%d.%m.%y') for el in stats]
+
+    context['trips_data'] = trip_data
+    context['trips_sum'] = trip_sum
+    context['cars'] = json.dumps(trip_label)
+    context['colors'] = json.dumps(trip_color)
+    return render(request, 'admin_template/dashboard.html', context)
