@@ -220,16 +220,15 @@ class ListAdmin(EtcAdmin):
 
     def view_custom(self, request: HttpRequest) -> HttpResponse:
         title = self.get_title()
-        cl = self.Cl()
         opts = self.Opts()
         config = self.AppConfig(title)
-        list_display = self.get_list_display(request)
-        list_display_links = self.get_list_display_links(request, list_display)
-        # Add the action checkboxes if any actions are available.
-        if self.get_actions(request):
-            list_display = ['action_checkbox', *list_display]
         sortable_by = self.get_sortable_by(request)
         if self.use_change_list:
+            list_display = self.get_list_display(request)
+            list_display_links = self.get_list_display_links(request, list_display)
+            # Add the action checkboxes if any actions are available.
+            if self.get_actions(request):
+                list_display = ['action_checkbox', *list_display]
             cl = ChangeListSpecial(
                 request,
                 self.model,
@@ -245,22 +244,24 @@ class ListAdmin(EtcAdmin):
                 self,
                 sortable_by,
             )
-
-        setattr(cl, 'opts', opts)
-        setattr(cl, 'result_count', 0)
-        setattr(cl, 'full_result_count', 0)
-        setattr(cl, 'get_ordering_field_columns', '')
-        setattr(opts, 'app_label', 'admin')
-        setattr(opts, 'app_config', config)
-        # cl.opts.app_config.verbose_name
-        setattr(opts, 'object_name', title)
+            opts = cl.opts
+        else:
+            cl = self.Cl()
+            setattr(cl, 'opts', opts)
+            setattr(cl, 'result_count', 10)
+            setattr(cl, 'full_result_count', 10)
+            setattr(cl, 'get_ordering_field_columns', sortable_by)
+            setattr(opts, 'app_label', 'admin')
+            setattr(opts, 'app_config', config)
+            # cl.opts.app_config.verbose_name
+            setattr(opts, 'object_name', title)
         context: dict = {
             **self.admin_site.each_context(request),
             'title': title,
             'opts': opts,
             'cl': cl,
-
         }
+        print(context)
         return TemplateResponse(request, 'test.html', context)
 
 
@@ -270,3 +271,6 @@ def get_model_fields(model):
     for field in sorted(options.concrete_fields + options.many_to_many):
         fields[field.name] = field
     return fields
+
+
+

@@ -4,7 +4,8 @@ from django.utils.timezone import now
 
 from balance.services import Balance
 from carmanagment.models import ExpensesTypes, Investor, CarBrand, CarModel, Counterpart, Driver, TaxiOperator, TaxiTrip
-from carmanagment.services import ExpensesProcessor, CarCreator
+from carmanagment.serivices.expense_service import ExpensesProcessor
+from carmanagment.serivices.car_service import CarCreator
 
 
 class CheckExpense(TestCase):

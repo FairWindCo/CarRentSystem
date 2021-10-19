@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
 from carmanagment.custom_admin import CustomPageModelAdmin, ListAdmin
-from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage
+from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage, EmptyModel, CarRentPage
 from carmanagment.models import *
 
 
@@ -94,7 +94,7 @@ class MyList(ListAdmin):
     model_field_sets = {
         'name': models.CharField(max_length=250, verbose_name='Номерной знак'),
     }
-    model_query = Car
+    # model_query = Car
     list_display = ('name',)
     search_fields = ('name',)
     list_filter = ('name',)
@@ -102,15 +102,20 @@ class MyList(ListAdmin):
     use_change_list = True
 
     def get_queryset(self, request):
+        print('QUERYSET')
         return Car.objects.all()
 
+
+class ProfileAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('user', 'account')
 
 ExpensePage.register(admin_model=CarExpenseBase)
 OtherExpensePage.register(admin_model=OtherExpenseBase)
 CarAddPage.register(admin_model=CarAddPageAdmin)
 TaxiTripPage.register(admin_model=TaxiTripPageAdmin)
-# EmptyModel.register(admin_model=ListAdmin)
-ListAdmin.register()
+CarRentPage.register()
+#EmptyModel.register(admin_model=ListAdmin)
+#ListAdmin.register()
 MyList.register()
 admin.site.register(Car, CarAdmin)
 admin.site.register(Expenses, ReadOnlyModelAdmin)
@@ -122,3 +127,4 @@ admin.site.register(Counterpart, CounterpartAdmin)
 admin.site.register(TaxiOperator, TaxiOperatorAdmin)
 admin.site.register(CarsInOperator, CarInTaxiAdmin)
 admin.site.register(CarBrand)
+admin.site.register(UserProfile, ProfileAdmin)

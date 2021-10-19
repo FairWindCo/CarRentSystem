@@ -13,5 +13,6 @@ if __name__ == '__main__':
     os.environ['DJANGO_SETTINGS_MODULE'] = 'CarRentSystem.settings'
 
     django.setup()
-    from carmanagment.services import Statistics
-    Statistics.create_statistics(datetime.datetime.strptime('21.09.2021','%d.%m.%Y'))
+    from carmanagment.serivices.statisrics_service import Statistics
+
+    Statistics.create_statistics(datetime.datetime.strptime('16.10.2021','%d.%m.%Y'))

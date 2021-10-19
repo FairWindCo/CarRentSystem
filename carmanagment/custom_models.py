@@ -4,7 +4,9 @@ from django.utils.translation import gettext_lazy as _
 
 from carmanagment.custom_admin import CustomModelPage
 from carmanagment.models import *
-from carmanagment.services import ExpensesProcessor, CarCreator
+from carmanagment.serivices.car_rent_service import CarRentService
+from carmanagment.serivices.expense_service import ExpensesProcessor
+from carmanagment.serivices.car_service import CarCreator
 from external_services.fresh_contants import get_special_fuel_help_text
 
 
@@ -134,3 +136,26 @@ class TaxiTripPage(CustomModelPage):
 
 class EmptyModel(CustomModelPage):
     pass
+
+
+class CarRentPage(CustomModelPage):
+    title = 'Вывод прибыли по машине'  # set page title
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, verbose_name='Модель')
+    amount = models.FloatField(verbose_name='Сумма', validators=[
+        MinValueValidator(0.01)
+    ])
+
+    def clean(self):
+        if not hasattr(self, 'car') or self.car is None:
+            raise ValidationError(_('Машина обязательна'))
+        super().clean()
+
+    def save(self):
+        if not self.bound_request.user and not hasattr(self.bound_request.user, 'userprofile'):
+            raise ValidationError(_('Пользователь не можут списывать прибыли'))
+        firm_account = self.bound_request.user.userprofile.account
+        result, message = CarRentService.move_rent_many(self.car, self.amount, firm_account)
+        if result:
+            self.bound_admin.message_success(self.bound_request, _('прибыль списана'))
+        else:
+            self.bound_admin.message_error(self.bound_request, message)

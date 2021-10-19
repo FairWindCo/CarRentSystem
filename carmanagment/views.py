@@ -7,7 +7,7 @@ from vue_utils.views import FilterListView
 
 from balance.models import AccountTransaction, Transaction
 from carmanagment.models import TaxiTrip, Car, Expenses, Investor, Driver, TaxiOperator, Counterpart, TripStatistics
-from carmanagment.services import Statistics
+from carmanagment.serivices.statisrics_service import Statistics
 from django_request_processor.django_list_view import UniversalFilterListView
 from main_menu.views import MainMenuView
 

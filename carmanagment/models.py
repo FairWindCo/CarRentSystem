@@ -1,7 +1,8 @@
 import math
+
+from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction, IntegrityError
-
 # Create your models here.
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
@@ -182,14 +183,15 @@ class TaxiTrip(models.Model):
             with transaction.atomic():
                 print(start)
                 tz = timezone.get_current_timezone()
-                taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer, mileage=millage, amount=amount,
+                taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer,
+                                    mileage=millage, amount=amount,
                                     cash=cash)
 
                 fuel_trip = (millage + car.additional_miilage) / 100 * car.fuel_consumption
                 fuel_price = round(fuel_trip * gas_price, 2)
                 real_pay = round(amount * (1 - (payer.cash_profit if cash else payer.profit)), 2)
                 real_amount = round(real_pay - fuel_price, 2)
-                taxitrip.payer_amount =round(amount - real_pay, 2)
+                taxitrip.payer_amount = round(amount - real_pay, 2)
                 driver_money = round(real_amount * (driver.profit / 100), 2)
                 taxitrip.driver_amount = driver_money
                 operations = [
@@ -265,3 +267,16 @@ class TripStatistics(models.Model):
 
     class Meta:
         unique_together = (('car', 'stat_date'),)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    account = models.OneToOneField(Account, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('user', 'account'),)
+
+    def __str__(self):
+        return f'{self.user.username} {self.account.name}'
+
+
