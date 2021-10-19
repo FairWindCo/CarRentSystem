@@ -11,7 +11,7 @@ if sys.version_info < (3, 7, 0):
     from collections.abc import Mapping
 else:
     from collections.abc import Sequence
-    from collections import Mapping
+    from collections.abc import Mapping
 
 import pytz
 

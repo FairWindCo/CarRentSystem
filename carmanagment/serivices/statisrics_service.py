@@ -15,8 +15,8 @@ class Statistics:
     def create_car_statistics(car: Car, statistics_date: datetime.date):
         from django.db.models import Sum, Count
         if statistics_date is None:
-            statistics_date = datetime.datetime.now()
-        statistics_start_date: datetime.date = statistics_date.date()
+            statistics_date = datetime.datetime.now().date()
+        statistics_start_date: datetime.date = statistics_date
         statistics_end_date: datetime.date = statistics_start_date + datetime.timedelta(days=1)
         expenses_sum = Expenses.objects.filter(account=car,
                                                date_mark__lte=statistics_end_date,
