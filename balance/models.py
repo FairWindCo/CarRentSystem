@@ -123,6 +123,7 @@ class Transaction(models.Model):
         DEPOSIT = 4, 'Внесение денежных средств '
         WITHDRAWAL = 5, 'Вывод денежных средств'
         INVESTMENT = 6, 'Инвестиция'
+        INSURANCE = 7, 'Строховка'
 
     transactionTime = models.DateTimeField(auto_now_add=True, verbose_name='Время транзакции')
     transactionType = models.IntegerField(choices=TransactionType.choices, verbose_name='Тип')
@@ -133,7 +134,10 @@ class Transaction(models.Model):
         verbose_name_plural = 'транзакции'
 
     def get_transaction_type(self):
-        return Transaction.TransactionType.labels[self.transactionType]
+        for el in Transaction.TransactionType.choices:
+            if el[0] == self.transactionType:
+                return el[1]
+        return '--'
 
     def __str__(self):
         return f'{self.pk} [{self.transactionTime.strftime("%d.%m.%Y %H:%M:%S")}] - {self.get_transaction_type()}'

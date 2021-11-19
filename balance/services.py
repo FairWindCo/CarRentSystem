@@ -15,6 +15,7 @@ class Balance:
     DEPOSIT = Transaction.TransactionType.DEPOSIT
     WITHDRAWAL = Transaction.TransactionType.WITHDRAWAL
     INVESTMENT = Transaction.TransactionType.INVESTMENT
+    INSURANCE = Transaction.TransactionType.INSURANCE
 
     @staticmethod
     # Create one transaction with list of account operation (from_account, to_account, amount)

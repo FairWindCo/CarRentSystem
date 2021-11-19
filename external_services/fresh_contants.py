@@ -14,7 +14,7 @@ def get_special_fuel_help_text(field_id='id_gas_price'):
         'FUEL_GAS': 'Газ',
     }
     fuels_strings = "".join([
-        f'<a href="#" onclick="{field_id}.value= {getattr(config, fuel_code)}; return false;">{name}: {getattr(config, fuel_code)} грн/л</a><br>'
+        f'<a href="#" onclick="{field_id}.value= {round(getattr(config, fuel_code), 2)}; return false;">{name}: {round(getattr(config, fuel_code), 2)} грн/л</a><br>'
         for fuel_code, name in FUELS.items()])
     return fuels_strings
 
@@ -50,7 +50,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False):
                         gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
                         start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
                         TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
-                                                              ride['cost'], gas_price, cash)
+                                                         ride['cost'], gas_price, cash)
                         processed_rides += 1
                     except CarsInOperator.DoesNotExist:
                         continue

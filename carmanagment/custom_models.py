@@ -1,12 +1,11 @@
 from constance import config
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from carmanagment.custom_admin import CustomModelPage
 from carmanagment.models import *
 from carmanagment.serivices.car_rent_service import CarRentService
-from carmanagment.serivices.expense_service import ExpensesProcessor
 from carmanagment.serivices.car_service import CarCreator
+from carmanagment.serivices.expense_service import ExpensesProcessor
 from external_services.fresh_contants import get_special_fuel_help_text
 
 
@@ -50,16 +49,20 @@ class ExpensePage(CustomModelPage):
             raise ValidationError(_('Тип затьраты обязателен'))
         if self.expense_type.type_class not in [ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE,
                                                 ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
+                                                ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE,
                                                 ]:
             raise ValidationError(_('Не верный класс затраты для машины'))
         if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE and self.currency_rate is None:
             raise ValidationError(_('Для капитальных затрат курс - обязателен'))
+        if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE and self.currency_rate is None:
+            raise ValidationError(_('Для страховых затрат курс - обязателен'))
         super().clean()
 
     def save(self):
         if not hasattr(self, 'expense_type'):
             raise ValidationError(_('Тип затраты обязателен'))
-        if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE:
+        if self.expense_type.type_class in [ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
+                                            ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE]:
             ExpensesProcessor.form_car_capital_expense(
                 self.car, self.amount, self.currency_rate, self.expense_type, self.counterpart, self.comment)
         elif self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE:

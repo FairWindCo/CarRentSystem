@@ -1,9 +1,10 @@
 from django.contrib import admin
 from django.db.models import Q
+from django.http import HttpRequest
 
 from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
 from carmanagment.custom_admin import CustomPageModelAdmin, ListAdmin
-from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage, EmptyModel, CarRentPage
+from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage, CarRentPage
 from carmanagment.models import *
 
 
@@ -68,6 +69,16 @@ class CarInTaxiAdmin(admin.ModelAdmin):
     autocomplete_fields = ('car', 'driver', 'operator')
 
 
+class CarInsuranceAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('car', 'insurer')
+
+    def has_delete_permission(self, request: HttpRequest, obj: models.Model = None) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 # Register my page within Django admin.
 class CounterpartAdmin(admin.ModelAdmin):
     ordering = ['name']
@@ -109,13 +120,14 @@ class MyList(ListAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     autocomplete_fields = ('user', 'account')
 
+
 ExpensePage.register(admin_model=CarExpenseBase)
 OtherExpensePage.register(admin_model=OtherExpenseBase)
 CarAddPage.register(admin_model=CarAddPageAdmin)
 TaxiTripPage.register(admin_model=TaxiTripPageAdmin)
 CarRentPage.register()
-#EmptyModel.register(admin_model=ListAdmin)
-#ListAdmin.register()
+# EmptyModel.register(admin_model=ListAdmin)
+# ListAdmin.register()
 MyList.register()
 admin.site.register(Car, CarAdmin)
 admin.site.register(Expenses, ReadOnlyModelAdmin)
@@ -128,3 +140,4 @@ admin.site.register(TaxiOperator, TaxiOperatorAdmin)
 admin.site.register(CarsInOperator, CarInTaxiAdmin)
 admin.site.register(CarBrand)
 admin.site.register(UserProfile, ProfileAdmin)
+admin.site.register(CarInsurance, CarInsuranceAdmin)
