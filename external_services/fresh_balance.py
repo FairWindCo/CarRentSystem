@@ -1,9 +1,19 @@
-import datetime
 import os
 import sys
+from datetime import timedelta
 
 import django
 from django.utils import timezone
+
+
+def refresh_balanses():
+    from balance.models import Account
+
+    current_date = timezone.now().date() - timedelta(days=1)
+    for balance in Account.objects.all():
+        current_statement_balance = balance.form_statement(current_date)
+        print(balance.name, current_statement_balance)
+
 
 if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -13,7 +23,4 @@ if __name__ == '__main__':
     os.environ['DJANGO_SETTINGS_MODULE'] = 'CarRentSystem.settings'
 
     django.setup()
-    from carmanagment.serivices.statisrics_service import Statistics
-
-    Statistics.create_statistics((timezone.now().date() - datetime.timedelta(days=1)))
-    Statistics.create_statistics(datetime.datetime.strptime('16.10.2021', '%d.%m.%Y'))
+    refresh_balanses()

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import environ
 import requests
+from django.utils import timezone
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -195,7 +196,7 @@ class UklonTaxiService:
 
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
         if day is None:
-            day = datetime.now()
+            day = timezone.now()
         start_time = int(time.mktime(day.date().timetuple()))
         end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
         count = 0
@@ -284,7 +285,7 @@ if __name__ == '__main__':
     # print(uklon.get_rides())
     print(uklon.get_day_rides())
 
-    current_date = datetime.now()
+    current_date = timezone.now()
     yesterday = current_date - timedelta(days=2)
     rides = uklon.get_day_rides(yesterday)
 

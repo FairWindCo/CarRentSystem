@@ -1,5 +1,6 @@
 from django.utils.timezone import now
 
+from balance.models import Account
 from balance.services import Balance
 from carmanagment.models import Investor, CarModel, Car, InvestmentCarBalance
 
@@ -17,7 +18,8 @@ class CarCreator:
                             start_amount: int, **kwargs) -> Car:
         car = Car(name=car_plate, year=year, mileage_at_start=mileage_at_start, control_mileage=mileage_at_start,
                   model_id=model_id, car_investor_id=investor_id)
-        car.investment = InvestmentCarBalance(name=car_plate, create_date=now().date())
+        car.investment = InvestmentCarBalance(name=car_plate, create_date=now().date(),
+                                              currency=Account.AccountCurrency.DOLLAR)
         car.investment.save()
         car.save()
         Balance.form_transaction(Balance.DEPOSIT, [

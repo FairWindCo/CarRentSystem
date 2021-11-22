@@ -3,6 +3,7 @@ import os
 import sys
 
 import django
+from django.utils import timezone
 
 
 def get_special_fuel_help_text(field_id='id_gas_price'):
@@ -32,7 +33,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False):
     uklon = UklonTaxiService(user_name, user_pass)
     if uklon.connect(selenium=use_silenuim):
         if uklon.get_my_info():
-            current_date = datetime.datetime.now()
+            current_date = timezone.now()
             yesterday = current_date - datetime.timedelta(days=2)
             rides = uklon.get_day_rides(yesterday)
             uklon.logout()

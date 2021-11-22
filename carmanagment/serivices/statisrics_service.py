@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import IntegrityError
+from django.utils import timezone
 
 from carmanagment.models import Car, Expenses, TaxiTrip, TripStatistics
 
@@ -15,7 +16,7 @@ class Statistics:
     def create_car_statistics(car: Car, statistics_date: datetime.date):
         from django.db.models import Sum, Count
         if statistics_date is None:
-            statistics_date = datetime.datetime.now().date()
+            statistics_date = timezone.now().date()
         statistics_start_date: datetime.date = statistics_date
         statistics_end_date: datetime.date = statistics_start_date + datetime.timedelta(days=1)
         expenses_sum = Expenses.objects.filter(account=car,
@@ -59,7 +60,7 @@ class Statistics:
     @staticmethod
     def create_statistics(statistics_date: datetime.date = None):
         if statistics_date is None:
-            statistics_date = datetime.datetime.now()
+            statistics_date = timezone.now()
 
         cars = Car.objects.all()
 

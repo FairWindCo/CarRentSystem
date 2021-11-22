@@ -67,6 +67,42 @@ class Account(models.Model):
                 Sum('amount'))['amount__sum']
         return balance
 
+    def form_statement(self, on_date=None):
+        if on_date is None:
+            on_date = now()
+        old_balance, from_date, statement_balance = self.get_statement_balance(on_date)
+        if statement_balance:
+            return statement_balance
+        if from_date is not None:
+            credit = AccountTransaction.objects.filter(account=self, amount__lt=0,
+                                                       transaction__transactionTime__gt=from_date,
+                                                       transaction__transactionTime__lte=on_date).aggregate(
+                Sum('amount'))['amount__sum']
+            debit = AccountTransaction.objects.filter(account=self, amount__gt=0,
+                                                      transaction__transactionTime__gt=from_date,
+                                                      transaction__transactionTime__lte=on_date).aggregate(
+                Sum('amount'))['amount__sum']
+        else:
+            old_balance = 0
+            credit = AccountTransaction.objects.filter(account=self, amount__lt=0,
+                                                       transaction__transactionTime__lte=on_date).aggregate(
+                Sum('amount'))['amount__sum']
+            debit = AccountTransaction.objects.filter(account=self, amount__gt=0,
+                                                      transaction__transactionTime__lte=on_date).aggregate(
+                Sum('amount'))['amount__sum']
+        debit = int(0 if debit is None else debit)
+        credit = int(0 if credit is None else credit)
+        balance = old_balance + debit + credit
+
+        statement_balance = AccountStatement(account=self, statementDate=on_date, closingBalance=balance,
+                                             totalDebit=debit, totalCredit=credit)
+        statement_balance.save()
+        no_update = AccountStatement.objects.filter(account=self, statementDate__gt=on_date).exists()
+        if not no_update:
+            self.last_period_balance = statement_balance
+            self.save()
+        return statement_balance
+
     def current_balance(self):
         balance = self.get_current_balance()
         return balance / 100 if balance else 0

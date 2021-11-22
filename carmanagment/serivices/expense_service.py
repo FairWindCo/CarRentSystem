@@ -1,6 +1,7 @@
 import math
 
 from django.db import transaction
+from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
 from balance.models import Account
@@ -71,7 +72,7 @@ class ExpensesProcessor:
     @staticmethod
     def get_car_insurance(car: Car):
         if car:
-            now = datetime.now().date()
+            now = timezone.now().date()
             try:
                 return CarInsurance.objects.get(car=car, start_date__gte=now, end_date__lte=now)
             except CarInsurance.DoesNotExist:
