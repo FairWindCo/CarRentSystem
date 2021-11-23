@@ -59,8 +59,8 @@ class Account(models.Model):
             total = AccountTransaction.objects.filter(account=self,
                                                       transaction__transactionTime__gt=from_date,
                                                       transaction__transactionTime__lte=on_date).aggregate(
-                Sum('amount'))
-            balance = balance + total['amount__sum']
+                Sum('amount'))['amount__sum']
+            balance = balance + (total if total is not None else 0)
         else:
             balance = AccountTransaction.objects.filter(account=self,
                                                         transaction__transactionTime__lte=on_date).aggregate(
