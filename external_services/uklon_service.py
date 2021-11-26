@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 
 import environ
 import requests
-from django.utils import timezone
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -196,7 +195,7 @@ class UklonTaxiService:
 
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
         if day is None:
-            day = timezone.now()
+            day = datetime.now()
         start_time = int(time.mktime(day.date().timetuple()))
         end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
         count = 0
@@ -283,14 +282,24 @@ if __name__ == '__main__':
     # print(uklon.cars)
     # print(uklon.drivers)
     # print(uklon.get_rides())
-    print(uklon.get_day_rides())
+    # print(uklon.get_day_rides())
 
-    current_date = timezone.now()
-    yesterday = current_date - timedelta(days=2)
-    rides = uklon.get_day_rides(yesterday)
+    # current_date = timezone.now()
+    # yesterday = current_date - timedelta(days=2)
+    # rides = uklon.get_day_rides(yesterday)
+    #
+    # for ride in rides:
+    #     print(datetime.fromtimestamp(ride['pickup_time']))
+    current_date = datetime.now()
+    start_day = current_date - timedelta(days=10)
 
-    for ride in rides:
-        print(datetime.fromtimestamp(ride['pickup_time']))
+    while start_day < current_date:
+        rides = uklon.get_day_rides(start_day)
+
+        for ride in rides:
+            print(datetime.fromtimestamp(ride['pickup_time']))
+
+        start_day += timedelta(days=1)
 
     print(uklon.logout())
 

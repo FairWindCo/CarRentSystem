@@ -9,7 +9,7 @@ class CarCreator:
     @staticmethod
     def add_new_car(investor: Investor, model: CarModel, car_plate: str, year: int, mileage_at_start: int,
                     start_amount: int) -> Car:
-        return CarCreator.add_new_car_from_id(name=car_plate, year=year, mileage_at_start=mileage_at_start,
+        return CarCreator.add_new_car_from_id(car_plate=car_plate, year=year, mileage_at_start=mileage_at_start,
                                               start_amount=start_amount,
                                               model_id=model.pk, investor_id=investor.pk)
 
