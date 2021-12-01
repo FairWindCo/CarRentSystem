@@ -117,11 +117,13 @@ class TaxiTripPage(CustomModelPage):
                                     related_name='taxi_service')
     amount = models.PositiveIntegerField(verbose_name='Сумма')
     millage = models.PositiveIntegerField(verbose_name='Растояние')
-    gas_price = models.PositiveIntegerField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
+    gas_price = models.FloatField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
     cash = models.BooleanField(verbose_name='Оплата наличными', default=False)
     start_time = models.DateTimeField(verbose_name='Дата и время начала поездки')
 
     def clean(self):
+        if config.FIRM is None:
+            raise ValidationError('Need Set Firm account in Config')
         if not hasattr(self, 'car'):
             raise ValidationError(_('Машина обязательна'))
         if not hasattr(self, 'driver'):

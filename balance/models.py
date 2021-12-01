@@ -192,5 +192,12 @@ class AccountTransaction(models.Model):
         verbose_name = 'Операция в транзакция'
         verbose_name_plural = 'Транзакционные операции'
 
+
     def cents_amount(self):
         return f'{self.amount / 100:.2f}'
+
+
+class CashBox(Account):
+    class Meta:
+        verbose_name = 'Касса'
+        verbose_name_plural = 'Кассы'

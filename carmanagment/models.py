@@ -1,6 +1,7 @@
 import math
 
 from audit_log.models import CreatingUserField
+from constance import config
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -9,6 +10,7 @@ from django.db import models, transaction, IntegrityError
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
+import CarRentSystem
 from balance.models import Account, Transaction
 from balance.services import Balance
 
@@ -60,6 +62,7 @@ def get_fuel_price_for_type(fuel_type, fuel_price):
 
 class Investor(Account):
     profit = models.FloatField(verbose_name='Коифициент распределения прибыли')
+    operating_costs_percent = models.FloatField(verbose_name='Процент на операционные затраты', default=5.0)
 
     class Meta:
         verbose_name = 'Инвестор'
@@ -189,34 +192,49 @@ class TaxiTrip(models.Model):
                 taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer,
                                     mileage=millage, amount=amount,
                                     cash=cash)
-
+                # this is millage for calculate fuel price
                 fuel_trip = (millage + car.additional_miilage) / 100 * car.fuel_consumption
                 fuel_price = round(fuel_trip * gas_price, 2)
+
+                # this is money without taxi service profit
                 real_pay = round(amount * (1 - (payer.cash_profit if cash else payer.profit)), 2)
+
+                # this is money without fuel cost
                 real_amount = round(real_pay - fuel_price, 2)
+
+                # this is operating costs
+                firm_account = config.FIRM
+                if firm_account is None:
+                    raise ValueError('Need Set Firm account in Config')
+                operating_costs = round(real_pay * (car.car_investor.operating_costs_percent / 100), 2)
+
+                # taxi service profit
                 taxitrip.payer_amount = round(amount - real_pay, 2)
-                driver_money = round(real_amount * (driver.profit / 100), 2)
+                # driver profit
+                driver_money = round((real_amount - operating_costs) * (driver.profit / 100), 2)
                 taxitrip.driver_amount = driver_money
                 operations = [
                     (payer, car, math.trunc(real_pay * 100), 'Платеж от оператора'),
                     (car, driver, math.trunc(fuel_price * 100), 'Компенсация топлива'),
+                    (car, firm_account, math.trunc(operating_costs * 100), 'Операционные затраты'),
                     (car, driver, math.trunc(driver_money * 100), 'Зарплата водителя'),
                 ]
                 if cash:
-                    operations.append((driver, None, math.trunc(amount * 100), 'Вывод галичных'))
+                    operations.append((driver, None, math.trunc(amount * 100), 'Вывод наличных'))
                 # print(operations)
                 # print(fuel_trip, taxitrip.fuel, driver_money)
                 transaction_record = Balance.form_transaction(Balance.DEPOSIT, operations, comment if comment
                 else f'Поездка {start} {car.name} {driver.name}')
 
                 taxitrip.fuel = fuel_price
-                taxitrip.car_amount = real_pay - fuel_price - driver_money
+                taxitrip.car_amount = real_pay - fuel_price - driver_money - operating_costs
                 taxitrip.transaction = transaction_record
                 taxitrip.save()
                 print('OK')
                 return True
         except IntegrityError:
             return False
+
 
 
 class ExpensesTypes(models.Model):
@@ -262,13 +280,16 @@ class TripStatistics(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
     stat_date = models.DateField(auto_created=True, verbose_name='Дата')
     trip_count = models.PositiveIntegerField(verbose_name='Кол-во поездок', default=0)
-    mileage = models.FloatField(verbose_name='Пробег по трекеру', default=0)
+    mileage = models.FloatField(verbose_name='Пробег за поездки', default=0)
     fuel = models.FloatField(verbose_name='Затраты на топливо', default=0)
     amount = models.FloatField(verbose_name='Сумма оплаты', default=0)
     car_amount = models.FloatField(verbose_name='Сумма прибыли по машине', default=0)
     payer_amount = models.FloatField(verbose_name='Прибыль сервиса', default=0)
     driver_amount = models.FloatField(verbose_name='Зарплата водителя', default=0)
     expanse_amount = models.FloatField(verbose_name='Затраты по машине', default=0)
+    rent_amount = models.FloatField(verbose_name='Прибыль от аренды', default=0)
+    lost_amount = models.FloatField(verbose_name='Не полученная прибыль', default=0)
+    rent_mileage = models.FloatField(verbose_name='Пробег в аренде', default=0)
 
     class Meta:
         unique_together = (('car', 'stat_date'),)
@@ -335,3 +356,32 @@ class CarInsurance(models.Model):
 
     def __str__(self):
         return f'{self.car.name} {self.insurer.name} от {self.start_date} до {self.end_date}'
+
+
+class DriversSchedule(models.Model):
+    car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Водитель')
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    class Meta:
+        verbose_name = 'Расписание работы на авто'
+        verbose_name_plural = 'Расписания работы на авто'
+
+
+class CarDayRent(models.Model):
+    car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
+    date = models.DateField(verbose_name='Дата аренды')
+    rent_amount = models.FloatField(verbose_name='Ставка оренды', default=0.0)
+
+
+class CarSchedule(models.Model):
+    car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
+    fix_rent = models.BooleanField(verbose_name='Машина в аренде', default=True)
+    rent_price = models.FloatField(verbose_name='Ставка оренды', default=0.0)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    class Meta:
+        verbose_name = 'Расписание работы на авто'
+        verbose_name_plural = 'Расписания работы на авто'
