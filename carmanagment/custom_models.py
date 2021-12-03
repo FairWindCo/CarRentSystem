@@ -46,7 +46,6 @@ class ExpensePage(CustomModelPage):
     cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
                                  related_name='expense_cash_box')
 
-
     def clean(self):
         if not hasattr(self, 'expense_type') or self.expense_type is None:
             raise ValidationError(_('Тип затьраты обязателен'))
@@ -59,6 +58,8 @@ class ExpensePage(CustomModelPage):
             raise ValidationError(_('Для капитальных затрат курс - обязателен'))
         if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE and self.currency_rate is None:
             raise ValidationError(_('Для страховых затрат курс - обязателен'))
+        if self.cash_box.current_balance() <= self.amount:
+            raise ValidationError(_('В кассе недостаточно денег'))
         super().clean()
 
     def save(self):
@@ -99,6 +100,8 @@ class OtherExpensePage(CustomModelPage):
             raise ValidationError(_('Затраты для машины - заносятся отдельно'))
         if self.account.currency == Account.AccountCurrency.DOLLAR:
             raise ValidationError(_('Внос капитальных затрат не разрешен'))
+        if self.cash_box.current_balance() <= self.amount:
+            raise ValidationError(_('В кассе недостаточно денег'))
         super().clean()
 
     def save(self):
@@ -149,6 +152,49 @@ class TaxiTripPage(CustomModelPage):
             self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
 
 
+class MoveCashPage(CustomModelPage):
+    title = 'Переместить деньги в другую кассу'  # set page title
+    # Define some fields.
+    amount = models.FloatField(verbose_name='Сумма')
+    from_cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                      related_name='moved_cash_box')
+    to_cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                    related_name='recipient_cash_box')
+
+    def clean(self):
+        if self.from_cash_box.current_balance() <= self.amount:
+            raise ValidationError(_('В кассе недостаточно денег'))
+
+        super().clean()
+
+    def save(self):
+        if Balance.form_transaction(Balance.DEPOSIT, [
+            (self.from_cash_box, self.to_cash_box, math.trunc(self.amount * 100), 'Перемешение средств'),
+        ], 'Перемешение денег между кассами'):
+            self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
+
+
+class InsertCashPage(CustomModelPage):
+    title = 'Внести деньги в кассу'  # set page title
+    # Define some fields.
+    amount = models.FloatField(verbose_name='Сумма')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, verbose_name='Баланс',
+                                      related_name='moved_account_rel')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                    related_name='recipient_cash_box_rel')
+
+    def clean(self):
+        super().clean()
+
+    def save(self):
+        if Balance.form_transaction(Balance.DEPOSIT, [
+            (None, self.cash_box, math.trunc(self.amount * 100), 'Пополнение кассы'),
+            (None, self.account, math.trunc(self.amount * 100), 'Внесение денег в кассу'),
+        ], 'Перемешение денег между кассами'):
+            self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
+
+
+
 class EmptyModel(CustomModelPage):
     pass
 
@@ -167,7 +213,7 @@ class CarRentPage(CustomModelPage):
 
     def save(self):
         if not self.bound_request.user and not hasattr(self.bound_request.user, 'userprofile'):
-            raise ValidationError(_('Пользователь не можут списывать прибыли'))
+            raise ValidationError(_('Пользователь не могут списывать прибыли'))
         firm_account = self.bound_request.user.userprofile.account
         result, message = CarRentService.move_rent_many(self.car, self.amount, firm_account)
         if result:

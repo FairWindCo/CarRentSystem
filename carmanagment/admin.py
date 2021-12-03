@@ -4,7 +4,8 @@ from django.http import HttpRequest
 
 from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
 from carmanagment.custom_admin import CustomPageModelAdmin, ListAdmin
-from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage, CarRentPage
+from carmanagment.custom_models import ExpensePage, OtherExpensePage, CarAddPage, TaxiTripPage, CarRentPage, \
+    MoveCashPage, InsertCashPage
 from carmanagment.models import *
 
 
@@ -126,6 +127,8 @@ OtherExpensePage.register(admin_model=OtherExpenseBase)
 CarAddPage.register(admin_model=CarAddPageAdmin)
 TaxiTripPage.register(admin_model=TaxiTripPageAdmin)
 CarRentPage.register()
+MoveCashPage.register()
+InsertCashPage.register()
 # EmptyModel.register(admin_model=ListAdmin)
 # ListAdmin.register()
 MyList.register()

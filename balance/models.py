@@ -201,3 +201,7 @@ class CashBox(Account):
     class Meta:
         verbose_name = 'Касса'
         verbose_name_plural = 'Кассы'
+
+    def __str__(self):
+        cash = self.get_current_balance()
+        return f'{self.name} {cash if cash else 0}{self.get_currency()}'

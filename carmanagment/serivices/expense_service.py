@@ -16,7 +16,7 @@ class ExpensesProcessor:
                      expense_type: ExpensesTypes,
                      counterpart: Counterpart,
                      description: str,
-                     cash_box: CashBox) -> Expenses:
+                     cash_box: CashBox = None) -> Expenses:
         if expense_type.type_class in [ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE,
                                        ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
                                        ]:
@@ -26,15 +26,17 @@ class ExpensesProcessor:
         if account.currency == Account.AccountCurrency.DOLLAR:
             raise TypeError('Investment balance is not allowed')
         with transaction.atomic():
-            transaction_record = Balance.form_transaction(Balance.EXPENSE,
-                                                          [
-                                                              (
-                                                                  account,
-                                                                  counterpart,
-                                                                  math.trunc(amount * 100),
-                                                                  'Эатрата'
-                                                              ),
-                                                          ],
+            operation_list = [
+                (
+                    account,
+                    counterpart,
+                    math.trunc(amount * 100),
+                    'Эатрата'
+                ),
+            ]
+            if cash_box:
+                operation_list.append((cash_box, None, math.trunc(amount * 100), ''))
+            transaction_record = Balance.form_transaction(Balance.EXPENSE, operation_list,
                                                           description
                                                           )
             expense = Expenses(
@@ -49,19 +51,23 @@ class ExpensesProcessor:
                                  amount: float,
                                  expense_type: ExpensesTypes,
                                  counterpart: Counterpart,
-                                 description: str) -> Expenses:
+                                 description: str,
+                                 cash_box: CashBox = None) -> Expenses:
         if expense_type.type_class != ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE:
             raise TypeError('TypeError class only CAR_EXPENSE')
         with transaction.atomic():
-            transaction_record = Balance.form_transaction(Balance.EXPENSE,
-                                                          [
-                                                              (
-                                                                  car,
-                                                                  counterpart,
-                                                                  math.trunc(amount * 100),
-                                                                  'Расходы на машину'
-                                                              )
-                                                          ], description
+            operation_list = [
+                (
+                    car,
+                    counterpart,
+                    math.trunc(amount * 100),
+                    'Расходы на машину'
+                ),
+            ]
+            if cash_box:
+                operation_list.append((cash_box, None, math.trunc(amount * 100), ''))
+            transaction_record = Balance.form_transaction(Balance.EXPENSE, operation_list
+                                                          , description
                                                           )
             expense = Expenses(
                 account=car, counterpart=counterpart, expenseType=expense_type,
@@ -85,7 +91,8 @@ class ExpensesProcessor:
                                  amount: float, course: float,
                                  expense_type: ExpensesTypes,
                                  counterpart: Counterpart,
-                                 description: str) -> Expenses:
+                                 description: str,
+                                 cash_box: CashBox = None) -> Expenses:
         if expense_type.type_class != ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE:
             raise TypeError('TypeError class only CAPITAL_CAR_EXPENSE')
         with transaction.atomic():
@@ -112,6 +119,8 @@ class ExpensesProcessor:
                     (car.car_investor, car, math.trunc(amount * 100), 'Покрытие капитальной затрата инвестором'),
                     (car.investment, None, math.trunc(amount * 100 / course), 'Увеличения стоимости капитала')
                 ]
+            if cash_box is not None:
+                transaction_operation.append((cash_box, None, math.trunc(amount * 100), ''))
             transaction_record = Balance.form_transaction(Balance.EXPENSE, transaction_operation, description)
             expense = Expenses(
                 account=car, counterpart=counterpart, expenseType=expense_type,
