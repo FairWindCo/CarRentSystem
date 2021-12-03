@@ -4,7 +4,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
-from balance.models import Account
+from balance.models import Account, CashBox
 from balance.services import Balance
 from carmanagment.models import ExpensesTypes, Counterpart, Expenses, Car, CarInsurance
 
@@ -15,7 +15,8 @@ class ExpensesProcessor:
                      amount: float,
                      expense_type: ExpensesTypes,
                      counterpart: Counterpart,
-                     description: str) -> Expenses:
+                     description: str,
+                     cash_box: CashBox) -> Expenses:
         if expense_type.type_class in [ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE,
                                        ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
                                        ]:

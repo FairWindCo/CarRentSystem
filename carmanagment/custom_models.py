@@ -43,6 +43,9 @@ class ExpensePage(CustomModelPage):
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, verbose_name='Контрагент')
     comment = models.TextField(verbose_name='Коментарий')
     currency_rate = models.FloatField(verbose_name='Курс', null=True, blank=True, default=config.USD_CURRENCY)
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='expense_cash_box')
+
 
     def clean(self):
         if not hasattr(self, 'expense_type') or self.expense_type is None:
@@ -82,6 +85,8 @@ class OtherExpensePage(CustomModelPage):
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, verbose_name='Контрагент',
                                     related_name='other_expense')
     comment = models.TextField(verbose_name='Коментарий')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='other_expense_cash_box')
 
     def clean(self):
         if not hasattr(self, 'expense_type'):
@@ -120,6 +125,8 @@ class TaxiTripPage(CustomModelPage):
     gas_price = models.FloatField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
     cash = models.BooleanField(verbose_name='Оплата наличными', default=False)
     start_time = models.DateTimeField(verbose_name='Дата и время начала поездки')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='trip_cash_box', blank=True, null=True)
 
     def clean(self):
         if config.FIRM is None:
@@ -130,12 +137,15 @@ class TaxiTripPage(CustomModelPage):
             raise ValidationError(_('Водительн обязателен'))
         if not hasattr(self, 'counterpart'):
             raise ValidationError(_('Контрагент обязателен'))
+        if hasattr(self, 'cash') and getattr(self, 'cash') and \
+                (not hasattr(self, 'cash_box') or getattr(self, 'cash_box') is None):
+            raise ValidationError(_('Для наличных средств обязательна касса'))
         super().clean()
 
     def save(self):
         if TaxiTrip.manual_create_taxi_trip(self.car, self.driver, self.start_time,
                                             self.counterpart, self.millage, self.amount,
-                                            self.gas_price, self.cash):
+                                            self.gas_price, self.cash, '', self.cash_box):
             self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
 
 

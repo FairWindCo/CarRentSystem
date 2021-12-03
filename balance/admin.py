@@ -17,6 +17,16 @@ class ReadOnlyModelAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         return False
 
+class OnlyAddModelAdmin(admin.ModelAdmin):
+
+    # Prevent deletion from admin portal
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 
 class BalanceReadOnlyField(admin.ModelAdmin):
     readonly_fields = ['last_period_balance']
@@ -24,8 +34,15 @@ class BalanceReadOnlyField(admin.ModelAdmin):
     search_fields = ['name']
 
 
+
+
 class BalanceModel(BalanceReadOnlyField, ReadOnlyModelAdmin):
     pass
+
+
+class CacheModel(BalanceReadOnlyField, OnlyAddModelAdmin):
+    pass
+
 
 
 class TransactionOperation(ReadOnlyModelAdmin):
@@ -36,6 +53,7 @@ class TransactionOperation(ReadOnlyModelAdmin):
 
 
 admin.site.register(Account, BalanceModel)
+admin.site.register(CashBox, CacheModel)
 admin.site.register(AccountStatement, ReadOnlyModelAdmin)
 admin.site.register(Transaction, ReadOnlyModelAdmin)
 admin.site.register(AccountTransaction, TransactionOperation)

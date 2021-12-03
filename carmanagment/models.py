@@ -10,8 +10,7 @@ from django.db import models, transaction, IntegrityError
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 
-import CarRentSystem
-from balance.models import Account, Transaction
+from balance.models import Account, Transaction, CashBox
 from balance.services import Balance
 
 
@@ -86,6 +85,7 @@ class Counterpart(Account):
 class TaxiOperator(Counterpart):
     cash_profit = models.FloatField(default=0.15, verbose_name='Коифициент прибили с поезди оператора (нал)')
     profit = models.FloatField(default=0.17, verbose_name='Коифициент прибили с поезди оператора (без нал)')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         verbose_name = 'Оператор такси'
@@ -178,7 +178,8 @@ class TaxiTrip(models.Model):
 
     @staticmethod
     def manual_create_taxi_trip(car: Car, driver: Driver, start: datetime, payer: TaxiOperator, millage: float,
-                                amount: float, gas_price: int, cash: bool = False, comment: str = ''):
+                                amount: float, gas_price: float, cash: bool = False, comment: str = '',
+                                many_cash_box: CashBox = None):
         if not isinstance(car, Car) or car is None:
             raise TypeError('Need car account')
         if not isinstance(driver, Driver) or driver is None:
@@ -219,8 +220,14 @@ class TaxiTrip(models.Model):
                     (car, firm_account, math.trunc(operating_costs * 100), 'Операционные затраты'),
                     (car, driver, math.trunc(driver_money * 100), 'Зарплата водителя'),
                 ]
+                cash_box = payer.cash_box
                 if cash:
                     operations.append((driver, None, math.trunc(amount * 100), 'Вывод наличных'))
+                    cash_box = many_cash_box
+                if cash_box:
+                    operations.append((None, cash_box, math.trunc(real_pay * 100),
+                                       f'Пополнение кассы {cash_box.name} за '
+                                       f'поездку {start} {car.name} {driver.name}'))
                 # print(operations)
                 # print(fuel_trip, taxitrip.fuel, driver_money)
                 transaction_record = Balance.form_transaction(Balance.DEPOSIT, operations, comment if comment
@@ -234,7 +241,6 @@ class TaxiTrip(models.Model):
                 return True
         except IntegrityError:
             return False
-
 
 
 class ExpensesTypes(models.Model):
@@ -364,6 +370,9 @@ class DriversSchedule(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
+    def __str__(self):
+        return f'{self.car.name} {self.driver.name} от {self.start_time} до {self.end_time}'
+
     class Meta:
         verbose_name = 'Расписание работы на авто'
         verbose_name_plural = 'Расписания работы на авто'
@@ -374,6 +383,13 @@ class CarDayRent(models.Model):
     date = models.DateField(verbose_name='Дата аренды')
     rent_amount = models.FloatField(verbose_name='Ставка оренды', default=0.0)
 
+    def __str__(self):
+        return f'{self.car.name} {self.rent_amount} от {self.date}'
+
+    class Meta:
+        verbose_name = 'Аренда авто'
+        verbose_name_plural = 'Даты аренды авто'
+
 
 class CarSchedule(models.Model):
     car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
@@ -381,6 +397,9 @@ class CarSchedule(models.Model):
     rent_price = models.FloatField(verbose_name='Ставка оренды', default=0.0)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+    def __str__(self):
+        return f'{self.car.name} {self.rent_price} от {self.start_time} до {self.end_time}'
 
     class Meta:
         verbose_name = 'Расписание работы на авто'
