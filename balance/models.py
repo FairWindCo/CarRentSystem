@@ -204,4 +204,5 @@ class CashBox(Account):
 
     def __str__(self):
         cash = self.get_current_balance()
-        return f'{self.name} {cash if cash else 0}{self.get_currency()}'
+        cash = cash/100 if cash else 0
+        return f'{self.name} {cash:.2f}{self.get_currency()}'

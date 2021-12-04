@@ -373,34 +373,34 @@ class DriversSchedule(models.Model):
     def __str__(self):
         return f'{self.car.name} {self.driver.name} от {self.start_time} до {self.end_time}'
 
-    class Meta:
-        verbose_name = 'Расписание работы на авто'
-        verbose_name_plural = 'Расписания работы на авто'
-
-
-class CarDayRent(models.Model):
-    car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
-    date = models.DateField(verbose_name='Дата аренды')
-    rent_amount = models.FloatField(verbose_name='Ставка оренды', default=0.0)
-
-    def __str__(self):
-        return f'{self.car.name} {self.rent_amount} от {self.date}'
+    def clean(self):
+        if self.end_time is None or self.start_time is None:
+            raise ValidationError('Start Date and end date is required')
+        if self.end_time <= self.start_time:
+            raise ValidationError('Start date need be less then End date')
 
     class Meta:
         verbose_name = 'Аренда авто'
-        verbose_name_plural = 'Даты аренды авто'
+        verbose_name_plural = 'Расписание аренды авто'
 
 
 class CarSchedule(models.Model):
     car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
     fix_rent = models.BooleanField(verbose_name='Машина в аренде', default=True)
-    rent_price = models.FloatField(verbose_name='Ставка оренды', default=0.0)
+    rent_amount = models.PositiveIntegerField(verbose_name='Сумма оренды', default=0.0)
+    deposit = models.PositiveIntegerField(verbose_name='Залог', default=0.0)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
     def __str__(self):
-        return f'{self.car.name} {self.rent_price} от {self.start_time} до {self.end_time}'
+        return f'{self.car.name} {self.rent_amount} от {self.start_time} до {self.end_time}'
 
     class Meta:
         verbose_name = 'Расписание работы на авто'
         verbose_name_plural = 'Расписания работы на авто'
+
+    def clean(self):
+        if self.end_time is None or self.start_time is None:
+            raise ValidationError('Start Date and end date is required')
+        if self.end_time <= self.start_time:
+            raise ValidationError('Start date need be less then End date')
