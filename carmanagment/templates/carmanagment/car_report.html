@@ -92,6 +92,9 @@
                         <td>{{ obj.car_amount|floatformat:2 }} грн</td>
                         <td>{{ obj.driver_amount|floatformat:2 }} грн</td>
                         <td>{{ obj.payer_amount|floatformat:2 }} грн</td>
+                        <td>{{ obj.total_firm_rent|floatformat:2 }} грн</td>
+                        <td>{{ obj.total_bank_rent|floatformat:2 }} грн</td>
+                        <td>{{ obj.total_payer_amount|floatformat:2 }} грн</td>
                     </tr>
                 {% endfor %}
                     <tr>
@@ -103,6 +106,9 @@
                         <td>{{ total.car_amount|floatformat:2  }} грн</td>
                         <td>{{ total.driver_amount|floatformat:2  }} грн</td>
                         <td>{{ total.payer_amount|floatformat:2  }} грн</td>
+                        <td>{{ total.firm_rent|floatformat:2  }} грн</td>
+                        <td>{{ total.total_bank|floatformat:2  }} грн</td>
+                        <td>{{ total.full_total_payer_amount|floatformat:2  }} грн</td>
                     </tr>
                 </tbody>
             </table>

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Optional
 
 from django.contrib import admin
@@ -8,6 +9,7 @@ from django.forms import ModelChoiceField
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.urls import path
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from utils.custom_ import ChangeListSpecial
@@ -21,7 +23,6 @@ class MyModelChoiceField(ModelChoiceField):
         super().__init__(queryset, empty_label=empty_label, required=required, widget=widget, label=label,
                          initial=initial, help_text=help_text, to_field_name=to_field_name,
                          limit_choices_to=limit_choices_to, blank=blank, **kwargs)
-
 
     def _get_queryset(self):
         return self._mquery_set() if callable(self._mquery_set) else self._mquery_set
@@ -37,7 +38,6 @@ class MyModelChoiceField(ModelChoiceField):
         self.widget.choices = self.choices
 
     queryset = property(_get_queryset, _set_queryset)
-
 
 
 class EtcAdmin(admin.ModelAdmin):
@@ -301,4 +301,30 @@ def get_model_fields(model):
     return fields
 
 
+class TimeRange(models.Model):
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
 
+    class Meta:
+        abstract = True
+
+    @abstractmethod
+    def get_unique_check_in_range(self):
+        pass
+
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        from django.db.models import Q
+        current_time = now()
+        if self.end_time is None or self.start_time is None:
+            raise ValidationError('Start Date and end date is required')
+        if self.end_time <= self.start_time:
+            raise ValidationError('Start date need be less then End date')
+        if self.end_time < current_time or self.start_time < current_time:
+            raise ValidationError('Нельзя захватить прошлые периоды')
+
+        if self.get_unique_check_in_range().filter(
+                Q(start_time__lte=self.start_time, end_time__gte=self.start_time) |
+                Q(start_time__lte=self.end_time, end_time__gte=self.end_time)
+        ).exists():
+            raise ValidationError('Такой объект уже есть')
