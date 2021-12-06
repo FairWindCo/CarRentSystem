@@ -1,7 +1,10 @@
 # Create your views here.
 import json
+from datetime import timedelta
 
+from django import forms
 from django.shortcuts import render
+from django.utils.timezone import now
 from django.views.generic import ListView
 from vue_utils.views import FilterListView
 
@@ -102,6 +105,13 @@ class GlobalMainMenu(MainMenuView):
             'submenu': {
                 'Статистика': {
                     'view': 'trip_stat',
+                },
+            }
+        },
+        'Отчеты': {
+            'submenu': {
+                'Отчет по авто': {
+                    'view': 'car_report',
                 },
             }
         },
@@ -253,9 +263,9 @@ def dashboard(request):
 
     def getRandomCol():
 
-        r = hex(random.randrange(0, 16))[2:]+hex(random.randrange(0, 16))[2:]
-        g = hex(random.randrange(0, 255))[2:]+hex(random.randrange(0, 16))[2:]
-        b = hex(random.randrange(0, 255))[2:]+hex(random.randrange(0, 16))[2:]
+        r = hex(random.randrange(0, 16))[2:] + hex(random.randrange(0, 16))[2:]
+        g = hex(random.randrange(0, 255))[2:] + hex(random.randrange(0, 16))[2:]
+        b = hex(random.randrange(0, 255))[2:] + hex(random.randrange(0, 16))[2:]
 
         random_col = '#' + r[:2] + g[:2] + b[:2]
         return random_col
@@ -283,3 +293,68 @@ def dashboard(request):
     context['cars'] = json.dumps(trip_label)
     context['colors'] = json.dumps(trip_color)
     return render(request, 'admin_template/dashboard.html', context)
+
+
+class CarReportForm(forms.Form):
+    start_date = forms.DateField(label='Дата начала периода', widget=forms.DateInput(format='%Y-%m-%d'),
+                                 initial=(now() - timedelta(days=7)).date().strftime('%Y-%m-%d'))
+    end_date = forms.DateField(label='Дата конца периода', widget=forms.DateInput(format='%Y-%m-%d'),
+                               initial=(now()).date().strftime('%Y-%m-%d'))
+    car = forms.ModelChoiceField(label='Машина', queryset=Car.objects.all(),
+                                 widget=forms.Select(attrs={'class': 'form-control round'}))
+
+
+def car_usage_report(request):
+    context = GlobalMainMenu.form_menu_context(request)
+    cars_trips_stat = []
+    expenses = []
+    total_rent, total_fuel, total_trip, expense_amount = 0, 0, 0, 0
+    total_millage, total_car_amount, total_driver, total_payer_amount = 0, 0, 0, 0
+    full_total_payer_amount = 0
+    total_bank = 0
+    firm_rent = 0
+    if request.method == 'POST':
+        form = CarReportForm(request.POST)
+        if form.is_valid():
+            cars_trips_stat = TripStatistics.objects.filter(
+                stat_date__lte=form.cleaned_data['end_date'],
+                stat_date__gte=form.cleaned_data['start_date'],
+                car=form.cleaned_data['car']).all()
+            for trip_stat in cars_trips_stat:
+                total_rent += trip_stat.amount
+                total_fuel += trip_stat.fuel
+                total_trip += trip_stat.trip_count
+                total_millage += trip_stat.mileage
+                total_car_amount += trip_stat.car_amount
+                total_driver += trip_stat.driver_amount
+                total_payer_amount += trip_stat.payer_amount
+                full_total_payer_amount += trip_stat.total_payer_amount
+                total_bank += trip_stat.total_bank_rent
+                firm_rent += trip_stat.total_firm_rent
+
+            expenses = Expenses.objects.filter(account=form.cleaned_data['car'],
+                                               date_mark__lte=form.cleaned_data['end_date'],
+                                               date_mark__gte=form.cleaned_data['start_date']
+                                               ).all()
+            expense_amount = sum(expense.amount for expense in expenses)
+    else:
+        form = CarReportForm()
+
+    context['form'] = form
+    context['object_list'] = cars_trips_stat
+    context['expenses'] = expenses
+    context['total'] = {
+        'amount': total_rent,
+        'fuel': total_fuel,
+        'trip': total_trip,
+        'mileage': total_millage,
+        'car_amount': total_car_amount,
+        'driver_amount': total_driver,
+        'payer_amount': total_payer_amount,
+        'expense_amount': expense_amount,
+        'total_sum': total_car_amount - expense_amount,
+        'full_total_payer_amount': full_total_payer_amount,
+        'total_bank':total_bank,
+        'firm_rent': firm_rent,
+    }
+    return render(request, 'carmanagment/car_report.html', context)

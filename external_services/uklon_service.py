@@ -282,14 +282,24 @@ if __name__ == '__main__':
     # print(uklon.cars)
     # print(uklon.drivers)
     # print(uklon.get_rides())
-    print(uklon.get_day_rides())
+    # print(uklon.get_day_rides())
 
+    # current_date = timezone.now()
+    # yesterday = current_date - timedelta(days=2)
+    # rides = uklon.get_day_rides(yesterday)
+    #
+    # for ride in rides:
+    #     print(datetime.fromtimestamp(ride['pickup_time']))
     current_date = datetime.now()
-    yesterday = current_date - timedelta(days=2)
-    rides = uklon.get_day_rides(yesterday)
+    start_day = current_date - timedelta(days=10)
 
-    for ride in rides:
-        print(datetime.fromtimestamp(ride['pickup_time']))
+    while start_day < current_date:
+        rides = uklon.get_day_rides(start_day)
+
+        for ride in rides:
+            print(datetime.fromtimestamp(ride['pickup_time']))
+
+        start_day += timedelta(days=1)
 
     print(uklon.logout())
 

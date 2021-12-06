@@ -1,6 +1,8 @@
 import datetime
 import unittest
 
+from django.utils import timezone
+
 from request_processor.value_utility import PrototypedValueAccessor
 
 
@@ -11,7 +13,7 @@ class ExampleClass:
     field_4 = '10/05/2021 13:16:04'
     field_5 = 12.2
     field_6 = {'test6': {'test1.1': 661.1, 'test_2.1': 20}, 'test7': [10, 20, 30]}
-    field_7 = datetime.datetime.now()
+    field_7 = timezone.now()
     field_8 = '12.2'
     field_9 = '33'
 

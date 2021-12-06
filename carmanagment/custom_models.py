@@ -1,12 +1,18 @@
+import math
+
 from constance import config
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 
+from balance.models import CashBox, Account
+from balance.services import Balance
 from carmanagment.custom_admin import CustomModelPage
 from carmanagment.models import *
 from carmanagment.serivices.car_rent_service import CarRentService
-from carmanagment.serivices.expense_service import ExpensesProcessor
 from carmanagment.serivices.car_service import CarCreator
+from carmanagment.serivices.expense_service import ExpensesProcessor
 from external_services.fresh_contants import get_special_fuel_help_text
 
 
@@ -44,22 +50,30 @@ class ExpensePage(CustomModelPage):
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, verbose_name='Контрагент')
     comment = models.TextField(verbose_name='Коментарий')
     currency_rate = models.FloatField(verbose_name='Курс', null=True, blank=True, default=config.USD_CURRENCY)
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='expense_cash_box')
 
     def clean(self):
         if not hasattr(self, 'expense_type') or self.expense_type is None:
             raise ValidationError(_('Тип затьраты обязателен'))
         if self.expense_type.type_class not in [ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE,
                                                 ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
+                                                ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE,
                                                 ]:
             raise ValidationError(_('Не верный класс затраты для машины'))
         if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE and self.currency_rate is None:
             raise ValidationError(_('Для капитальных затрат курс - обязателен'))
+        if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE and self.currency_rate is None:
+            raise ValidationError(_('Для страховых затрат курс - обязателен'))
+        if self.cash_box.current_balance() <= self.amount:
+            raise ValidationError(_('В кассе недостаточно денег'))
         super().clean()
 
     def save(self):
         if not hasattr(self, 'expense_type'):
             raise ValidationError(_('Тип затраты обязателен'))
-        if self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE:
+        if self.expense_type.type_class in [ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
+                                            ExpensesTypes.ExpensesTypesClassify.CRASH_CAR_EXPENSE]:
             ExpensesProcessor.form_car_capital_expense(
                 self.car, self.amount, self.currency_rate, self.expense_type, self.counterpart, self.comment)
         elif self.expense_type.type_class == ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE:
@@ -79,6 +93,8 @@ class OtherExpensePage(CustomModelPage):
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, verbose_name='Контрагент',
                                     related_name='other_expense')
     comment = models.TextField(verbose_name='Коментарий')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='other_expense_cash_box')
 
     def clean(self):
         if not hasattr(self, 'expense_type'):
@@ -91,6 +107,8 @@ class OtherExpensePage(CustomModelPage):
             raise ValidationError(_('Затраты для машины - заносятся отдельно'))
         if self.account.currency == Account.AccountCurrency.DOLLAR:
             raise ValidationError(_('Внос капитальных затрат не разрешен'))
+        if self.cash_box.current_balance() <= self.amount:
+            raise ValidationError(_('В кассе недостаточно денег'))
         super().clean()
 
     def save(self):
@@ -114,23 +132,72 @@ class TaxiTripPage(CustomModelPage):
                                     related_name='taxi_service')
     amount = models.PositiveIntegerField(verbose_name='Сумма')
     millage = models.PositiveIntegerField(verbose_name='Растояние')
-    gas_price = models.PositiveIntegerField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
+    gas_price = models.FloatField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
     cash = models.BooleanField(verbose_name='Оплата наличными', default=False)
     start_time = models.DateTimeField(verbose_name='Дата и время начала поездки')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='trip_cash_box', blank=True, null=True)
 
     def clean(self):
+        if config.FIRM is None:
+            raise ValidationError('Need Set Firm account in Config')
         if not hasattr(self, 'car'):
             raise ValidationError(_('Машина обязательна'))
         if not hasattr(self, 'driver'):
             raise ValidationError(_('Водительн обязателен'))
         if not hasattr(self, 'counterpart'):
             raise ValidationError(_('Контрагент обязателен'))
+        if hasattr(self, 'cash') and getattr(self, 'cash') and \
+                (not hasattr(self, 'cash_box') or getattr(self, 'cash_box') is None):
+            raise ValidationError(_('Для наличных средств обязательна касса'))
         super().clean()
 
     def save(self):
         if TaxiTrip.manual_create_taxi_trip(self.car, self.driver, self.start_time,
                                             self.counterpart, self.millage, self.amount,
-                                            self.gas_price, self.cash):
+                                            self.gas_price, self.cash, '', self.cash_box):
+            self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
+
+
+class MoveCashPage(CustomModelPage):
+    title = 'Переместить деньги в другую кассу'  # set page title
+    # Define some fields.
+    amount = models.FloatField(verbose_name='Сумма')
+    from_cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                      related_name='moved_cash_box')
+    to_cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                    related_name='recipient_cash_box')
+
+    def clean(self):
+        if self.from_cash_box.current_balance() <= self.amount:
+            raise ValidationError(_('В кассе недостаточно денег'))
+
+        super().clean()
+
+    def save(self):
+        if Balance.form_transaction(Balance.DEPOSIT, [
+            (self.from_cash_box, self.to_cash_box, math.trunc(self.amount * 100), 'Перемешение средств'),
+        ], 'Перемешение денег между кассами'):
+            self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
+
+
+class InsertCashPage(CustomModelPage):
+    title = 'Внести деньги в кассу'  # set page title
+    # Define some fields.
+    amount = models.FloatField(verbose_name='Сумма')
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, verbose_name='Баланс',
+                                related_name='moved_account_rel')
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='recipient_cash_box_rel')
+
+    def clean(self):
+        super().clean()
+
+    def save(self):
+        if Balance.form_transaction(Balance.DEPOSIT, [
+            (None, self.cash_box, math.trunc(self.amount * 100), 'Пополнение кассы'),
+            (None, self.account, math.trunc(self.amount * 100), 'Внесение денег в кассу'),
+        ], 'Перемешение денег между кассами'):
             self.bound_admin.message_success(self.bound_request, _('Поездка добавлена'))
 
 
@@ -152,10 +219,51 @@ class CarRentPage(CustomModelPage):
 
     def save(self):
         if not self.bound_request.user and not hasattr(self.bound_request.user, 'userprofile'):
-            raise ValidationError(_('Пользователь не можут списывать прибыли'))
+            raise ValidationError(_('Пользователь не могут списывать прибыли'))
         firm_account = self.bound_request.user.userprofile.account
         result, message = CarRentService.move_rent_many(self.car, self.amount, firm_account)
         if result:
             self.bound_admin.message_success(self.bound_request, _('прибыль списана'))
         else:
             self.bound_admin.message_error(self.bound_request, message)
+
+
+class CarInRentPage(CustomModelPage):
+    title = 'Сдача машины в аренду'  # set page title
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, verbose_name='Модель')
+    start_time = models.DateTimeField(verbose_name='Дата и время начала аренды')
+    end_time = models.DateTimeField(verbose_name='Дата и время завершения аренды')
+    amount = models.FloatField(verbose_name='Сумма', validators=[
+        MinValueValidator(0.01)
+    ])
+    deposit = models.FloatField(verbose_name='Залог', validators=[
+        MinValueValidator(0.01)
+    ])
+    cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
+                                 related_name='rent_amount_cash_box')
+    deposit_cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса для залога',
+                                         related_name='rent_deposit_cash_box')
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Касса для залога',
+                               related_name='rent_driver_link', null=True, default=None, blank=True)
+
+    def clean(self):
+        if not hasattr(self, 'car') or self.car is None:
+            raise ValidationError(_('Машина обязательна'))
+        if not hasattr(self, 'cash_box') or self.cash_box is None:
+            raise ValidationError(_('Касса обязательна'))
+        super().clean()
+
+    def save(self):
+        amount = math.trunc(self.amount * 100)
+        deposit = math.trunc(self.deposit * 100)
+        cash_box_deposit = self.deposit_cash_box if self.deposit_cash_box is not None else self.cash_box
+        with transaction.atomic():
+            car_scheduler = CarSchedule(car=self.car, start_time=self.start_time, end_time=self.end_time,
+                                        rent_amount=amount, deposit=deposit)
+            car_scheduler.save()
+            if Balance.form_transaction(Balance.DEPOSIT, [
+                (None, self.cash_box, amount, f'Деньги за аренду {self.car.name}'),
+                (None, cash_box_deposit, deposit, f'Залог за аренду {self.car.name}'),
+                (self.driver, self.car, amount, f'Деньги за аренду {self.car.name}'),
+            ], 'Аренда автомобиля'):
+                self.bound_admin.message_success(self.bound_request, _('Аренда запланирована'))

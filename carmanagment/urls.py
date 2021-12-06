@@ -2,7 +2,7 @@ from django.urls import path
 
 from carmanagment.views import ViewTrips, ViewTripsNew, ViewTripsNew2, ViewCarTrips, ViewCarExpenses, OperationsView, \
     TransactionView, ViewCarAccount, ViewInvestorAccount, ViewDriverAccount, ViewTaxiOperatorAccount, \
-    ViewCounterpartAccount, ViewCarInvestmentAccount, test_view, ViewCarStatistic, dashboard
+    ViewCounterpartAccount, ViewCarInvestmentAccount, test_view, ViewCarStatistic, dashboard, car_usage_report
 
 urlpatterns = [
     path('cars', ViewCarAccount.as_view(), name='cars'),
@@ -23,6 +23,8 @@ urlpatterns = [
     path('car_stat', ViewCarStatistic.as_view(), name='trip_stat'),
     path('car_stat/<car_name>/', ViewCarStatistic.as_view(), name='trip_stat_by_car'),
     path('dashboard', dashboard, name='dashboard'),
+    path('car_report', car_usage_report, name='car_report'),
+
 
     path('test/', ViewTrips.as_view()),
     path('json/', ViewTripsNew.as_view()),

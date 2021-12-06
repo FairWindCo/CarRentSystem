@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 import environ
@@ -51,6 +53,38 @@ INSTALLED_APPS = [
 
 # see https://github.com/jazzband/django-constance
 CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
+
+
+def list_account():
+    from balance.models import Account
+    return Account.objects.all()
+
+
+def list_investors():
+    from carmanagment.models import Investor
+    return Investor.objects.all()
+
+
+def list_cash():
+    from balance.models import CashBox
+    return CashBox.objects.all()
+
+
+CONSTANCE_ADDITIONAL_FIELDS = {
+    'all_select': ['carmanagment.custom_admin.MyModelChoiceField', {
+        'widget': 'django.forms.Select',
+        'queryset': list_account
+    }],
+    'investor_select': ['carmanagment.custom_admin.MyModelChoiceField', {
+        'widget': 'django.forms.Select',
+        'queryset': list_investors
+    }],
+    'cashbox_select': ['carmanagment.custom_admin.MyModelChoiceField', {
+        'widget': 'django.forms.Select',
+        'queryset': list_cash
+    }],
+}
+
 CONSTANCE_CONFIG = {
     'USD_CURRENCY': (27., 'Курс доллара США', float),
     'FUEL_A95': (30., 'Стоимость литра А95', float),
@@ -60,6 +94,8 @@ CONSTANCE_CONFIG = {
     'FUEL_A98': (32., 'Стоимость литра А98', float),
     'FUEL_A95+': (30., 'Стоимость литра А95+', float),
     'FUEL_DISEL+': (28., 'Стоимость литра Дизеля+', float),
+    'FIRM': (None, 'Акаунт фирмы', 'investor_select'),
+    'CASH': (None, 'Касса по умолчанию', 'cashbox_select'),
 }
 
 MIDDLEWARE = [
@@ -70,6 +106,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'audit_log.middleware.JWTAuthMiddleware',
+    'audit_log.middleware.UserLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'CarRentSystem.urls'

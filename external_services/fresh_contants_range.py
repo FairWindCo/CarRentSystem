@@ -20,7 +20,7 @@ def get_special_fuel_help_text(field_id='id_gas_price'):
     return fuels_strings
 
 
-def get_uklon_taxi_trip(fuel_prices, use_silenuim=False):
+def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
     from CarRentSystem import settings
     from carmanagment.models import CarsInOperator
     from external_services.uklon_service import UklonTaxiService
@@ -34,28 +34,34 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False):
     if uklon.connect(selenium=use_silenuim):
         if uklon.get_my_info():
             current_date = timezone.now()
-            yesterday = current_date - datetime.timedelta(days=2)
-            rides = uklon.get_day_rides(yesterday)
-            uklon.logout()
-            ulon_cars = CarsInOperator.objects
+            yesterday = current_date - datetime.timedelta(days=1)
+            stat_date = yesterday - datetime.timedelta(days=day_count)
             processed_rides = 0
-            for ride in rides:
-                if ride['status'] == 'completed':
-                    uklon_car_id = ride['vehicle_id']
-                    try:
-                        taxi_car_driver = ulon_cars.get(car_uid=uklon_car_id)
-                        car = taxi_car_driver.car
-                        driver = taxi_car_driver.driver
-                        operator = taxi_car_driver.operator
-                        cash = ride['payments']['fee_type'] == 'cash'
-                        gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
-                        start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
-                        TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
-                                                         ride['cost'], gas_price, cash)
-                        processed_rides += 1
-                    except CarsInOperator.DoesNotExist:
-                        continue
-            return processed_rides, len(rides)
+            total_rides = 0
+            for i in range(day_count):
+                print(stat_date)
+                rides = uklon.get_day_rides(stat_date)
+                uklon_cars = CarsInOperator.objects
+                for ride in rides:
+                    if ride['status'] == 'completed':
+                        uklon_car_id = ride['vehicle_id']
+                        try:
+                            taxi_car_driver = uklon_cars.get(car_uid=uklon_car_id)
+                            car = taxi_car_driver.car
+                            driver = taxi_car_driver.driver
+                            operator = taxi_car_driver.operator
+                            cash = ride['payments']['fee_type'] == 'cash'
+                            gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
+                            start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
+                            TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
+                                                             ride['cost'], gas_price, cash, '', operator.cash_box)
+                            processed_rides += 1
+                        except CarsInOperator.DoesNotExist:
+                            continue
+                total_rides += len(rides)
+                stat_date += datetime.timedelta(days=1)
+            uklon.logout()
+            return processed_rides, total_rides
     return 0, 0
 
 
@@ -80,7 +86,7 @@ if __name__ == '__main__':
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sys.path.append(os.path.abspath(BASE_DIR))
     sys.path.append(os.path.abspath(os.path.join(BASE_DIR, os.pardir)))
-    print(BASE_DIR, os.path.abspath(os.path.join(BASE_DIR, os.pardir)))
+
     os.environ['DJANGO_SETTINGS_MODULE'] = 'CarRentSystem.settings'
 
     django.setup()
