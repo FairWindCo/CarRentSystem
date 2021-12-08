@@ -6,11 +6,11 @@ from balance.models import *
 
 class ReadOnlyModelAdmin(admin.ModelAdmin):
 
-    # Prevent deletion from admin portal
+    # Prevent deletion from admin_pages portal
     def has_delete_permission(self, request, obj=None):
         return False
 
-    # Prevent adding from admin portal
+    # Prevent adding from admin_pages portal
     def has_add_permission(self, request, obj=None):
         return False
 
@@ -19,7 +19,7 @@ class ReadOnlyModelAdmin(admin.ModelAdmin):
 
 class OnlyAddModelAdmin(admin.ModelAdmin):
 
-    # Prevent deletion from admin portal
+    # Prevent deletion from admin_pages portal
     def has_delete_permission(self, request, obj=None):
         return False
 

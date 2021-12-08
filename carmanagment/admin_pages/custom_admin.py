@@ -41,7 +41,7 @@ class MyModelChoiceField(ModelChoiceField):
 
 
 class EtcAdmin(admin.ModelAdmin):
-    """Base etc admin."""
+    """Base etc admin_pages."""
 
     def message_success(self, request: HttpRequest, msg: str):
         self.message_user(request, msg, messages.SUCCESS)
@@ -54,7 +54,7 @@ class EtcAdmin(admin.ModelAdmin):
 
 
 class ReadonlyAdmin(EtcAdmin):
-    """Read-only etc admin base class."""
+    """Read-only etc admin_pages base class."""
 
     view_on_site: bool = False
     actions = None
@@ -84,7 +84,7 @@ class ReadonlyAdmin(EtcAdmin):
 
 
 class CustomPageModelAdmin(ReadonlyAdmin):
-    """Base for admin pages with contents based on custom models."""
+    """Base for admin_pages pages with contents based on custom models."""
 
     def get_urls(self) -> list:
         meta = self.model._meta
@@ -116,7 +116,7 @@ class CustomPageModelAdmin(ReadonlyAdmin):
 
 
 class CustomModelPage(models.Model):
-    """Allows construction of admin pages based on user input.
+    """Allows construction of admin_pages pages based on user input.
     Define your fields (as usual in models) and override .save() method.
     .. code-block:: python
         class MyPage(CustomModelPage):
@@ -126,20 +126,20 @@ class CustomModelPage(models.Model):
             def save(self):
                 ...  # Implement data handling.
                 super().save()
-        # Register my page within Django admin.
+        # Register my page within Django admin_pages.
         MyPage.register()
     """
     title: str = _('Custom page')
     """Page title to be used."""
 
     app_label: str = 'admin'
-    """Application label to relate page to. Default: admin"""
+    """Application label to relate page to. Default: admin_pages"""
 
     bound_request: Optional[HttpRequest] = None
     """Request object bound to the model"""
 
     bound_admin: Optional[EtcAdmin] = None
-    """Django admin model bound to this model."""
+    """Django admin_pages model bound to this model."""
 
     class Meta:
         abstract = True
@@ -154,7 +154,7 @@ class CustomModelPage(models.Model):
 
     @classmethod
     def register(cls, *, admin_model: CustomPageModelAdmin = None):
-        """Registers this model page class in Django admin.
+        """Registers this model page class in Django admin_pages.
         :param admin_model:
         """
         register(cls)(admin_model or CustomPageModelAdmin)
@@ -179,7 +179,7 @@ class AddDynamicFieldMixin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         gf = super().get_fields(request, obj)
         new_dynamic_fields = getattr(self, 'dynamic_fields', [])
-        # without updating get_fields, the admin form will display w/o any new fields
+        # without updating get_fields, the admin_pages form will display w/o any new fields
         # without updating base_fields or declared_fields, django will throw an error:
         # django.core.exceptions.FieldError: Unknown field(s) (test) specified for MyModel.
         # Check fields/fieldsets/exclude attributes of class MyModelAdmin.
@@ -279,7 +279,7 @@ class ListAdmin(EtcAdmin):
             setattr(cl, 'result_count', 10)
             setattr(cl, 'full_result_count', 10)
             setattr(cl, 'get_ordering_field_columns', sortable_by)
-            setattr(opts, 'app_label', 'admin')
+            setattr(opts, 'app_label', 'admin_pages')
             setattr(opts, 'app_config', config)
             # cl.opts.app_config.verbose_name
             setattr(opts, 'object_name', title)
@@ -328,3 +328,7 @@ class TimeRange(models.Model):
                 Q(start_time__lte=self.end_time, end_time__gte=self.end_time)
         ).exists():
             raise ValidationError('Такой объект уже есть')
+
+
+class EmptyModel(CustomModelPage):
+    pass

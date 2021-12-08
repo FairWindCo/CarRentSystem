@@ -187,10 +187,10 @@ from django.contrib.admin.views.main import *
 #
 #     def get_results(self, request):
 #         paginator = self.model_admin.get_paginator(request, self.queryset, self.list_per_page)
-#         # Get the number of objects, with admin filters applied.
+#         # Get the number of objects, with admin_pages filters applied.
 #         result_count = paginator.count
 #
-#         # Get the total number of objects, with no admin filters applied.
+#         # Get the total number of objects, with no admin_pages filters applied.
 #         if self.model_admin.show_full_result_count:
 #             full_result_count = self.root_queryset.count()
 #         else:
@@ -230,7 +230,7 @@ from django.contrib.admin.views.main import *
 #         """
 #         Return the proper model field name corresponding to the given
 #         field_name to use for ordering. field_name may either be the name of a
-#         proper model field or the name of a method (on the admin or model) or a
+#         proper model field or the name of a method (on the admin_pages or model) or a
 #         callable with the 'admin_order_field' attribute. Return None if no
 #         proper model field name can be matched.
 #         """
@@ -253,7 +253,7 @@ from django.contrib.admin.views.main import *
 #     def get_ordering(self, request, queryset):
 #         """
 #         Return the list of ordering fields for the change list.
-#         First check the get_ordering() method in model admin, then check
+#         First check the get_ordering() method in model admin_pages, then check
 #         the object's default ordering. Then, any manually-specified ordering
 #         from the query string overrides anything. Finally, a deterministic
 #         order is guaranteed by calling _get_deterministic_ordering() with the
@@ -479,7 +479,7 @@ from django.contrib.admin.views.main import *
 #
 #     def url_for_result(self, result):
 #         pk = getattr(result, self.pk_attname)
-#         return reverse('admin:%s_%s_change' % (self.opts.app_label,
+#         return reverse('admin_pages:%s_%s_change' % (self.opts.app_label,
 #                                                self.opts.model_name),
 #                        args=(quote(pk),),
 #                        current_app=self.model_admin.admin_site.name)

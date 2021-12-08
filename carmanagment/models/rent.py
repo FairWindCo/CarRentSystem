@@ -56,7 +56,9 @@ class DriversSchedule(CarSchedule):
 
 
 class CarSchedule(CarSchedule):
-    fix_rent = models.BooleanField(verbose_name='Машина в аренде', default=True)
+    plan_rent = models.BooleanField(verbose_name='Запланированная аренда', default=True)
+    end_rent = models.BooleanField(verbose_name='Аренда завершена досрочно', default=True)
+    my_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
     rent_amount = models.PositiveIntegerField(verbose_name='Сумма оренды', default=0.0)
     deposit = models.PositiveIntegerField(verbose_name='Залог', default=0.0)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Арендатор', blank=True, null=True)

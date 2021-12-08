@@ -2,7 +2,8 @@ from django.urls import path
 
 from carmanagment.views import ViewTrips, ViewTripsNew, ViewTripsNew2, ViewCarTrips, ViewCarExpenses, OperationsView, \
     TransactionView, ViewCarAccount, ViewInvestorAccount, ViewDriverAccount, ViewTaxiOperatorAccount, \
-    ViewCounterpartAccount, ViewCarInvestmentAccount, test_view, ViewCarStatistic, dashboard, car_usage_report
+    ViewCounterpartAccount, ViewCarInvestmentAccount, test_view, ViewCarStatistic, dashboard, car_usage_report, \
+    ViewCashboxAccount
 
 urlpatterns = [
     path('cars', ViewCarAccount.as_view(), name='cars'),
@@ -11,6 +12,7 @@ urlpatterns = [
     path('taxi_operators', ViewTaxiOperatorAccount.as_view(), name='taxi_operators'),
     path('counterparts', ViewCounterpartAccount.as_view(), name='counterparts'),
     path('invest', ViewCarInvestmentAccount.as_view(), name='invest'),
+    path('cashbox', ViewCashboxAccount.as_view(), name='cashbox'),
 
 
 

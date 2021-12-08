@@ -6,7 +6,7 @@ class GlobalMainMenu(MainMenuView):
         'DashBoard': {
             'icon': 'grid-fill',
             'view': 'dashboard',
-            # 'user': 'admin'
+            # 'user': 'admin_pages'
         },
         'Финансы': {
             'group': 'anon'
@@ -46,6 +46,10 @@ class GlobalMainMenu(MainMenuView):
         'Средства': {
             'icon': 'credit-card',
             'submenu': {
+                'Кассы': {
+                    'view': 'cashbox',
+                    'icon': 'cash',
+                },
                 'Транзакции': {
                     'view': 'all_transactions',
                 },

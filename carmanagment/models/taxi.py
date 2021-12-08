@@ -125,6 +125,8 @@ class TaxiTrip(models.Model):
                 taxitrip.driver_amount = driver_money
                 if not car_in_rent:
                     operations = [
+                        (None, payer, math.trunc(amount * 100), 'Платеж от клиента'),
+                        (payer, None, math.trunc(payer_interest * 100), 'Комисия оператора такси'),
                         (payer, car, math.trunc(real_pay * 100), 'Платеж от оператора'),
                         (car, driver, math.trunc(fuel_price * 100), 'Компенсация топлива'),
                         (car, firm_account, math.trunc(operating_costs * 100), 'Операционные затраты'),
@@ -134,6 +136,8 @@ class TaxiTrip(models.Model):
                     if cash:
                         operations.append((driver, None, math.trunc(amount * 100), 'Вывод наличных'))
                         cash_box = many_cash_box
+                    else:
+                        operations.append((payer, None, math.trunc(bank_rent * 100), 'Комисия банка'))
                     if cash_box:
                         operations.append((None, cash_box, math.trunc(real_pay * 100),
                                            f'Пополнение кассы {cash_box.name} за '

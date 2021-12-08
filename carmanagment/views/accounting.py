@@ -1,3 +1,4 @@
+from balance.models import CashBox
 from carmanagment.models import Car, Investor, Driver, Counterpart, TaxiOperator
 from carmanagment.views.global_menu import GlobalMainMenu
 from django_request_processor.django_list_view import UniversalFilterListView
@@ -23,6 +24,10 @@ class ViewCarInvestmentAccount(ViewCarAccount, GlobalMainMenu):
 
 class ViewInvestorAccount(ViewCarAccount, GlobalMainMenu):
     model = Investor
+
+
+class ViewCashboxAccount(ViewCarAccount, GlobalMainMenu):
+    model = CashBox
 
 
 class ViewDriverAccount(ViewCarAccount, GlobalMainMenu):
