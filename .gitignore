@@ -1,6 +1,7 @@
 /.idea/
 /venv/
 /.venv/
+/external_services/UKLON/*
 .env
 *.pyc
 *.log

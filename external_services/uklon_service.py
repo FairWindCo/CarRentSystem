@@ -1,3 +1,5 @@
+import os
+import pickle
 import time
 from datetime import datetime, timedelta
 
@@ -196,6 +198,10 @@ class UklonTaxiService:
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
         if day is None:
             day = datetime.now()
+        file_path = f"UKLON/uklon_{vehicle_id}_{day}.dat"
+        if os.path.exists(file_path) and os.path.isfile(file_path):
+            with open(file_path, "rb") as file:
+                return pickle.load(file)
         start_time = int(time.mktime(day.date().timetuple()))
         end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
         count = 0
@@ -219,6 +225,9 @@ class UklonTaxiService:
                     break
             else:
                 break
+        if response:
+            with open(file_path, "wb") as file:
+                pickle.dump(response, file)
         return response
 
     def process_car_driver_data(self, car_driver_data):
