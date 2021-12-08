@@ -7,8 +7,13 @@ from django.utils.translation import gettext_lazy as _
 
 from balance.models import CashBox
 from balance.services import Balance
-from .custom_admin import CustomModelPage
+from .custom_admin import CustomModelPage, ReadonlyAdmin
 from carmanagment.models import Car, Driver, CarSchedule
+
+
+class CarRentPageAdmin(ReadonlyAdmin):
+    ordering = ['-end_time', '-start_time', 'car__name']
+    search_fields = ['car__name']
 
 
 class CarInRentPage(CustomModelPage):
@@ -50,3 +55,8 @@ class CarInRentPage(CustomModelPage):
                 (self.driver, self.car, amount, f'Деньги за аренду {self.car.name}'),
             ], 'Аренда автомобиля'):
                 self.bound_admin.message_success(self.bound_request, _('Аренда запланирована'))
+
+
+class ReturnCarRentPage(CustomModelPage):
+    title = 'Срочный возврат машины из аренды'  # set page title
+    car_rent = models.ForeignKey(CarSchedule, on_delete=models.CASCADE, verbose_name='Аренда')
