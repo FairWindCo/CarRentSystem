@@ -35,8 +35,12 @@ class TaxiCalculator:
         self._firm_profit = round(self._real_amount - self._driver_money - self._operating_costs, 2)
         # Общая сумма денег которые необходимо отдать оператору такси
         self._total_payer_amount = self._payer_interest + self._bank_rent
-
-        self._credit_cart_many = self._trip_many_without_bank - self.cash
+        # деньги который поступили - процент уклона - процент банка - наличные
+        # по идее это должно упасть в кассу уклона
+        if clean_credit_cart_cash >0:
+            self._credit_cart_many = self._trip_many_without_bank - self.cash
+        else:
+            self._credit_cart_many = self._payer_interest - self._bank_rent
 
     @property
     def firm_profit(self):

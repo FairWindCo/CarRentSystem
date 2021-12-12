@@ -127,7 +127,7 @@ class TaxiTrip(models.Model):
                         operations.append((None, many_cash_box, math.trunc(calc.cash * 100), 'Пополнение кассы'))
                     if payer.cash_box:
                         payer_balance_cache = calc.credit_cart_many
-                        if payer_balance_cache > 0:
+                        if calc.bank_rent > 0:
                             operations.append(
                                 (None, payer.cash_box, math.trunc(payer_balance_cache * 100),
                                  f'Пополнение кассы {payer.cash_box.name} за '
