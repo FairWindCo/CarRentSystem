@@ -96,6 +96,7 @@ CONSTANCE_CONFIG = {
     'FUEL_DISEL+': (28., 'Стоимость литра Дизеля+', float),
     'FIRM': (None, 'Акаунт фирмы', 'investor_select'),
     'CASH': (None, 'Касса по умолчанию', 'cashbox_select'),
+    'MIN_RENT': (3, 'Количество дней минимальной аренды', int),
 }
 
 MIDDLEWARE = [

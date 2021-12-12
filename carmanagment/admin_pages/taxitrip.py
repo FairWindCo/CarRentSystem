@@ -19,7 +19,7 @@ class TaxiTripPage(CustomModelPage):
     amount = models.PositiveIntegerField(verbose_name='Сумма')
     millage = models.PositiveIntegerField(verbose_name='Растояние')
     gas_price = models.FloatField(verbose_name='Цена газа', help_text=get_special_fuel_help_text())
-    cash = models.BooleanField(verbose_name='Оплата наличными', default=False)
+    cash = models.FloatField(verbose_name='Оплата наличными', default=0)
     start_time = models.DateTimeField(verbose_name='Дата и время начала поездки')
     cash_box = models.ForeignKey(CashBox, on_delete=models.CASCADE, verbose_name='Касса',
                                  related_name='trip_cash_box', blank=True, null=True)

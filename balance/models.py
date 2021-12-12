@@ -65,6 +65,7 @@ class Account(models.Model):
             balance = AccountTransaction.objects.filter(account=self,
                                                         transaction__transactionTime__lte=on_date).aggregate(
                 Sum('amount'))['amount__sum']
+            balance = balance if balance is not None else 0
         return balance
 
     def form_statement(self, on_date=None):

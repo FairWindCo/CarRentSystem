@@ -176,6 +176,22 @@ class UklonTaxiService:
             }
         return res
 
+    def get_ride_info(self, ride_id):
+        # https://partner.uklon.com.ua/api/v1/driver/orders/e9da3779-ac15-4d06-8b1a-d823fb9d6d1a
+        # return object like
+        # {"uid":"e9da3779ac154d068b1ad823fb9d6d1a",
+        # "fee_type":"mixed","cost":149,"cash_cost":94,"distance":7.01,
+        # "pickup_time":1639171121,"add_conditions":[],"clients_comments":[null],"idle":0,"start_sector":"ПАНЬКОВЩИНА",
+        # "end_sector":"НАУ","route":{"route_points":[{"address_name":"Світова (Жилянська вулиця, 74)","lat":50.43695,"lng":30.50221,"is_place":true,"atype":"geocode",
+        # "type":"pickup"},{"address_name":"Вадима Гетьмана вулиця, 44","lat":50.43891,"lng":30.44536,"is_place":true,"atype":"geocode","type":"dropoff"}]},"route_legs":[[[30.50206,50.43687],[30.50258,50.43645],[30.50391,50.43544],[30.50485,50.43474],[30.5057,50.43459],[30.50595,50.43518],[30.50614,50.43572],[30.50644,50.43646],[30.50587,50.43653],[30.50562,50.4367],[30.50531,50.43694],[30.50305,50.43859],[30.50264,50.43895],[30.50176,50.43961],[30.50142,50.43985],[30.50123,50.43998],[30.49976,50.44107],[30.49973,50.44111],[30.49961,50.44122],[30.49698,50.44366],[30.49682,50.4438],[30.4959,50.44466],[30.49507,50.44547],[30.49454,50.44591],[30.49435,50.44592],[30.49413,50.44582],[30.49387,50.4457],[30.49349,50.44554],[30.49285,50.44529],[30.49272,50.44529],[30.49254,50.44533],[30.49236,50.44555],[30.49057,50.44616],[30.4889,50.44634],[30.48664,50.44625],[30.48568,50.44634],[30.48371,50.44661],[30.48274,50.44687],[30.47983,50.44743],[30.47946,50.44748],[30.47869,50.44759],[30.4782,50.44765],[30.47718,50.44777],[30.47622,50.44781],[30.47534,50.44785],[30.47311,50.4477],[30.47169,50.44748],[30.47035,50.4473],[30.46721,50.44671],[30.46704,50.44667],[30.46535,50.44635],[30.46378,50.446],[30.46329,50.44591],[30.46264,50.44582],[30.46186,50.4458],[30.46063,50.44584],[30.45315,50.44674],[30.45259,50.44666],[30.44841,50.44569],[30.44581,50.445],[30.44304,50.44431],[30.44084,50.44376],[30.44037,50.44384],[30.44052,50.44408],[30.44155,50.44437],[30.44182,50.44419],[30.44208,50.44336],[30.44218,50.44326],[30.44387,50.44072],[30.44325,50.44052],[30.44181,50.44022],[30.44187,50.44013],[30.44234,50.43951],[30.44316,50.43964],[30.44377,50.43948],[30.44389,50.43909],[30.44537,50.43897]]],"currency":"UAH","offer_accepted_at":1639170707,"completed_at":1639171644}
+
+        res = self._send_api_request(endpoint=f'driver/orders/{ride_id}',
+                                     method='GET', debug=False, api=self.api)
+        print(res)
+        if res['fee_type'] == 'mixed':
+            return res['cost'], res['cash_cost']
+        return res['cost'], 0
+
     def get_rides(self, from_time=None, to_time=None, driver_id: str = None, vehicle_id: str = None, page: int = 1,
                   size: int = 50):
         params = {
@@ -198,12 +214,12 @@ class UklonTaxiService:
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
         if day is None:
             day = datetime.now()
-        file_path = f"UKLON/uklon_{vehicle_id}_{day}.dat"
+        file_path = os.path.join('UKLON', f"uklon_{vehicle_id}_{day.strftime('%d-%m-%y')}.dat")
         if os.path.exists(file_path) and os.path.isfile(file_path):
             with open(file_path, "rb") as file:
                 return pickle.load(file)
         start_time = int(time.mktime(day.date().timetuple()))
-        end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
+        end_time = int(time.mktime((day.date() + timedelta(days=1)).timetuple()))
         count = 0
         page = 1
         response = []
@@ -216,7 +232,16 @@ class UklonTaxiService:
                     page = page + 1
                     for trip in trips:
                         if end_time >= trip['pickup_time'] >= start_time:
-                            response.append(trip)
+                            if trip['status'] == 'completed':
+                                if trip['payments']['fee_type'] == 'mixed':
+                                    additional_many = self.get_ride_info(trip['uid'])
+                                    trip['cash_many_info'] = additional_many[1]
+                                    trip['pay_many_info'] = additional_many[0]
+                                else:
+                                    trip['cash_many_info'] = trip['cost'] if trip['payments'][
+                                                                                 'fee_type'] == 'cash' else 0
+                                    trip['pay_many_info'] = trip['cost']
+                                response.append(trip)
                         else:
                             next_iteration = False
                     if next_iteration:
@@ -226,6 +251,8 @@ class UklonTaxiService:
             else:
                 break
         if response:
+            if not os.path.exists('UKLON'):
+                os.mkdir('UKLON')
             with open(file_path, "wb") as file:
                 pickle.dump(response, file)
         return response

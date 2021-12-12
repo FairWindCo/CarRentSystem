@@ -87,7 +87,15 @@
                         <td class="text-bold-500">{{ obj.car.name }}</td>
                         <td>{{ obj.driver.name }}</td>
                         <td>{{ obj.mileage|floatformat:2 }} км</td>
-                        <td>{{ obj.amount|floatformat:2 }} грн</td>
+                        <td>
+                            {% if obj.many_in_cash == obj.amount %}
+                                <i class="bi bi-cash">{{ obj.amount|floatformat:2 }} грн</i>
+                            {% elif obj.many_in_cash > 0 %}
+                                <i class="bi bi-award">{{ obj.amount|floatformat:2 }} грн</i>
+                            {% else %}
+                                <i class="bi bi-credit-card">{{ obj.amount|floatformat:2 }} грн</i>
+                            {% endif %}
+                        </td>
                         <td>{{ obj.fuel|floatformat:2 }} грн</td>
                         <td>{{ obj.car_amount|floatformat:2 }} грн</td>
                         <td>{{ obj.driver_amount|floatformat:2 }} грн</td>

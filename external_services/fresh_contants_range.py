@@ -34,7 +34,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
     if uklon.connect(selenium=use_silenuim):
         if uklon.get_my_info():
             current_date = timezone.now()
-            yesterday = current_date - datetime.timedelta(days=1)
+            yesterday = current_date
             stat_date = yesterday - datetime.timedelta(days=day_count)
             processed_rides = 0
             total_rides = 0
@@ -50,7 +50,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
                             car = taxi_car_driver.car
                             driver = taxi_car_driver.driver
                             operator = taxi_car_driver.operator
-                            cash = ride['payments']['fee_type'] == 'cash'
+                            cash = ride['cash_many_info']
                             gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
                             start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
                             TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],

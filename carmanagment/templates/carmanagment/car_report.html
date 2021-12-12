@@ -177,7 +177,7 @@
                 </tr>
                 <tr>
                     <th>Затраты на обслуживание</th>
-                    <td>{{ total.car_amount|floatformat:2  }} грн</td>
+                    <td>{{ total.firm_rent|floatformat:2  }} грн</td>
                 </tr>
                 <tr>
                     <th>Зарплата водителя</th>
@@ -187,6 +187,11 @@
                     <th>Деньги оператор</th>
                     <td>{{ total.payer_amount|floatformat:2  }} грн</td>
                 </tr>
+                <tr>
+                    <th>Банковский процент</th>
+                    <td>{{ total.total_bank|floatformat:2  }} грн</td>
+                </tr>
+
                 <tr>
                 </tr>
                 </tbody>
