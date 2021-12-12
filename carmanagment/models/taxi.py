@@ -81,7 +81,6 @@ class TaxiTrip(models.Model):
             raise TypeError('Need car account')
         if not isinstance(payer, Counterpart) or payer is None:
             raise TypeError('Need Counterpart account')
-        cash = True if cash_many > 0 else False
         try:
             with transaction.atomic():
                 car_in_rent = CarSchedule.check_date_in_interval(car, start)
@@ -119,18 +118,25 @@ class TaxiTrip(models.Model):
                         (car, firm_account, math.trunc(calc.operating_costs * 100), 'Операционные затраты'),
                         (car, driver, math.trunc(calc.driver_money * 100), 'Зарплата водителя'),
                     ]
-                    if cash:
+                    if calc.cash > 0:
                         operations.append((driver, None, math.trunc(calc.cash * 100), 'Вывод наличных'))
-                        cash_box = many_cash_box
                     if calc.bank_rent > 0:
                         operations.append((payer, None, math.trunc(calc.bank_rent * 100), 'Комисия банка'))
                     if many_cash_box:
                         operations.append((None, driver, math.trunc(calc.cash * 100), 'Внос денег в кассу'))
                         operations.append((None, many_cash_box, math.trunc(calc.cash * 100), 'Пополнение кассы'))
                     if payer.cash_box:
-                        operations.append((None, payer.cash_box, math.trunc((calc.trip_many_without_bank - cash_many) * 100),
-                                           f'Пополнение кассы {payer.cash_box.name} за '
-                                           f'поездку {start} {car.name} {driver.name}'))
+                        payer_balance_cache = calc.credit_cart_many
+                        if payer_balance_cache > 0:
+                            operations.append(
+                                (None, payer.cash_box, math.trunc(payer_balance_cache * 100),
+                                 f'Пополнение кассы {payer.cash_box.name} за '
+                                 f'поездку {start} {car.name} {driver.name}'))
+                        else:
+                            operations.append(
+                                (payer.cash_box, None, math.trunc(payer_balance_cache * 100),
+                                 f'Пополнение кассы {payer.cash_box.name} за '
+                                 f'поездку {start} {car.name} {driver.name}'))
                     # print(operations)
                     # print(fuel_trip, taxitrip.fuel, driver_money)
                     transaction_record = Balance.form_transaction(Balance.DEPOSIT, operations, comment if comment
@@ -158,6 +164,7 @@ class TripStatistics(models.Model):
     trip_count = models.PositiveIntegerField(verbose_name='Кол-во поездок', default=0)
     mileage = models.FloatField(verbose_name='Пробег за поездки', default=0)
     fuel = models.FloatField(verbose_name='Затраты на топливо', default=0)
+    cash = models.FloatField(verbose_name='Сумма наличнных', default=0)
     amount = models.FloatField(verbose_name='Сумма оплаты', default=0)
     car_amount = models.FloatField(verbose_name='Сумма прибыли по машине', default=0)
     payer_amount = models.FloatField(verbose_name='Прибыль сервиса', default=0)

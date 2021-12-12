@@ -22,6 +22,9 @@ class Statistics:
         expenses_sum = Expenses.objects.filter(account=car,
                                                date_mark__lte=statistics_end_date,
                                                date_mark__gte=statistics_start_date).aggregate(Sum('amount'))
+        cash_sum = TaxiTrip.objects.filter(car=car, is_rent=False,
+                                               timestamp__lte=statistics_end_date,
+                                               timestamp__gte=statistics_start_date).aggregate(Sum('many_in_cash'))
         trip_sum = TaxiTrip.objects.filter(car=car, is_rent=False,
                                            timestamp__lte=statistics_end_date,
                                            timestamp__gte=statistics_start_date). \
@@ -50,6 +53,7 @@ class Statistics:
                            total_firm_rent=get_sum(trip_sum, 'firm_rent__sum'),
                            total_bank_rent=get_sum(trip_sum, 'bank_amount__sum'),
                            trip_count=get_sum(trip_sum, 'pk__count'),
+                           cash=get_sum(cash_sum, 'many_in_cash__sum')
                            ).save()
         except IntegrityError as e:
             stat = TripStatistics.objects.get(car=car, stat_date=statistics_start_date)

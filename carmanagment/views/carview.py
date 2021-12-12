@@ -67,6 +67,7 @@ def car_usage_report(request):
     full_total_payer_amount = 0
     total_bank = 0
     firm_rent = 0
+    cash = 0
     if request.method == 'POST':
         form = CarReportForm(request.POST)
         if form.is_valid():
@@ -85,6 +86,7 @@ def car_usage_report(request):
                 full_total_payer_amount += trip_stat.total_payer_amount
                 total_bank += trip_stat.total_bank_rent
                 firm_rent += trip_stat.total_firm_rent
+                cash += trip_stat.cash
 
             expenses = Expenses.objects.filter(account=form.cleaned_data['car'],
                                                date_mark__lte=form.cleaned_data['end_date'],
@@ -110,5 +112,6 @@ def car_usage_report(request):
         'full_total_payer_amount': full_total_payer_amount,
         'total_bank':total_bank,
         'firm_rent': firm_rent,
+        'cash': cash
     }
     return render(request, 'carmanagment/car_report.html', context)

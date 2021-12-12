@@ -54,7 +54,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
                             gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
                             start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
                             TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
-                                                             ride['cost'], gas_price, cash, '', operator.cash_box)
+                                                             ride['cost'], gas_price, cash, '', None)
                             processed_rides += 1
                         except CarsInOperator.DoesNotExist:
                             continue

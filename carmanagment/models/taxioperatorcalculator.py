@@ -36,6 +36,8 @@ class TaxiCalculator:
         # Общая сумма денег которые необходимо отдать оператору такси
         self._total_payer_amount = self._payer_interest + self._bank_rent
 
+        self._credit_cart_many = self._trip_many_without_bank - self.cash
+
     @property
     def firm_profit(self):
         return self._firm_profit
@@ -91,3 +93,7 @@ class TaxiCalculator:
     @property
     def cash(self):
         return self._cash
+
+    @property
+    def credit_cart_many(self):
+        return self._credit_cart_many

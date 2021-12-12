@@ -35,15 +35,17 @@
                     <div class="row">
                         <div class="col-md-3">
                             {{ form.start_date.errors }}
-                             <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}:</label>
-                            <input type="date" name="{{ form.start_date.html_name }}" placeholder="{{ form.start_date.label }}"
+                            <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}:</label>
+                            <input type="date" name="{{ form.start_date.html_name }}"
+                                   placeholder="{{ form.start_date.label }}"
                                    class="form-control round" id="{{ form.start_date.id_for_label }}"
                                    value="{{ form.start_date.value }}"/>
                         </div>
                         <div class="col-md-3">
                             {{ form.end_date.errors }}
-                             <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}:</label>
-                            <input type="date" name="{{ form.end_date.html_name }}" placeholder="{{ form.end_date.label }}"
+                            <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}:</label>
+                            <input type="date" name="{{ form.end_date.html_name }}"
+                                   placeholder="{{ form.end_date.label }}"
                                    class="form-control round" id="{{ form.end_date.id_for_label }}"
                                    value="{{ form.end_date.value }}"/>
                         </div>
@@ -61,143 +63,148 @@
                 </div>
             </form>
         </div>
-    <div class="card-header">
-        <h4 class="card-title">Список поездок</h4>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table mb-0">
-                <thead class="thead-dark">
-                <tr>
-                    <th>Дата</th>
-                    <th>Машина</th>
-                    <th>Поездки</th>
-                    <th>Пробег</th>
-                    <th>Сумма</th>
-                    <th>Стоимость топлива</th>
-                    <th>Доход</th>
-                    <th>Зарплата</th>
-                    <th>Оператор</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for obj in object_list %}
+        <div class="card-header">
+            <h4 class="card-title">Список поездок</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="thead-dark">
                     <tr>
-                        <td>{{ obj.stat_date|date:'d-m-Y' }}</td>
-                        <td class="text-bold-500">{{ obj.car.name }}</td>
-                        <td>{{ obj.trip_count }}</td>
-                        <td>{{ obj.mileage|floatformat:2 }} км</td>
-                        <td>{{ obj.amount|floatformat:2 }} грн</td>
-                        <td>{{ obj.fuel|floatformat:2 }} грн</td>
-                        <td>{{ obj.car_amount|floatformat:2 }} грн</td>
-                        <td>{{ obj.driver_amount|floatformat:2 }} грн</td>
-                        <td>{{ obj.payer_amount|floatformat:2 }} грн</td>
-                        <td>{{ obj.total_firm_rent|floatformat:2 }} грн</td>
-                        <td>{{ obj.total_bank_rent|floatformat:2 }} грн</td>
-                        <td>{{ obj.total_payer_amount|floatformat:2 }} грн</td>
+                        <th>Дата</th>
+                        <th>Машина</th>
+                        <th>Поездки</th>
+                        <th>Пробег</th>
+                        <th>Сумма</th>
+                        <th>Стоимость топлива</th>
+                        <th>Доход</th>
+                        <th>Зарплата</th>
+                        <th>Оператор</th>
                     </tr>
-                {% endfor %}
+                    </thead>
+                    <tbody>
+                    {% for obj in object_list %}
+                        <tr>
+                            <td>{{ obj.stat_date|date:'d-m-Y' }}</td>
+                            <td class="text-bold-500">{{ obj.car.name }}</td>
+                            <td>{{ obj.trip_count }}</td>
+                            <td>{{ obj.mileage|floatformat:2 }} км</td>
+                            <td>{{ obj.amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.fuel|floatformat:2 }} грн</td>
+                            <td>{{ obj.car_amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.driver_amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.payer_amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.total_firm_rent|floatformat:2 }} грн</td>
+                            <td>{{ obj.total_bank_rent|floatformat:2 }} грн</td>
+                            <td>{{ obj.total_payer_amount|floatformat:2 }} грн</td>
+                        </tr>
+                    {% endfor %}
                     <tr>
                         <td colspan="2">Итого</td>
                         <td>{{ total.trip }}</td>
                         <td>{{ total.mileage|floatformat:2 }} км</td>
-                        <td>{{ total.amount|floatformat:2  }} грн</td>
-                        <td>{{ total.fuel|floatformat:2  }} грн</td>
-                        <td>{{ total.car_amount|floatformat:2  }} грн</td>
-                        <td>{{ total.driver_amount|floatformat:2  }} грн</td>
-                        <td>{{ total.payer_amount|floatformat:2  }} грн</td>
-                        <td>{{ total.firm_rent|floatformat:2  }} грн</td>
-                        <td>{{ total.total_bank|floatformat:2  }} грн</td>
-                        <td>{{ total.full_total_payer_amount|floatformat:2  }} грн</td>
+                        <td>{{ total.amount|floatformat:2 }} грн</td>
+                        <td>{{ total.fuel|floatformat:2 }} грн</td>
+                        <td>{{ total.car_amount|floatformat:2 }} грн</td>
+                        <td>{{ total.driver_amount|floatformat:2 }} грн</td>
+                        <td>{{ total.payer_amount|floatformat:2 }} грн</td>
+                        <td>{{ total.firm_rent|floatformat:2 }} грн</td>
+                        <td>{{ total.total_bank|floatformat:2 }} грн</td>
+                        <td>{{ total.full_total_payer_amount|floatformat:2 }} грн</td>
                     </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-    <div class="card-header">
-        <h4 class="card-title">Список затрат на осблуживание</h4>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table mb-0">
-                <thead class="thead-dark">
-                <tr>
-                    <th>Дата</th>
-                    <th>Сумма</th>
-                    <th>Тип затраты</th>
-                    <th>Описание</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for expense in expenses %}
+        <div class="card-header">
+            <h4 class="card-title">Список затрат на осблуживание</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="thead-dark">
                     <tr>
-                        <td>{{ expense.date_mark|date:'d-m-Y' }}</td>
-                        <td>{{ expense.amount|floatformat:2 }} грн</td>
-                        <td>{{ expense.description }}</td>
-                        <td>{{ expense.expenseType }}</td>
+                        <th>Дата</th>
+                        <th>Сумма</th>
+                        <th>Тип затраты</th>
+                        <th>Описание</th>
                     </tr>
-                {% endfor %}
+                    </thead>
+                    <tbody>
+                    {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date_mark|date:'d-m-Y' }}</td>
+                            <td>{{ expense.amount|floatformat:2 }} грн</td>
+                            <td>{{ expense.description }}</td>
+                            <td>{{ expense.expenseType }}</td>
+                        </tr>
+                    {% endfor %}
                     <tr>
                         <td>Итого</td>
                         <td>{{ total.expense_amount|floatformat:2 }} грн</td>
                         <td colspan="2"></td>
                     </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
         <div class="card-header">
-        <h4 class="card-title">Рентабельность</h4>
+            <h4 class="card-title">Рентабельность</h4>
             <div class="table-responsive">
-            <table class="table mb-0">
-                <tbody class="thead-dark">
-                <tr>
-                    <th>Доход</th>
-                    <td>{{ total.total_sum|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Прибыль от машины</th>
-                    <td>{{ total.car_amount|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Количество поездок</th>
-                    <td>{{ total.trip }}</td>
-                </tr>
-                <tr>
-                    <th>Пробег</th>
-                    <td>{{ total.mileage|floatformat:2 }} км</td>
-                </tr>
-                <tr>
-                    <th>Сумма полученных средств</th>
-                    <td>{{ total.amount|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Затраты на топливо</th>
-                    <td>{{ total.fuel|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Затраты на обслуживание</th>
-                    <td>{{ total.firm_rent|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Зарплата водителя</th>
-                    <td>{{ total.driver_amount|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Деньги оператор</th>
-                    <td>{{ total.payer_amount|floatformat:2  }} грн</td>
-                </tr>
-                <tr>
-                    <th>Банковский процент</th>
-                    <td>{{ total.total_bank|floatformat:2  }} грн</td>
-                </tr>
+                <table class="table mb-0">
+                    <tbody class="thead-dark">
+                    <tr>
+                        <th>Доход</th>
+                        <td>{{ total.total_sum|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Прибыль от машины</th>
+                        <td>{{ total.car_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Количество поездок</th>
+                        <td>{{ total.trip }}</td>
+                    </tr>
+                    <tr>
+                        <th>Пробег</th>
+                        <td>{{ total.mileage|floatformat:2 }} км</td>
+                    </tr>
+                    <tr>
+                        <th>Сумма полученных средств</th>
+                        <td>{{ total.amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Полученные наличные средства</th>
+                        <td>{{ total.cash|floatformat:2 }} грн</td>
+                    </tr>
 
-                <tr>
-                </tr>
-                </tbody>
-            </table>
+                    <tr>
+                        <th>Затраты на топливо</th>
+                        <td>{{ total.fuel|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Затраты на обслуживание</th>
+                        <td>{{ total.firm_rent|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Зарплата водителя</th>
+                        <td>{{ total.driver_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Деньги оператор</th>
+                        <td>{{ total.payer_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Банковский процент</th>
+                        <td>{{ total.total_bank|floatformat:2 }} грн</td>
+                    </tr>
+
+                    <tr>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
     </div>
 {% endblock %}
 
