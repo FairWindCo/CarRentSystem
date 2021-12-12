@@ -9,15 +9,7 @@ from django.utils.datetime_safe import datetime
 from balance.models import CashBox, Transaction, Account
 from balance.services import Balance
 from carmanagment.models import Counterpart, Car, Driver, CarSchedule, DriversSchedule
-
-
-class TaxiCalculator:
-    def __init__(self, millage: float, cash: float, credit_cart_cash: float,
-                 additional_millage: float = 0,
-                 operator_cash_profit: float = 0.15,
-                 cart_cash_profit: float = 0.15,
-                 bank_profit: float = 0.025):
-        pass
+from carmanagment.models.taxioperatorcalculator import TaxiCalculator
 
 
 class TaxiOperator(Counterpart):
@@ -92,8 +84,6 @@ class TaxiTrip(models.Model):
         cash = True if cash_many > 0 else False
         try:
             with transaction.atomic():
-                print(start)
-
                 car_in_rent = CarSchedule.check_date_in_interval(car, start)
                 if not car_in_rent:
                     driver_schedule = DriversSchedule.get_object_from_date(car, start)
@@ -108,59 +98,37 @@ class TaxiTrip(models.Model):
                 taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer,
                                     mileage=millage, amount=total_trip_many_amount,
                                     many_in_cash=cash_many)
-                # this is millage for calculate fuel price
-                fuel_trip = (millage + car.additional_miilage) / 100 * car.fuel_consumption
-                fuel_price = round(fuel_trip * gas_price, 2)
+                calc = TaxiCalculator(millage, total_trip_many_amount, cash_many,
+                                      car.fuel_consumption, gas_price, car.additional_miilage,
+                                      payer.cash_profit, payer.profit, payer.bank_interest,
+                                      car.car_investor.operating_costs_percent,
+                                      driver.profit
+                                      )
 
-                # this is money without taxi service profit
-                # payer_interest = round(amount * (payer.cash_profit if cash else payer.profit), 2)
-                credit_cart_many = total_trip_many_amount - cash_many
-
-                # taxi operator many
-                payer_interest = round(cash_many * payer.cash_profit + credit_cart_many * payer.profit, 2)
-
-                trip_firm_total_many = round(total_trip_many_amount - payer_interest, 2)
-
-                if credit_cart_many - payer_interest > 0:
-                    bank_rent = round((credit_cart_many - payer_interest) * payer.bank_interest, 2)
-                else:
-                    bank_rent = - payer_interest * payer.bank_interest
-
-                trip_many_without_bank = trip_firm_total_many - bank_rent
-
-                # this is money without fuel cost
-                real_amount = round(trip_many_without_bank - fuel_price, 2)
-
-                # this is operating costs
                 firm_account = config.FIRM
                 if firm_account is None:
                     raise ValueError('Need Set Firm account in Config')
-                operating_costs = round(trip_many_without_bank * (car.car_investor.operating_costs_percent / 100), 2)
-
-                # taxi service profit
-                taxitrip.payer_amount = payer_interest
-                # driver profit
-                driver_money = round(real_amount * (driver.profit / 100), 2)
-                taxitrip.driver_amount = driver_money
+                taxitrip.payer_amount = calc.payer_interest
+                taxitrip.driver_amount = calc.driver_money
                 if not car_in_rent:
                     operations = [
-                        (None, payer, math.trunc(total_trip_many_amount * 100), 'Платеж от клиента'),
-                        (payer, None, math.trunc(payer_interest * 100), 'Комисия оператора такси'),
-                        (payer, car, math.trunc(trip_many_without_bank * 100), 'Платеж от оператора'),
-                        (car, driver, math.trunc(fuel_price * 100), 'Компенсация топлива'),
-                        (car, firm_account, math.trunc(operating_costs * 100), 'Операционные затраты'),
-                        (car, driver, math.trunc(driver_money * 100), 'Зарплата водителя'),
+                        (None, payer, math.trunc(calc.total_trip_many * 100), 'Платеж от клиента'),
+                        (payer, None, math.trunc(calc.payer_interest * 100), 'Комисия оператора такси'),
+                        (payer, car, math.trunc(calc.trip_many_without_bank * 100), 'Платеж от оператора'),
+                        (car, driver, math.trunc(calc.fuel_price * 100), 'Компенсация топлива'),
+                        (car, firm_account, math.trunc(calc.operating_costs * 100), 'Операционные затраты'),
+                        (car, driver, math.trunc(calc.driver_money * 100), 'Зарплата водителя'),
                     ]
                     if cash:
-                        operations.append((driver, None, math.trunc(cash_many * 100), 'Вывод наличных'))
+                        operations.append((driver, None, math.trunc(calc.cash * 100), 'Вывод наличных'))
                         cash_box = many_cash_box
-                    if bank_rent > 0:
-                        operations.append((payer, None, math.trunc(bank_rent * 100), 'Комисия банка'))
+                    if calc.bank_rent > 0:
+                        operations.append((payer, None, math.trunc(calc.bank_rent * 100), 'Комисия банка'))
                     if many_cash_box:
-                        operations.append((None, driver, math.trunc(cash_many * 100), 'Внос денег в кассу'))
-                        operations.append((None, many_cash_box, math.trunc(cash_many * 100), 'Пополнение кассы'))
+                        operations.append((None, driver, math.trunc(calc.cash * 100), 'Внос денег в кассу'))
+                        operations.append((None, many_cash_box, math.trunc(calc.cash * 100), 'Пополнение кассы'))
                     if payer.cash_box:
-                        operations.append((None, payer.cash_box, math.trunc((trip_many_without_bank - cash_many) * 100),
+                        operations.append((None, payer.cash_box, math.trunc((calc.trip_many_without_bank - cash_many) * 100),
                                            f'Пополнение кассы {payer.cash_box.name} за '
                                            f'поездку {start} {car.name} {driver.name}'))
                     # print(operations)
@@ -171,11 +139,11 @@ class TaxiTrip(models.Model):
                     transaction_record = None
                     taxitrip.is_rent = True
 
-                taxitrip.fuel = fuel_price
-                taxitrip.car_amount = trip_many_without_bank - fuel_price - driver_money - operating_costs
-                taxitrip.bank_amount = bank_rent
-                taxitrip.firm_rent = operating_costs
-                taxitrip.total_payer_amount = payer_interest + bank_rent
+                taxitrip.fuel = calc.fuel_price
+                taxitrip.car_amount = calc.firm_profit
+                taxitrip.bank_amount = calc.bank_rent
+                taxitrip.firm_rent = calc.operating_costs
+                taxitrip.total_payer_amount = calc.total_payer_amount
                 taxitrip.transaction = transaction_record
                 taxitrip.save()
                 print('OK')
