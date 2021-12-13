@@ -97,7 +97,7 @@ class TaxiTrip(models.Model):
                 tz = timezone.get_current_timezone()
                 taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer,
                                     mileage=millage, amount=total_trip_many_amount,
-                                    many_in_cash=cash_many)
+                                    many_in_cash=cash_many, car_in_rent=car_in_rent)
                 calc = TaxiCalculator(millage, total_trip_many_amount, cash_many,
                                       car.fuel_consumption, gas_price, car.additional_miilage,
                                       payer.cash_profit, payer.profit, payer.bank_interest,

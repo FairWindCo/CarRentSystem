@@ -21,16 +21,16 @@ class Statistics:
             statistics_date = timezone.now().date()
 
         statistics_start_date = datetime.datetime.combine(statistics_date,
-                                                                         datetime.datetime.min.time(),
-                                                                         Statistics.LOCAL_TIMEZONE)
+                                                          datetime.datetime.min.time(),
+                                                          Statistics.LOCAL_TIMEZONE)
         statistics_end_date = statistics_start_date + datetime.timedelta(days=1)
         print(statistics_start_date)
         expenses_sum = Expenses.objects.filter(account=car,
                                                date_mark__lte=statistics_end_date,
                                                date_mark__gte=statistics_start_date).aggregate(Sum('amount'))
         cash_sum = TaxiTrip.objects.filter(car=car, is_rent=False,
-                                               timestamp__lte=statistics_end_date,
-                                               timestamp__gte=statistics_start_date).aggregate(Sum('many_in_cash'))
+                                           timestamp__lte=statistics_end_date,
+                                           timestamp__gte=statistics_start_date).aggregate(Sum('many_in_cash'))
         trip_sum = TaxiTrip.objects.filter(car=car, is_rent=False,
                                            timestamp__lte=statistics_end_date,
                                            timestamp__gte=statistics_start_date). \

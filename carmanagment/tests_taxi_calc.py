@@ -30,7 +30,7 @@ class CheckTaxiCaclculator(TestCase):
         self.assertEquals(calc.payer_interest, 12, 'Не совпадает процент по Уклону')
         self.assertEquals(calc.bank_rent, -0.3, 'Не совпадает комисия банка')
         self.assertEquals(calc.operating_costs, 3.42, 'Не совпадает комисия фирмы')
-        self.assertEquals(calc.driver_money, 24.57, 'Не совпадает зарплата водителя')
+        self.assertEquals(calc.driver_money, 24.58, 'Не совпадает зарплата водителя')
         self.assertEquals(calc.firm_profit, 21.16, 'Не совпадает прибыль машины')
         self.assertEquals(calc.real_amount, 49.15, 'Деньги пришли на фирму')
 
@@ -45,6 +45,6 @@ class CheckTaxiCaclculator(TestCase):
         self.assertEquals(calc.payer_interest, 22.35, 'Не совпадает процент по Уклону')
         self.assertEquals(calc.bank_rent, 0.82, 'Не совпадает комисия банка')
         self.assertEquals(calc.operating_costs, 6.29, 'Не совпадает комисия фирмы')
-        self.assertEquals(calc.driver_money, 48.23, 'Не совпадает зарплата водителя')
+        self.assertEquals(calc.driver_money, 48.24, 'Не совпадает зарплата водителя')
         self.assertEquals(calc.firm_profit, 41.95, 'Не совпадает прибыль машины')
         self.assertEquals(calc.real_amount, 96.47, 'Деньги пришли на фирму')
