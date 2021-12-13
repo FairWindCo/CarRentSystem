@@ -5,6 +5,8 @@ import sys
 import django
 from django.utils import timezone
 
+from external_services.uklon_service import LOCAL_TIMEZONE
+
 
 def get_special_fuel_help_text(field_id='id_gas_price'):
     from constance import config
@@ -20,7 +22,7 @@ def get_special_fuel_help_text(field_id='id_gas_price'):
     return fuels_strings
 
 
-def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
+def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=7):
     from CarRentSystem import settings
     from carmanagment.models import CarsInOperator
     from external_services.uklon_service import UklonTaxiService
@@ -34,7 +36,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
     if uklon.connect(selenium=use_silenuim):
         if uklon.get_my_info():
             current_date = timezone.now()
-            yesterday = current_date
+            yesterday = current_date - datetime.timedelta(days=2)
             stat_date = yesterday - datetime.timedelta(days=day_count)
             processed_rides = 0
             total_rides = 0
@@ -52,7 +54,7 @@ def get_uklon_taxi_trip(fuel_prices, use_silenuim=False, day_count=9):
                             operator = taxi_car_driver.operator
                             cash = ride['cash_many_info']
                             gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
-                            start_time = datetime.datetime.fromtimestamp(ride['pickup_time'])
+                            start_time = datetime.datetime.fromtimestamp(ride['pickup_time']).astimezone(LOCAL_TIMEZONE)
                             TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
                                                              ride['cost'], gas_price, cash, '', None)
                             processed_rides += 1

@@ -82,6 +82,7 @@ class TaxiTrip(models.Model):
         if not isinstance(payer, Counterpart) or payer is None:
             raise TypeError('Need Counterpart account')
         try:
+            start = start.astimezone(timezone.utc)
             with transaction.atomic():
                 car_in_rent = CarSchedule.check_date_in_interval(car, start)
                 if not car_in_rent:
@@ -107,34 +108,36 @@ class TaxiTrip(models.Model):
                 firm_account = config.FIRM
                 if firm_account is None:
                     raise ValueError('Need Set Firm account in Config')
-                taxitrip.payer_amount = calc.payer_interest
-                taxitrip.driver_amount = calc.driver_money
+                taxitrip.payer_amount = calc.payer_interest_f
+                taxitrip.driver_amount = calc.driver_money_f
                 if not car_in_rent:
                     operations = [
-                        (None, payer, math.trunc(calc.total_trip_many * 100), 'Платеж от клиента'),
-                        (payer, None, math.trunc(calc.payer_interest * 100), 'Комисия оператора такси'),
-                        (payer, car, math.trunc(calc.trip_many_without_bank * 100), 'Платеж от оператора'),
-                        (car, driver, math.trunc(calc.fuel_price * 100), 'Компенсация топлива'),
-                        (car, firm_account, math.trunc(calc.operating_costs * 100), 'Операционные затраты'),
-                        (car, driver, math.trunc(calc.driver_money * 100), 'Зарплата водителя'),
+                        (None, payer, calc.total_trip_many_int, 'Платеж от клиента'),
+                        (payer, None, calc.payer_interest_int, 'Комисия оператора такси'),
+                        (payer, car, calc.trip_many_without_bank_int, 'Платеж от оператора'),
+                        (car, driver, calc.fuel_price_int, 'Компенсация топлива'),
+                        (car, firm_account, calc.operating_costs_int, 'Операционные затраты'),
+                        (car, driver, calc.driver_money_int, 'Зарплата водителя'),
                     ]
                     if calc.cash > 0:
-                        operations.append((driver, None, math.trunc(calc.cash * 100), 'Вывод наличных'))
+                        operations.append((driver, None, calc.cash_int, 'Вывод наличных'))
                     if calc.bank_rent > 0:
-                        operations.append((payer, None, math.trunc(calc.bank_rent * 100), 'Комисия банка'))
+                        operations.append((payer, None, calc.bank_rent_int, 'Комисия банка'))
+                    else:
+                        operations.append((None, payer, abs(calc.bank_rent_int), 'возврат комисии банка за комисию оператора'))
                     if many_cash_box:
-                        operations.append((None, driver, math.trunc(calc.cash * 100), 'Внос денег в кассу'))
-                        operations.append((None, many_cash_box, math.trunc(calc.cash * 100), 'Пополнение кассы'))
+                        operations.append((None, driver, calc.cash_int, 'Внос денег в кассу'))
+                        operations.append((None, many_cash_box, calc.cash_int, 'Пополнение кассы'))
                     if payer.cash_box:
-                        payer_balance_cache = calc.credit_cart_many
+                        payer_balance_cache = calc.credit_cart_many_int
                         if calc.bank_rent > 0:
                             operations.append(
-                                (None, payer.cash_box, math.trunc(payer_balance_cache * 100),
+                                (None, payer.cash_box, payer_balance_cache,
                                  f'Пополнение кассы {payer.cash_box.name} за '
                                  f'поездку {start} {car.name} {driver.name}'))
                         else:
                             operations.append(
-                                (payer.cash_box, None, math.trunc(payer_balance_cache * 100),
+                                (payer.cash_box, None, payer_balance_cache,
                                  f'Пополнение кассы {payer.cash_box.name} за '
                                  f'поездку {start} {car.name} {driver.name}'))
                     # print(operations)
@@ -145,11 +148,11 @@ class TaxiTrip(models.Model):
                     transaction_record = None
                     taxitrip.is_rent = True
 
-                taxitrip.fuel = calc.fuel_price
-                taxitrip.car_amount = calc.firm_profit
-                taxitrip.bank_amount = calc.bank_rent
-                taxitrip.firm_rent = calc.operating_costs
-                taxitrip.total_payer_amount = calc.total_payer_amount
+                taxitrip.fuel = calc.fuel_price_f
+                taxitrip.car_amount = calc.firm_profit_f
+                taxitrip.bank_amount = calc.bank_rent_f
+                taxitrip.firm_rent = calc.operating_costs_f
+                taxitrip.total_payer_amount = calc.total_payer_amount_f
                 taxitrip.transaction = transaction_record
                 taxitrip.save()
                 print('OK')

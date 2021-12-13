@@ -1,7 +1,7 @@
 import os
 import pickle
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import environ
 import requests
@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
+LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
 
 class UklonTaxiService:
     base_url = 'https://partner.uklon.com.ua/'
@@ -213,13 +214,15 @@ class UklonTaxiService:
 
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
         if day is None:
-            day = datetime.now()
+            day = datetime.now(LOCAL_TIMEZONE).date()
         file_path = os.path.join('UKLON', f"uklon_{vehicle_id}_{day.strftime('%d-%m-%y')}.dat")
+        start_time = int(time.mktime(day.date().timetuple()))
+        end_time = int(time.mktime((day.date() + timedelta(days=1)).timetuple()))
+        print(day.date(), start_time, end_time)
+
         if os.path.exists(file_path) and os.path.isfile(file_path):
             with open(file_path, "rb") as file:
                 return pickle.load(file)
-        start_time = int(time.mktime(day.date().timetuple()))
-        end_time = int(time.mktime((day.date() + timedelta(days=1)).timetuple()))
         count = 0
         page = 1
         response = []
@@ -241,6 +244,7 @@ class UklonTaxiService:
                                     trip['cash_many_info'] = trip['cost'] if trip['payments'][
                                                                                  'fee_type'] == 'cash' else 0
                                     trip['pay_many_info'] = trip['cost']
+                                    trip['timezone_time'] = trip['cost']
                                 response.append(trip)
                         else:
                             next_iteration = False
@@ -326,8 +330,8 @@ if __name__ == '__main__':
     #
     # for ride in rides:
     #     print(datetime.fromtimestamp(ride['pickup_time']))
-    current_date = datetime.now()
-    start_day = current_date - timedelta(days=10)
+    current_date = datetime.now() - timedelta(days=2)
+    start_day = current_date - timedelta(days=9)
 
     while start_day < current_date:
         rides = uklon.get_day_rides(start_day)

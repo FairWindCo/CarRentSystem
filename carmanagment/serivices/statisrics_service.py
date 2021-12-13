@@ -12,13 +12,19 @@ def get_sum(dict_obj, name):
 
 
 class Statistics:
+    LOCAL_TIMEZONE = datetime.datetime.now(timezone.utc).astimezone().tzinfo
+
     @staticmethod
     def create_car_statistics(car: Car, statistics_date: datetime.date):
         from django.db.models import Sum, Count
         if statistics_date is None:
             statistics_date = timezone.now().date()
-        statistics_start_date: datetime.date = statistics_date
-        statistics_end_date: datetime.date = statistics_start_date + datetime.timedelta(days=1)
+
+        statistics_start_date = datetime.datetime.combine(statistics_date,
+                                                                         datetime.datetime.min.time(),
+                                                                         Statistics.LOCAL_TIMEZONE)
+        statistics_end_date = statistics_start_date + datetime.timedelta(days=1)
+        print(statistics_start_date)
         expenses_sum = Expenses.objects.filter(account=car,
                                                date_mark__lte=statistics_end_date,
                                                date_mark__gte=statistics_start_date).aggregate(Sum('amount'))
@@ -41,7 +47,7 @@ class Statistics:
                       )
         try:
             TripStatistics(car=car,
-                           stat_date=statistics_start_date,
+                           stat_date=statistics_start_date.date(),
                            mileage=get_sum(trip_sum, 'mileage__sum'),
                            fuel=get_sum(trip_sum, 'fuel__sum'),
                            amount=get_sum(trip_sum, 'amount__sum'),
@@ -56,7 +62,7 @@ class Statistics:
                            cash=get_sum(cash_sum, 'many_in_cash__sum')
                            ).save()
         except IntegrityError as e:
-            stat = TripStatistics.objects.get(car=car, stat_date=statistics_start_date)
+            stat = TripStatistics.objects.get(car=car, stat_date=statistics_start_date.date())
             stat.mileage = get_sum(trip_sum, 'mileage__sum')
             stat.fuel = get_sum(trip_sum, 'fuel__sum')
             stat.amount = get_sum(trip_sum, 'amount__sum')
