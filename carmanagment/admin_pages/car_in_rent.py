@@ -24,7 +24,7 @@ class CarRentPageAdmin(ReadonlyAdmin):
 
         if 'model_name' in request.GET:
             if request.GET['model_name'] == 'returncarrentpage':
-                queryset = queryset.filter(Q(end_rent=False) & Q(my_break_rent=True) & Q(end_time__gt=now()))
+                queryset = queryset.filter(end_rent=False, my_break_rent=True, start_time__lt=now())
         results = super().get_search_results(request, queryset, search_term)
         return results
 
@@ -101,6 +101,7 @@ class ReturnCarRentPage(CustomModelPage):
     def save(self):
         with transaction.atomic():
             self.car_rent.end_rent = True
+            self.car_rent.end_rent = now()
             self.car_rent.save()
             return_many = self.car_rent.return_many
             if Balance.form_transaction(Balance.WITHDRAWAL, [
