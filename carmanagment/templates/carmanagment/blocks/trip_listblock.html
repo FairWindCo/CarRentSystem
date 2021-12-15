@@ -1,0 +1,82 @@
+<div class="table table-responsive">
+                <table class="table mb-0">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>Дата</th>
+                        <th>Машина</th>
+                        <th>Поездки</th>
+                        <th>Пробег</th>
+                        <th>Сумма</th>
+                        <th>Доход</th>
+                        <th>Зарплата</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for obj in object_list %}
+                        <tr>
+                            <td>{{ obj.stat_date|date:'d-m-Y' }}</td>
+                            <td class="text-bold-500">{{ obj.car.name }}</td>
+                            <td>{{ obj.trip_count }}</td>
+                            <td>{{ obj.mileage|floatformat:2 }} км</td>
+                            <td>{{ obj.amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.car_amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.driver_amount|floatformat:2 }} грн</td>
+                            <td>
+                                <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapserow{{ obj.id }}">...
+                                </button>
+                            </td>
+
+                        </tr>
+                        <tr class="collapse" id="collapserow{{ obj.id }}">
+                            <td colspan="8" class="container-fluid">
+                                <div class="row">
+                                    <div class="col col-1-4">Стоимость топлива</div>
+                                    <div class="col col-1-4">{{ obj.fuel|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">Оператор</div>
+                                    <div class="col col-1-4">{{ obj.payer_amount|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">Фирма</div>
+                                    <div class="col col-1-4">{{ obj.total_firm_rent|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">Банк %</div>
+                                    <div class="col col-1-4">{{ obj.total_bank_rent|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">Сумма денег оператора</div>
+                                    <div class="col col-1-4">{{ obj.total_payer_amount|floatformat:2 }} грн</div>
+                                </div>
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2">Итого</td>
+                        <td>{{ total.trip }}</td>
+                        <td>{{ total.mileage|floatformat:2 }} км</td>
+                        <td>{{ total.amount|floatformat:2 }} грн</td>
+                        <td>{{ total.car_amount|floatformat:2 }} грн</td>
+                        <td>{{ total.driver_amount|floatformat:2 }} грн</td>
+                        <td>
+                            <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapserow_sum">...
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="collapse" id="collapserow_sum">
+                        <td colspan="8" class="container-fluid">
+                            <div class="row">
+                                <div class="col col-1-4">Стоимость топлива</div>
+                                <div class="col col-1-4">{{ total.fuel|floatformat:2 }} грн</div>
+                                <div class="col col-1-4">Оператор</div>
+                                <div class="col col-1-4">{{ total.payer_amount|floatformat:2 }} грн</div>
+                                <div class="col col-1-4">Фирма</div>
+                                <div class="col col-1-4">{{ total.firm_rent|floatformat:2 }} грн</div>
+                                <div class="col col-1-4">Банк %</div>
+                                <div class="col col-1-4">{{ total.total_bank|floatformat:2 }} грн</div>
+                                <div class="col col-1-4">Сумма денег оператора</div>
+                                <div class="col col-1-4">{{ total.full_total_payer_amount|floatformat:2 }} грн</div>
+                            </div>
+
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>

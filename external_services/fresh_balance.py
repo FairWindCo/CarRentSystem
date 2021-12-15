@@ -1,9 +1,7 @@
-import os
-import sys
 from datetime import timedelta
-
-import django
 from django.utils import timezone
+
+from .django_common.django_native_execute import execute_code_in_django
 
 
 def refresh_balanses():
@@ -16,11 +14,4 @@ def refresh_balanses():
 
 
 if __name__ == '__main__':
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    sys.path.append(os.path.abspath(BASE_DIR))
-    sys.path.append(os.path.abspath(os.path.join(BASE_DIR, os.pardir)))
-
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'CarRentSystem.settings'
-
-    django.setup()
-    refresh_balanses()
+    execute_code_in_django(lambda _: refresh_balanses())

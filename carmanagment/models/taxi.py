@@ -85,19 +85,17 @@ class TaxiTrip(models.Model):
             start = start.astimezone(timezone.utc)
             with transaction.atomic():
                 car_in_rent = CarSchedule.check_date_in_interval(car, start)
+                # print(car.name, car_in_rent, type(start))
                 if not car_in_rent:
                     driver_schedule = DriversSchedule.get_object_from_date(car, start)
                     driver = driver_schedule if driver_schedule is not None else driver
                     if not isinstance(driver, Driver) or driver is None:
                         raise TypeError('Need Driver account')
-                else:
-                    driver = None
-                    payer = None
 
                 tz = timezone.get_current_timezone()
                 taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer,
                                     mileage=millage, amount=total_trip_many_amount,
-                                    many_in_cash=cash_many, car_in_rent=car_in_rent)
+                                    many_in_cash=cash_many, is_rent=car_in_rent)
                 calc = TaxiCalculator(millage, total_trip_many_amount, cash_many,
                                       car.fuel_consumption, gas_price, car.additional_miilage,
                                       payer.cash_profit, payer.profit, payer.bank_interest,
@@ -124,7 +122,8 @@ class TaxiTrip(models.Model):
                     if calc.bank_rent > 0:
                         operations.append((payer, None, calc.bank_rent_int, 'Комисия банка'))
                     else:
-                        operations.append((None, payer, abs(calc.bank_rent_int), 'возврат комисии банка за комисию оператора'))
+                        operations.append(
+                            (None, payer, abs(calc.bank_rent_int), 'возврат комисии банка за комисию оператора'))
                     if many_cash_box:
                         operations.append((None, driver, calc.cash_int, 'Внос денег в кассу'))
                         operations.append((None, many_cash_box, calc.cash_int, 'Пополнение кассы'))
@@ -155,7 +154,7 @@ class TaxiTrip(models.Model):
                 taxitrip.total_payer_amount = calc.total_payer_amount_f
                 taxitrip.transaction = transaction_record
                 taxitrip.save()
-                print('OK')
+                # print('OK')
                 return True
         except IntegrityError:
             return False
@@ -173,12 +172,11 @@ class TripStatistics(models.Model):
     payer_amount = models.FloatField(verbose_name='Прибыль сервиса', default=0)
     driver_amount = models.FloatField(verbose_name='Зарплата водителя', default=0)
     expanse_amount = models.FloatField(verbose_name='Затраты по машине', default=0)
-    rent_amount = models.FloatField(verbose_name='Прибыль от аренды', default=0)
-    lost_amount = models.FloatField(verbose_name='Не полученная прибыль', default=0)
-    rent_mileage = models.FloatField(verbose_name='Пробег в аренде', default=0)
     total_payer_amount = models.FloatField(verbose_name='Деньги для сервиса', default=0)
     total_firm_rent = models.FloatField(verbose_name='Операционные затрты', default=0)
     total_bank_rent = models.FloatField(verbose_name='Банк процент', default=0)
+    car_in_rent = models.BooleanField(verbose_name='Машина в аренде', default=False)
 
     class Meta:
-        unique_together = (('car', 'stat_date'),)
+        unique_together = (('car', 'stat_date', 'car_in_rent'),)
+        index_together = (('car', 'stat_date'),)

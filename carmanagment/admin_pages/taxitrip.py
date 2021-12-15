@@ -4,9 +4,9 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from balance.models import CashBox
+from external_services.fuel_statisitics.django_fuel_config import get_special_fuel_help_text
 from .custom_admin import CustomModelPage
 from carmanagment.models import Car, Driver, TaxiOperator, TaxiTrip
-from external_services.fresh_contants import get_special_fuel_help_text
 
 
 class TaxiTripPage(CustomModelPage):

@@ -1,0 +1,54 @@
+<div class="table-responsive">
+                <table class="table mb-0">
+                    <tbody class="thead-dark">
+                    <tr>
+                        <th>Доход</th>
+                        <td>{{ total.total_sum|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Прибыль от машины</th>
+                        <td>{{ total.car_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Количество поездок</th>
+                        <td>{{ total.trip }}</td>
+                    </tr>
+                    <tr>
+                        <th>Пробег</th>
+                        <td>{{ total.mileage|floatformat:2 }} км</td>
+                    </tr>
+                    <tr>
+                        <th>Сумма полученных средств</th>
+                        <td>{{ total.amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Полученные наличные средства</th>
+                        <td>{{ total.cash|floatformat:2 }} грн</td>
+                    </tr>
+
+                    <tr>
+                        <th>Затраты на топливо</th>
+                        <td>{{ total.fuel|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Затраты на обслуживание</th>
+                        <td>{{ total.firm_rent|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Зарплата водителя</th>
+                        <td>{{ total.driver_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Деньги оператор</th>
+                        <td>{{ total.payer_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Банковский процент</th>
+                        <td>{{ total.total_bank|floatformat:2 }} грн</td>
+                    </tr>
+
+                    <tr>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>

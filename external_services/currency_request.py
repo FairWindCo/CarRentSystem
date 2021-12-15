@@ -1,7 +1,7 @@
 import bs4
 import requests
 
-from external_services.fuel_price_request import convert_string_html_to_float
+from external_services.fuel_statisitics.django_fuel_config import convert_string_html_to_float
 
 
 def parse_html(html_data, default_value):

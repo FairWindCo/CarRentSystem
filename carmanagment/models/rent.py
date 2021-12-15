@@ -30,9 +30,10 @@ class CarSchedule(models.Model):
 
     @classmethod
     def check_date_in_interval(cls, car: Car, date_time: datetime) -> bool:
-        return cls.objects.filter(car=car).filter(
-            Q(start_time__gte=date_time, end_time__lte=date_time)
-        ).exists()
+        queryset = cls.objects.filter(car=car).filter(
+            start_time__lte=date_time, end_time__gte=date_time
+        )
+        return queryset.exists()
 
     def interval(self):
         return self.end_time - self.start_time

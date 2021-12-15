@@ -212,17 +212,20 @@ class UklonTaxiService:
                                      method='GET', debug=False, api=self.api, params=params)
         return res
 
-    def get_day_rides(self, day=None, vehicle_id: str = None, limit=None):
+    def get_day_rides(self, day=None, vehicle_id: str = None, limit=None, cache_path = None):
         if day is None:
             day = datetime.now(LOCAL_TIMEZONE).date()
-        file_path = os.path.join('UKLON', f"uklon_{vehicle_id}_{day.strftime('%d-%m-%y')}.dat")
+
+        file_path = None
         start_time = int(time.mktime(day.date().timetuple()))
         end_time = int(time.mktime((day.date() + timedelta(days=1)).timetuple()))
-        print(day.date(), start_time, end_time)
-
-        if os.path.exists(file_path) and os.path.isfile(file_path):
-            with open(file_path, "rb") as file:
-                return pickle.load(file)
+        # print(day.date(), start_time, end_time)
+        if cache_path is not None:
+            file_path = os.path.join(cache_path, f"uklon_{vehicle_id}_{day.strftime('%d-%m-%y')}.dat")
+            # print(file_path)
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                with open(file_path, "rb") as file:
+                    return pickle.load(file)
         count = 0
         page = 1
         response = []
@@ -254,9 +257,9 @@ class UklonTaxiService:
                     break
             else:
                 break
-        if response:
-            if not os.path.exists('UKLON'):
-                os.mkdir('UKLON')
+        if response and cache_path is not None:
+            if not os.path.exists('../UKLON'):
+                os.mkdir('../UKLON')
             with open(file_path, "wb") as file:
                 pickle.dump(response, file)
         return response

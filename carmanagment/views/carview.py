@@ -58,48 +58,59 @@ class CarReportForm(forms.Form):
                                  widget=forms.Select(attrs={'class': 'form-control round'}))
 
 
-def car_usage_report(request):
-    context = GlobalMainMenu.form_menu_context(request)
-    cars_trips_stat = []
-    expenses = []
+def day_usage_report(form, rent=False):
+    start_date = form.cleaned_data['end_date']
+    end_date = form.cleaned_data['start_date']
+    car = form.cleaned_data['car']
+    return form_day_usage_report(start_date, end_date, car, rent)
+
+
+def form_empty_data():
+    return {'total': {
+        'amount': 0,
+        'fuel': 0,
+        'trip': 0,
+        'mileage': 0,
+        'car_amount': 0,
+        'driver_amount': 0,
+        'payer_amount': 0,
+        'expense_amount': 0,
+        'total_sum': 0,
+        'full_total_payer_amount': 0,
+        'total_bank': 0,
+        'firm_rent': 0,
+        'cash': 0
+    },
+        'object_list': []}
+
+
+def form_day_usage_report(start_date, end_date, car, rent=False):
     total_rent, total_fuel, total_trip, expense_amount = 0, 0, 0, 0
     total_millage, total_car_amount, total_driver, total_payer_amount = 0, 0, 0, 0
     full_total_payer_amount = 0
     total_bank = 0
     firm_rent = 0
     cash = 0
-    if request.method == 'POST':
-        form = CarReportForm(request.POST)
-        if form.is_valid():
-            cars_trips_stat = TripStatistics.objects.filter(
-                stat_date__lte=form.cleaned_data['end_date'],
-                stat_date__gte=form.cleaned_data['start_date'],
-                car=form.cleaned_data['car']).all()
-            for trip_stat in cars_trips_stat:
-                total_rent += trip_stat.amount
-                total_fuel += trip_stat.fuel
-                total_trip += trip_stat.trip_count
-                total_millage += trip_stat.mileage
-                total_car_amount += trip_stat.car_amount
-                total_driver += trip_stat.driver_amount
-                total_payer_amount += trip_stat.payer_amount
-                full_total_payer_amount += trip_stat.total_payer_amount
-                total_bank += trip_stat.total_bank_rent
-                firm_rent += trip_stat.total_firm_rent
-                cash += trip_stat.cash
 
-            expenses = Expenses.objects.filter(account=form.cleaned_data['car'],
-                                               date_mark__lte=form.cleaned_data['end_date'],
-                                               date_mark__gte=form.cleaned_data['start_date']
-                                               ).all()
-            expense_amount = sum(expense.amount for expense in expenses)
-    else:
-        form = CarReportForm()
-
-    context['form'] = form
-    context['object_list'] = cars_trips_stat
-    context['expenses'] = expenses
-    context['total'] = {
+    cars_trips_stat = TripStatistics.objects.filter(
+        car_in_rent=rent,
+        stat_date__lte=start_date,
+        stat_date__gte=end_date,
+        car=car).all()
+    for trip_stat in cars_trips_stat:
+        total_rent += trip_stat.amount
+        total_fuel += trip_stat.fuel
+        total_trip += trip_stat.trip_count
+        total_millage += trip_stat.mileage
+        total_car_amount += trip_stat.car_amount
+        total_driver += trip_stat.driver_amount
+        total_payer_amount += trip_stat.payer_amount
+        full_total_payer_amount += trip_stat.total_payer_amount
+        total_bank += trip_stat.total_bank_rent
+        firm_rent += trip_stat.total_firm_rent
+        cash += trip_stat.cash
+    # print(rent, cars_trips_stat)
+    return {'total': {
         'amount': total_rent,
         'fuel': total_fuel,
         'trip': total_trip,
@@ -110,8 +121,34 @@ def car_usage_report(request):
         'expense_amount': expense_amount,
         'total_sum': total_car_amount - expense_amount,
         'full_total_payer_amount': full_total_payer_amount,
-        'total_bank':total_bank,
+        'total_bank': total_bank,
         'firm_rent': firm_rent,
         'cash': cash
-    }
+    }, 'object_list': cars_trips_stat}
+
+
+def car_usage_report(request):
+    context = GlobalMainMenu.form_menu_context(request)
+    expenses = []
+    expense_amount = 0
+    trip_stat = form_empty_data()
+    rent_trip_stat = form_empty_data()
+    if request.method == 'POST':
+        form = CarReportForm(request.POST)
+        if form.is_valid():
+            expenses = Expenses.objects.filter(account=form.cleaned_data['car'],
+                                               date_mark__lte=form.cleaned_data['end_date'],
+                                               date_mark__gte=form.cleaned_data['start_date']
+                                               ).all()
+            expense_amount = sum(expense.amount for expense in expenses)
+            trip_stat = day_usage_report(form, False)
+            rent_trip_stat = day_usage_report(form, True)
+    else:
+        form = CarReportForm()
+
+    context['form'] = form
+    context['trip_stat'] = trip_stat
+    context['rent_trip_stat'] = rent_trip_stat
+    context['expenses'] = expenses
+    context['expense_amount'] = expense_amount
     return render(request, 'carmanagment/car_report.html', context)
