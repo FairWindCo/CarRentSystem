@@ -3,7 +3,7 @@ from vue_utils.views import FilterListView
 from carmanagment.models import TaxiTrip
 from carmanagment.views.carview import ByCarView
 from carmanagment.views.global_menu import GlobalMainMenu
-from django_request_processor.django_list_view import UniversalFilterListView
+from django_helpers.django_request_processor import UniversalFilterListView
 
 
 class ViewTrips(FilterListView):

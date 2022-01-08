@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .custom_admin import CustomPageModelAdmin
+from django_helpers.admin.artificial_admin_models import CustomPageModelAdmin
 
 
 class InvestorAdmin(admin.ModelAdmin):

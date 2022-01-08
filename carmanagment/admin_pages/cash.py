@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 from balance.models import CashBox, Account
 from balance.services import Balance
-from .custom_admin import CustomModelPage
+from django_helpers.admin import CustomModelPage
 from carmanagment.models import Car
 from carmanagment.serivices.car_rent_service import CarRentService
 

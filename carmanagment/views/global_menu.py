@@ -1,4 +1,4 @@
-from main_menu.views import MainMenuView
+from django_helpers.views import MainMenuView
 
 
 class GlobalMainMenu(MainMenuView):

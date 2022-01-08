@@ -1,3 +1,4 @@
+import math
 from datetime import timedelta
 from math import trunc
 
@@ -8,11 +9,11 @@ from django.db import models
 from django.db.models import Q, F
 from django.utils.timezone import now
 
-from carmanagment.models import Car, Driver
+from carmanagment.models import Car, Driver, RentPrice
 from django.utils.datetime_safe import datetime
 
 
-class CarSchedule(models.Model):
+class CarScheduleBase(models.Model):
     car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
@@ -55,7 +56,7 @@ class CarSchedule(models.Model):
         verbose_name_plural = 'Расписания для авто'
 
 
-class DriversSchedule(CarSchedule):
+class DriversSchedule(CarScheduleBase):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Водитель')
 
     def __str__(self):
@@ -66,33 +67,53 @@ class DriversSchedule(CarSchedule):
         verbose_name_plural = 'Расписания работы на авто'
 
 
-class CarSchedule(CarSchedule):
-    plan_rent = models.BooleanField(verbose_name='Запланированная аренда', default=False)
-    end_rent = models.BooleanField(verbose_name='Аренда завершена досрочно', default=False)
-    my_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
-    rent_amount = models.FloatField(verbose_name='Сумма оренды', default=0.0)
+class CarSchedule(CarScheduleBase):
+    end_rent = models.DateTimeField(verbose_name='Аренда завершена', default=None, null=True, blank=True)
     deposit = models.FloatField(verbose_name='Залог', default=0.0)
+    paid_deposit = models.FloatField(verbose_name='Оплаченый залог', default=0.0)
+    amount = models.FloatField(verbose_name='Оплаченый залог', default=0.0)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Арендатор', blank=True, null=True)
+    price = models.ForeignKey(RentPrice, on_delete=models.CASCADE, verbose_name='тариф', related_name='scheduled_price')
 
-    def day_rent_price(self):
-        interval = self.interval().days
-        if interval == 0:
-            interval = 1
-        return self.rent_amount / interval
 
-    def day_rent_price_rounded(self):
-        return round(self.day_rent_price(), 2)
+
+    @property
+    def rent_interval(self):
+        return self.price.calculate_time_interval(self.start_time - self.end_time, self.price.minimal())
+
+    @property
+    def rent_price(self):
+        if self.amount > 0:
+            return round(self.amount / self.rent_interval, 2)
+        else:
+            return round(self.price.price, 2)
+
+    def rent_interval(self):
+        return self.price.calculate_time_interval(self.end_time - self.start_time, self.price.minimal())
 
     def current_return_many(self, end_date: datetime = now()):
-        if self.end_time <= end_date or not self.my_break_rent:
+        if self.end_rent is None:
+            if self.amount <= 0:
+                return round(self.price.get_return_price(self.start_time, self.end_time, end_date), 2)
+            else:
+                minimal = self.price.minimal()
+                plan = self.price.calculate_time_interval(self.end_time - self.start_time, minimal)
+                fact = self.price.calculate_time_interval(end_date - self.start_time, minimal)
+                interval = plan - fact
+                print(interval)
+                return round(self.rent_price * interval, 2)
+        else:
             return 0
-        dont_stop_date = self.start_time + timedelta(days=config.MIN_RENT)
-        stop_date = dont_stop_date if end_date <= dont_stop_date else end_date
-        delta = (self.end_time - stop_date).days
-        if delta <= 0:
-            return 0
-        day_price = self.day_rent_price()
-        return round(delta * day_price, 2)
+
+    def current_return(self, end_date: datetime = now()):
+        if self.end_rent is None:
+            return_price = self.current_return_many(end_date)
+            if return_price < 0:
+                delta_deposit = self.paid_deposit + return_price
+                return 0, delta_deposit
+            return return_price, round(self.paid_deposit, 2)
+        else:
+            return 0, 0
 
     @property
     def return_many(self):
@@ -100,14 +121,15 @@ class CarSchedule(CarSchedule):
 
     @property
     def return_deposit(self):
-        return trunc(self.deposit * 100)
+        return trunc(self.paid_deposit * 100)
 
     def __str__(self):
         start_date_formtted = self.start_time.strftime('%d.%m.%y %H:%M:%S') if self.start_time else '--'
         end_date_formtted = self.end_time.strftime('%d.%m.%y %H:%M:%S') if self.end_time else '--'
-        return f'{self.car.name} {self.rent_amount} от {start_date_formtted} до {end_date_formtted} ' \
-               f'{self.current_return_many()} {self.deposit}'
+        return f'{self.car.name} {self.price.price} от {start_date_formtted} до {end_date_formtted} ' \
+               f'{self.current_return_many()} {self.paid_deposit}'
 
     class Meta:
         verbose_name = 'Аренда авто'
         verbose_name_plural = 'Расписание аренды авто'
+        app_label = 'carrent'

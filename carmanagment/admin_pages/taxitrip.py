@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from balance.models import CashBox
 from external_services.fuel_statisitics.django_fuel_config import get_special_fuel_help_text
-from .custom_admin import CustomModelPage
+from django_helpers.admin import CustomModelPage
 from carmanagment.models import Car, Driver, TaxiOperator, TaxiTrip
 
 

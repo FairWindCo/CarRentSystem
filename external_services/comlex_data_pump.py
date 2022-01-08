@@ -1,9 +1,8 @@
 import datetime
 
 from external_services.django_common.django_native_execute import execute_code_in_django
-from .fresh_statistics import fresh_statistics_on_range
-from .uklon_trip_getter.get_trips_at_range import get_uklon_taxi_trip
-
+from uklon_trip_getter.get_trips_at_range import get_uklon_taxi_trip
+from fresh_statistics import fresh_statistics_on_range
 
 def uklon_data_pump(start_date: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
                     days_count=7,
@@ -28,4 +27,4 @@ def uklon_data_pump(start_date: datetime.date = datetime.date.today() - datetime
 
 
 if __name__ == '__main__':
-    execute_code_in_django(lambda _: uklon_data_pump())
+    execute_code_in_django(lambda: uklon_data_pump())

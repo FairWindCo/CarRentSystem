@@ -5,7 +5,8 @@ from django.db import models
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 
-from .custom_admin import CustomPageModelAdmin, CustomModelPage
+from django_helpers.admin import CustomModelPage
+from django_helpers.admin.artificial_admin_models import CustomPageModelAdmin
 from carmanagment.models import Investor, CarModel
 from carmanagment.serivices.car_service import CarCreator
 

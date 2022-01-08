@@ -1,6 +1,6 @@
 from balance.models import AccountTransaction, Transaction
 from carmanagment.views.global_menu import GlobalMainMenu
-from django_request_processor.django_list_view import UniversalFilterListView
+from django_helpers.django_request_processor import UniversalFilterListView
 
 
 class OperationsView(UniversalFilterListView, GlobalMainMenu):

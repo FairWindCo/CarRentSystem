@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 from balance.models import CashBox, Account
 
-
-from .custom_admin import CustomPageModelAdmin, CustomModelPage
+from django_helpers.admin import CustomModelPage
+from django_helpers.admin.artificial_admin_models import CustomPageModelAdmin
 from carmanagment.models import ExpensesTypes, Car, Counterpart
 from carmanagment.serivices.expense_service import ExpensesProcessor
 

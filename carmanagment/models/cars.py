@@ -67,6 +67,9 @@ class Car(Account):
     wialon_id = models.CharField(max_length=50, verbose_name='ID в системе WIALON', null=True, blank=True)
     fuel_consumption = models.FloatField(verbose_name='Расход топлива', default=14)
     additional_miilage = models.PositiveIntegerField(verbose_name='Дополнительный километраж на поездку', default=0)
+    rent_price_plan = models.ForeignKey("RentPrice", on_delete=models.CASCADE, null=True, blank=True,
+                                        related_name='rent_price_cars')
+    signal = models.CharField(max_length=6, default='', verbose_name='Позывной')
 
     def __str__(self):
         return f'{self.model.brand.name} {self.model.name} {self.name}'
@@ -79,4 +82,3 @@ class Car(Account):
 class CarMileage(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='mileage')
     mileage_at_start = models.PositiveIntegerField(verbose_name='')
-
