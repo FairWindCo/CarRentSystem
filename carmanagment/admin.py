@@ -3,7 +3,7 @@ from django.contrib import admin
 from balance.admin import ReadOnlyModelAdmin, BalanceReadOnlyField
 from carmanagment.admin_pages import *
 from carmanagment.models import *
-
+from carmanagment.models import RentPrice
 
 ExpensePage.register(admin_model=CarExpenseBase)
 OtherExpensePage.register(admin_model=OtherExpenseBase)
@@ -27,7 +27,6 @@ admin.site.register(CarsInOperator, CarInTaxiAdmin)
 admin.site.register(CarBrand)
 admin.site.register(UserProfile, ProfileAdmin)
 admin.site.register(CarInsurance, CarInsuranceAdmin)
-admin.site.register(CarSchedule, CarRentPageAdmin)
 admin.site.register(DriversSchedule)
-CarInRentPage.register()
-ReturnCarRentPage.register(admin_model=ReturnCarRentPageAdmin)
+admin.site.register(RentPrice)
+# ReturnCarRentPage.register(admin_model=ReturnCarRentPageAdmin)

@@ -1,0 +1,1 @@
+from .car_in_rent import AddDepositCarRentPage, AddDepositCarRentPageAdmin, PenaltyDepositCarRentPage, PenaltyDepositCarRentPageAdmin

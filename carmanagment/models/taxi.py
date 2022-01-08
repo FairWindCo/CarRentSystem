@@ -8,7 +8,7 @@ from django.utils.datetime_safe import datetime
 
 from balance.models import CashBox, Transaction, Account
 from balance.services import Balance
-from carmanagment.models import Counterpart, Car, Driver, CarSchedule, DriversSchedule
+from carmanagment.models import Counterpart, Car, Driver
 from carmanagment.models.taxioperatorcalculator import TaxiCalculator
 
 
@@ -28,6 +28,7 @@ class CarsInOperator(models.Model):
     driver = models.ForeignKey("Driver", on_delete=models.CASCADE, related_name='driver_in_taxi', verbose_name='Машина')
     operator = models.ForeignKey(TaxiOperator, on_delete=models.CASCADE, related_name='taxi_park',
                                  verbose_name='Таксопарк')
+    signal = models.CharField(max_length=7, verbose_name='Позывной', default='')
     car_uid = models.CharField(max_length=255, blank=True, null=True, verbose_name='Идентификатор машины')
 
     def __str__(self):
@@ -46,6 +47,7 @@ class WialonTrip(models.Model):
     fuel = models.PositiveIntegerField(verbose_name='Раход по трекеру')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,
                                verbose_name='Водитель, если известно')
+
 
 
 class TaxiTrip(models.Model):

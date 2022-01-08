@@ -47,8 +47,11 @@ INSTALLED_APPS = [
     'ajax_select',
     'balance',
     'carmanagment',
-    'main_menu',
-    'vue_utils'
+    'carrent',
+    'vue_utils',
+    'admin_wizard',
+    'formtools',
+    'django_helpers'
 ]
 
 # see https://github.com/jazzband/django-constance
@@ -71,15 +74,15 @@ def list_cash():
 
 
 CONSTANCE_ADDITIONAL_FIELDS = {
-    'all_select': ['carmanagment.admin_pages.MyModelChoiceField', {
+    'all_select': ['django_helpers.admin.MyModelChoiceField', {
         'widget': 'django.forms.Select',
         'queryset': list_account
     }],
-    'investor_select': ['carmanagment.admin_pages.MyModelChoiceField', {
+    'investor_select': ['django_helpers.admin.MyModelChoiceField', {
         'widget': 'django.forms.Select',
         'queryset': list_investors
     }],
-    'cashbox_select': ['carmanagment.admin_pages.MyModelChoiceField', {
+    'cashbox_select': ['django_helpers.admin.MyModelChoiceField', {
         'widget': 'django.forms.Select',
         'queryset': list_cash
     }],

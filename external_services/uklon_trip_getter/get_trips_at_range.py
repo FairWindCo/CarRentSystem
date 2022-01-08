@@ -19,6 +19,16 @@ def get_uklon_taxi_trip(fuel_prices,
     uklon = UklonTaxiService(user_name, user_pass)
     if uklon.connect(selenium=use_silenuim):
         if uklon.get_my_info():
+            uklon.get_partner_drivers_and_cars()
+            for signal, driver in uklon.drivers.items():
+                try:
+                    taxi = CarsInOperator.objects.get(signal=signal)
+                    if not taxi.car_uid:
+                        taxi.car_uid = driver['uid']
+                        taxi.save()
+                except CarsInOperator.DoesNotExist:
+                    pass
+
             stat_date = last_day_rides - datetime.timedelta(days=day_count)
             processed_rides = 0
             total_rides = 0
@@ -27,7 +37,7 @@ def get_uklon_taxi_trip(fuel_prices,
                 uklon_cars = CarsInOperator.objects
                 for ride in rides:
                     if ride['status'] == 'completed':
-                        uklon_car_id = ride['vehicle_id']
+                        uklon_car_id = ride['driver_id']
                         try:
                             taxi_car_driver = uklon_cars.get(car_uid=uklon_car_id)
                             car = taxi_car_driver.car

@@ -149,6 +149,12 @@ class UklonTaxiService:
                 self.balance = result['balance']
         return result
 
+    def get_drivers(self):
+        result = {}
+        if self.uid:
+            result = self._send_api_request(endpoint=f'fleets/{self.uid}/driver-accounts', method='GET', api=self.api)
+        return result
+
     def driver_cars(self):
         result = {}
         if self.uid:
@@ -215,10 +221,11 @@ class UklonTaxiService:
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None, cache_path = None):
         if day is None:
             day = datetime.now(LOCAL_TIMEZONE).date()
-
+        if isinstance(day, datetime):
+            day = day.date()
         file_path = None
-        start_time = int(time.mktime(day.date().timetuple()))
-        end_time = int(time.mktime((day.date() + timedelta(days=1)).timetuple()))
+        start_time = int(time.mktime(day.timetuple()))
+        end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
         # print(day.date(), start_time, end_time)
         if cache_path is not None:
             file_path = os.path.join(cache_path, f"uklon_{vehicle_id}_{day.strftime('%d-%m-%y')}.dat")
@@ -268,8 +275,8 @@ class UklonTaxiService:
         self.drivers.clear()
         self.cars.clear()
         for car_driver in car_driver_data:
-            phone = car_driver['driver']['phone']
-            self.drivers[phone] = {
+            signal = car_driver['driver']['signal']
+            self.drivers[signal] = {
                 'uid': car_driver['driver']['uid'],
                 'rating': car_driver['driver']['rating'],
                 'signal': car_driver['driver']['signal'],
