@@ -8,8 +8,7 @@ from django.utils.datetime_safe import datetime
 
 from balance.models import CashBox, Transaction, Account
 from balance.services import Balance
-from carmanagment.models import Counterpart, Car, Driver
-from carmanagment.models.taxioperatorcalculator import TaxiCalculator
+from carmanagment.models import *
 
 
 class TaxiOperator(Counterpart):
@@ -47,7 +46,6 @@ class WialonTrip(models.Model):
     fuel = models.PositiveIntegerField(verbose_name='Раход по трекеру')
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,
                                verbose_name='Водитель, если известно')
-
 
 
 class TaxiTrip(models.Model):
@@ -89,7 +87,7 @@ class TaxiTrip(models.Model):
                 car_in_rent = CarSchedule.check_date_in_interval(car, start)
                 # print(car.name, car_in_rent, type(start))
                 if not car_in_rent:
-                    driver_schedule = DriversSchedule.get_object_from_date(car, start)
+                    driver_schedule = DriversSchedule.get_driver(car, start)
                     driver = driver_schedule if driver_schedule is not None else driver
                     if not isinstance(driver, Driver) or driver is None:
                         raise TypeError('Need Driver account')

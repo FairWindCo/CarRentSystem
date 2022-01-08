@@ -16,18 +16,29 @@ from django.utils.datetime_safe import datetime
 class CarScheduleBase(models.Model):
     car = models.ForeignKey(Car, verbose_name='Машина', on_delete=models.CASCADE)
     start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    end_time = models.DateTimeField(blank=True, null=True, default=None)
 
     def clean(self):
-        if self.end_time is None or self.start_time is None:
+        if self.start_time is None:
             raise ValidationError('Start Date and end date is required')
-        if self.end_time <= self.start_time:
+        if self.end_time and self.end_time <= self.start_time:
             raise ValidationError('Start date need be less then End date')
-        if self.__class__.objects.filter(car=self.car).filter(
-                Q(start_time__lte=self.start_time, end_time__gte=self.start_time) |
-                Q(start_time__lte=self.end_time, end_time__gte=self.end_time)
-        ).exists():
-            raise ValidationError('Эта машина уже запланирована')
+        if self.end_time:
+            if self.__class__.objects.filter(car=self.car).filter(
+                    Q(start_time__lte=self.start_time, end_time__gte=self.start_time) |
+                    Q(start_time__lte=self.end_time, end_time__gte=self.end_time) |
+                    Q(start_time__lte=self.start_time, end_time__isnull=True) |
+                    Q(start_time__lte=self.end_time, end_time__isnull=True)
+            ).exists():
+                raise ValidationError('Эта машина уже запланирована')
+        else:
+            if self.__class__.objects.filter(car=self.car).filter(end_time__isnull=True).exists():
+                raise ValidationError('Для этой машины уже есть октрытый интервал')
+            if self.__class__.objects.filter(car=self.car).filter(
+                    Q(start_time__lte=self.start_time, end_time__gte=self.start_time) |
+                    Q(start_time__gte=self.start_time, end_time__gte=self.start_time)
+            ).exists():
+                raise ValidationError('Эта машина уже запланирована')
 
     @classmethod
     def check_date_in_interval(cls, car: Car, date_time: datetime) -> bool:
@@ -59,6 +70,19 @@ class CarScheduleBase(models.Model):
 class DriversSchedule(CarScheduleBase):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Водитель')
 
+    @classmethod
+    def get_driver(cls, car, current_date):
+        cars = cls.objects.annotate(ordering=F('end_time') - F('start_time')).filter(car=car)
+        try:
+            driver = cars.filter(start_time__gte=current_date, end_time__lte=current_date).order_by('ordering',
+                                                                                                    id).first().driver
+        except cls.DoesNotExist:
+            try:
+                driver = cars.filter(start_time__gte=current_date, end_time__isnull=True).order_by(id).first().driver
+            except cls.DoesNotExist:
+                driver = None
+        return driver
+
     def __str__(self):
         return f'{self.car.name} {self.driver.name} от {self.start_time} до {self.end_time}'
 
@@ -74,8 +98,6 @@ class CarSchedule(CarScheduleBase):
     amount = models.FloatField(verbose_name='Оплаченый залог', default=0.0)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Арендатор', blank=True, null=True)
     price = models.ForeignKey(RentPrice, on_delete=models.CASCADE, verbose_name='тариф', related_name='scheduled_price')
-
-
 
     @property
     def rent_interval(self):
