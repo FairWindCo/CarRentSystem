@@ -1,8 +1,8 @@
 from datetime import timedelta
 from django.utils import timezone
 
-from external_services.comlex_data_pump import parse_args
-from .django_common.django_native_execute import execute_code_in_django
+from comlex_data_pump import parse_args
+from django_common.django_native_execute import execute_code_in_django
 
 
 def refresh_balanses(current_date=timezone.now().date() - timedelta(days=1)):

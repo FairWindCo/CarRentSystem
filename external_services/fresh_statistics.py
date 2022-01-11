@@ -1,7 +1,7 @@
 import datetime
 
-from external_services.argument_parser import parse_args
-from external_services.django_common.django_native_execute import execute_code_in_django
+from argument_parser import parse_args
+from django_common.django_native_execute import execute_code_in_django
 
 
 def fresh_statistics_on_range(start_date: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
