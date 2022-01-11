@@ -72,7 +72,7 @@ class Car(Account):
     signal = models.CharField(max_length=6, default='', verbose_name='Позывной')
 
     def __str__(self):
-        return f'{self.model.brand.name} {self.model.name} {self.name}'
+        return f'{self.model.brand.name} {self.model.name} {self.name} [{self.signal}]'
 
     class Meta:
         verbose_name = 'Авто'

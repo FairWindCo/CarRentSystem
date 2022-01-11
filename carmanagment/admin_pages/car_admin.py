@@ -16,7 +16,7 @@ class CarAdmin(admin.ModelAdmin):
         'currency', 'last_period_balance', 'car_investor', 'model', 'investment', 'date_start', 'name', 'year',
         'mileage_at_start', 'investment')
     ordering = ['name', 'model__name', 'model__brand__name']
-    search_fields = ['name', 'model__name', 'model__brand__name']
+    search_fields = ['name', 'model__name', 'model__brand__name', 'signal']
 
     def has_delete_permission(self, request, obj=None):
         return False
@@ -57,6 +57,7 @@ class CarAddPage(CustomModelPage):
     car_plate = models.CharField(max_length=100, verbose_name='номе машины')
     investor = models.ForeignKey(Investor, on_delete=models.CASCADE, verbose_name='Ивестор')
     car_model = models.ForeignKey(CarModel, on_delete=models.CASCADE, verbose_name='Модель')
+    car_signal = models.CharField(max_length=6, default='')
     year = models.PositiveIntegerField(verbose_name='Год выпуска', validators=[
         MaxValueValidator(2100),
         MinValueValidator(1900)
@@ -72,5 +73,6 @@ class CarAddPage(CustomModelPage):
         super().clean()
 
     def save(self):
-        CarCreator.add_new_car(self.investor, self.car_model, self.car_plate, self.year, self.millage, self.amount)
+        CarCreator.add_new_car(self.investor, self.car_model, self.car_plate, self.year, self.millage, self.amount,
+                               self.car_signal)
         self.bound_admin.message_success(self.bound_request, _('Машина подключена'))
