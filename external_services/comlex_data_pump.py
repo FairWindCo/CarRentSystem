@@ -1,7 +1,7 @@
 import datetime
 
-from external_services.argument_parser import parse_args
-from external_services.django_common.django_native_execute import execute_code_in_django
+from argument_parser import parse_args
+from django_common.django_native_execute import execute_code_in_django
 from uklon_trip_getter.get_trips_at_range import get_uklon_taxi_trip
 from fresh_statistics import fresh_statistics_on_range
 
@@ -9,8 +9,8 @@ from fresh_statistics import fresh_statistics_on_range
 def uklon_data_pump(start_date: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
                     days_count=7,
                     cache_path=None):
-    from external_services.currency_request import get_currency
-    from external_services.fuel_statisitics.minfin_server import get_fuel_price
+    from currency_request import get_currency
+    from fuel_statisitics.minfin_server import get_fuel_price
     from constance.management.commands.constance import _set_constance_value
 
     result, currency_data = get_currency()
