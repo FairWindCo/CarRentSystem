@@ -140,7 +140,7 @@ class AddDepositCarRentPage(CustomModelPage):
     def clean(self):
         if not hasattr(self, 'car_rent') or self.car_rent is None:
             raise ValidationError(_('Необходимо выбрать возврат'))
-        if not hasattr(self, 'amount') or self.amount > 0 is None:
+        if not hasattr(self, 'amount') or self.amount > 0:
             raise ValidationError(_('Необходимо указать сумму'))
         if not hasattr(self, 'cash_box') or self.cash_box is None:
             raise ValidationError(_('Необходимо выбрать кассу для депозита'))
@@ -173,7 +173,7 @@ class PenaltyDepositCarRentPage(CustomModelPage):
     def clean(self):
         if not hasattr(self, 'car_rent') or self.car_rent is None:
             raise ValidationError(_('Необходимо выбрать возврат'))
-        if not hasattr(self, 'amount') or self.amount > 0 is None:
+        if not hasattr(self, 'amount') or self.amount > 0:
             raise ValidationError(_('Необходимо указать сумму'))
 
     def save(self):

@@ -1,4 +1,6 @@
 import datetime
+
+from external_services.comlex_data_pump import parse_args
 from external_services.django_common.django_native_execute import execute_code_in_django
 
 
@@ -16,4 +18,6 @@ def fresh_statistics_on_range(start_date: datetime.date = datetime.date.today() 
 
 
 if __name__ == '__main__':
-    execute_code_in_django(lambda _: fresh_statistics_on_range())
+    if __name__ == '__main__':
+        start_date, days, path = parse_args('Fresh Statistics')
+    execute_code_in_django(lambda _: fresh_statistics_on_range(start_date, days))

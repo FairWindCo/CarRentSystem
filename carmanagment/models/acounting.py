@@ -4,7 +4,7 @@ from balance.models import Account
 
 
 class Investor(Account):
-    profit = models.FloatField(verbose_name='Коифициент распределения прибыли')
+    profit = models.FloatField(default=50,verbose_name='Коифициент распределения прибыли')
     operating_costs_percent = models.FloatField(verbose_name='Процент на операционные затраты', default=5.0)
 
     class Meta:
@@ -13,7 +13,8 @@ class Investor(Account):
 
 
 class Driver(Account):
-    profit = models.FloatField(default=0.5, verbose_name='Коифициент распределения прибыли')
+    profit = models.FloatField(default=50, verbose_name='Коифициент распределения прибыли')
+    phone = models.CharField(max_length=15, default='', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Водитель'
