@@ -3,6 +3,6 @@ from .cars import InvestmentCarBalance, CarBrand, CarModel, CarMileage, Car, get
 from .expenses import ExpensesTypes, Expenses
 from .insurance import CarInsurance
 from .other import UserProfile
-from .taxi import TaxiTrip, WialonTrip, CarsInOperator, TaxiOperator, TripStatistics
 from .rent_price import RentPrice
 from .rent import CarSchedule, DriversSchedule
+from .taxi import TaxiTrip, WialonTrip, CarsInOperator, TaxiOperator, TripStatistics
