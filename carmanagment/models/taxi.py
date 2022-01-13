@@ -8,7 +8,8 @@ from django.utils.datetime_safe import datetime
 
 from balance.models import CashBox, Transaction, Account
 from balance.services import Balance
-from carmanagment.models import *
+from carmanagment.models import Counterpart, Car, Driver, CarSchedule, DriversSchedule
+from carmanagment.models.taxioperatorcalculator import TaxiCalculator
 
 
 class TaxiOperator(Counterpart):
@@ -180,3 +181,17 @@ class TripStatistics(models.Model):
     class Meta:
         unique_together = (('car', 'stat_date', 'car_in_rent'),)
         index_together = (('car', 'stat_date'),)
+
+
+class CarStatistics(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE)
+    stat_date = models.DateField(auto_created=True, verbose_name='Дата')
+    stat_period = models.PositiveIntegerField(verbose_name='Отчетный период', default=1)
+    mileage = models.FloatField(verbose_name='Пробег за поездки', default=0)
+    trip_count = models.PositiveIntegerField(verbose_name='Кол-во поездок', default=0)
+    control_mileage = models.FloatField(verbose_name='Контрольный пробег за поездки', default=0)
+    control_trip_count = models.PositiveIntegerField(verbose_name='Конроль поездок', default=0)
+    total_trip_amount = models.FloatField(verbose_name='Сумарный доход машины', default=0)
+    total_rent_amount = models.FloatField(verbose_name='Доход от аренды', default=0)
+    total_expense = models.FloatField(verbose_name='Затраты', default=0)
+    total_amount = models.FloatField(verbose_name='Прибыль инвестора', default=0)
