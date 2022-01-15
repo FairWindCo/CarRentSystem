@@ -75,10 +75,16 @@ class DriversSchedule(CarScheduleBase):
         cars = cls.objects.annotate(ordering=F('end_time') - F('start_time')).filter(car=car)
         try:
             driver = cars.filter(start_time__gte=current_date, end_time__lte=current_date).order_by('ordering',
-                                                                                                    id).first().driver
+                                                                                                    'id').first()
+            if driver:
+                return driver.driver
+            else:
+                driver = cars.filter(start_time__gte=current_date, end_time__isnull=True).order_by('id').first()
+                if driver:
+                    return driver.driver
         except cls.DoesNotExist:
             try:
-                driver = cars.filter(start_time__gte=current_date, end_time__isnull=True).order_by(id).first().driver
+                driver = cars.filter(start_time__gte=current_date, end_time__isnull=True).order_by('id').first().driver
             except cls.DoesNotExist:
                 driver = None
         return driver

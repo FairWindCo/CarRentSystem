@@ -1,13 +1,23 @@
 import datetime
 
-from wialon_reports.WialonReporter import WialonReporter, convert_row
+from CarRentSystem import settings
+from wialon_reports.WialonReporter import WialonReporter, convert_row, convert_row_trip, LOCAL_TIMEZONE
+import environ
+
+root = environ.Path(__file__)
+env = environ.Env()
+environ.Env.read_env()  # reading .env file
 
 if __name__ == '__main__':
-    wialon = WialonReporter('db69899bb2d08b9d3804ffd183ff20ac1164DB3636204B7114E158B9152BB1A9E4B414A1')
+    api_key = env.str('WIALON_KEY')
+    wialon = WialonReporter(api_key)
     print(wialon.get_monitoring_objects())
+
     print(wialon.get_reports_list())
-    print(wialon.get_monitoring_objects_position())
-    print(wialon.get_objects_position(6753))
+
+
+    # print(wialon.get_monitoring_objects_position())
+    # print(wialon.get_objects_position(6753))
 
     def check_time(datetime_value: datetime) -> bool:
         if datetime_value.weekday() in [0, 1, 2, 3, 4] and (
@@ -18,11 +28,20 @@ if __name__ == '__main__':
             return True
 
 
-    for table, rows in wialon.get_report(6827, 1, 6753, datetime.datetime(year=2021, month=8, day=1),
-                                         datetime.datetime(year=2021, month=8, day=30), 0):
-        print(table['label'])
-        print(table['header'])
-        for row in rows:
-            row_data = convert_row(row['c'])
-            if check_time(row_data['start_time']) or check_time(row_data['end_time']):
-                print(row_data)
+    # report_id = 6827 NKT
+    report_id = 112198
+    # object_id = 6753
+    object_id = 112171
+    # for table, rows in wialon.get_report(report_id, 1, object_id, datetime.datetime(year=2022, month=1, day=13),
+    #                                      datetime.datetime(year=2022, month=1, day=14), 1):
+    #     print(table['label'])
+    #     print(table['header'])
+    #     for row in rows:
+    #         print(row)
+    #         row_data = convert_row_trip(row['c'])
+    #     #     if check_time(row_data['start_time']) or check_time(row_data['end_time']):
+    #     #         print(row_data)
+    reports = wialon.get_report_sub_lists(report_id, 1, object_id,
+                                          datetime.datetime(year=2022, month=1, day=13, tzinfo=LOCAL_TIMEZONE),
+                                          datetime.datetime(year=2022, month=1, day=14, tzinfo=LOCAL_TIMEZONE), [0, 1])
+    print(reports)

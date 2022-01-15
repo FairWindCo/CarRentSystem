@@ -30,6 +30,7 @@ DEBUG = env.bool('DEBUG')
 SECRET_KEY = env.str('SECRET_KEY')
 UKLON_USER = env.str('UKLON_USER')
 UKLON_PASS = env.str('UKLON_PASS')
+WIALON_KEY = env.str('WIALON_KEY')
 
 ALLOWED_HOSTS = []
 
