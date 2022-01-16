@@ -124,6 +124,16 @@ class WialonReporter:
             return []
 
     def _get_report_table(self, report_tables, index):
+        if isinstance(index, str):
+            for i, table in enumerate(report_tables):
+                if index == table['name']:
+                    return self._get_report_table_by_index(report_tables, i)
+        elif isinstance(index, int):
+            return self._get_report_table_by_index(report_tables, index)
+        else:
+            return None
+
+    def _get_report_table_by_index(self, report_tables, index):
         if index in range(len(report_tables)):
             last_row = report_tables[index]['rows']
             report_date = self.wialon_api.report_get_result_rows(tableIndex=index, indexFrom=0,
@@ -196,11 +206,11 @@ def convert_stats(data):
         'end_interval': datetime.datetime.strptime(data[3][1], "%Y-%m-%d %H:%M:%S").astimezone(LOCAL_TIMEZONE),
         'count_stops': int(data[4][1]),
         'move_time': construct_delta_time(data[5][1]),
-        'millage': int(data[6][1][:-3]),
+        'millage': float(data[6][1][:-3]),
         'avg_speed': int(data[9][1][:-5]),
         'max_speed': int(data[10][1][:-5]),
         'stop_time': construct_delta_time(data[13][1]),
-        'stop_count': int(data[14][1]),
+        'parking_count': int(data[14][1]),
     }
 
 

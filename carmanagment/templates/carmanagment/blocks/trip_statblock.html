@@ -2,11 +2,20 @@
                 <table class="table mb-0">
                     <tbody class="thead-dark">
                     <tr>
-                        <th>Доход</th>
-                        <td>{{ total.total_sum|floatformat:2 }} грн</td>
+                        <th>Прибыль инвестора</th>
+                        <td>{{ total.total_investor_amount|floatformat:2 }} грн</td>
                     </tr>
                     <tr>
-                        <th>Прибыль от машины</th>
+                        <th>Прибыль парка</th>
+                        <td>{{ total.total_firm_amount|floatformat:2 }} грн</td>
+                    </tr>
+                    <tr>
+                        <th>Assistance</th>
+                        <td>{{ total.total_operating|floatformat:2 }} грн</td>
+                    </tr>
+
+                    <tr>
+                        <th>Сумма заработанная машиной</th>
                         <td>{{ total.car_amount|floatformat:2 }} грн</td>
                     </tr>
                     <tr>
@@ -25,21 +34,21 @@
                         <th>Полученные наличные средства</th>
                         <td>{{ total.cash|floatformat:2 }} грн</td>
                     </tr>
+                    <tr>
+                        <th>БН средства</th>
+                        <td>{{ total.total_credit_cart_sum|floatformat:2 }} грн</td>
+                    </tr>
 
                     <tr>
                         <th>Затраты на топливо</th>
                         <td>{{ total.fuel|floatformat:2 }} грн</td>
                     </tr>
                     <tr>
-                        <th>Затраты на обслуживание</th>
-                        <td>{{ total.firm_rent|floatformat:2 }} грн</td>
-                    </tr>
-                    <tr>
                         <th>Зарплата водителя</th>
                         <td>{{ total.driver_amount|floatformat:2 }} грн</td>
                     </tr>
                     <tr>
-                        <th>Деньги оператор</th>
+                        <th>Процент оператора такси</th>
                         <td>{{ total.payer_amount|floatformat:2 }} грн</td>
                     </tr>
                     <tr>

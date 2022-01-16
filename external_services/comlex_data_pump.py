@@ -6,7 +6,7 @@ from uklon_trip_getter.get_trips_at_range import get_uklon_taxi_trip
 from fresh_statistics import fresh_statistics_on_range
 
 
-def uklon_data_pump(start_date: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
+def uklon_data_pump(pamp_start_date: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
                     days_count=7,
                     cache_path=None):
     from currency_request import get_currency
@@ -22,10 +22,10 @@ def uklon_data_pump(start_date: datetime.date = datetime.date.today() - datetime
         for name, value in fuel_data.items():
             field_name = f'fuel_{name}'.upper()
             _set_constance_value(field_name, value)
-        proccessed, total = get_uklon_taxi_trip(fuel_data, start_date, days_count, cache_path=cache_path)
+        proccessed, total = get_uklon_taxi_trip(fuel_data, pamp_start_date, days_count, cache_path=cache_path)
         print(f'import {proccessed} trips from {total}')
         if proccessed > 0:
-            fresh_statistics_on_range(start_date, days_count)
+            fresh_statistics_on_range(pamp_start_date, days_count)
 
 
 if __name__ == '__main__':

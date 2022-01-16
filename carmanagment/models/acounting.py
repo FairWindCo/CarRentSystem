@@ -13,7 +13,8 @@ class Investor(Account):
 
 
 class Driver(Account):
-    profit = models.FloatField(default=50, verbose_name='Коифициент распределения прибыли')
+    profit = models.FloatField(default=50, verbose_name='Процент распределения прибыли')
+    fuel_compensation = models.FloatField(default=100, verbose_name='Процент компенсации топлива')
     phone = models.CharField(max_length=15, default='', null=True, blank=True)
 
     class Meta:

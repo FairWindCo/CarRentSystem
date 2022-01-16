@@ -20,7 +20,7 @@
                             <td>{{ obj.trip_count }}</td>
                             <td>{{ obj.mileage|floatformat:2 }} км</td>
                             <td>{{ obj.amount|floatformat:2 }} грн</td>
-                            <td>{{ obj.car_amount|floatformat:2 }} грн</td>
+                            <td>{{ obj.investor_amount|floatformat:2 }} грн</td>
                             <td>{{ obj.driver_amount|floatformat:2 }} грн</td>
                             <td>
                                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
@@ -34,14 +34,14 @@
                                 <div class="row">
                                     <div class="col col-1-4">Стоимость топлива</div>
                                     <div class="col col-1-4">{{ obj.fuel|floatformat:2 }} грн</div>
-                                    <div class="col col-1-4">Оператор</div>
+                                    <div class="col col-1-4">Оператор Такси</div>
                                     <div class="col col-1-4">{{ obj.payer_amount|floatformat:2 }} грн</div>
-                                    <div class="col col-1-4">Фирма</div>
-                                    <div class="col col-1-4">{{ obj.total_firm_rent|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">Обслуживание</div>
+                                    <div class="col col-1-4">{{ obj.operating_services|floatformat:2 }} грн</div>
                                     <div class="col col-1-4">Банк %</div>
-                                    <div class="col col-1-4">{{ obj.total_bank_rent|floatformat:2 }} грн</div>
-                                    <div class="col col-1-4">Сумма денег оператора</div>
-                                    <div class="col col-1-4">{{ obj.total_payer_amount|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">{{ obj.bank_amount|floatformat:2 }} грн</div>
+                                    <div class="col col-1-4">Доход парка</div>
+                                    <div class="col col-1-4">{{ obj.firm_amount|floatformat:2 }} грн</div>
                                 </div>
 
                             </td>
@@ -52,7 +52,7 @@
                         <td>{{ total.trip }}</td>
                         <td>{{ total.mileage|floatformat:2 }} км</td>
                         <td>{{ total.amount|floatformat:2 }} грн</td>
-                        <td>{{ total.car_amount|floatformat:2 }} грн</td>
+                        <td>{{ total.total_investor_amount|floatformat:2 }} грн</td>
                         <td>{{ total.driver_amount|floatformat:2 }} грн</td>
                         <td>
                             <button class="btn btn-primary" type="button" data-bs-toggle="collapse"
@@ -72,7 +72,7 @@
                                 <div class="col col-1-4">Банк %</div>
                                 <div class="col col-1-4">{{ total.total_bank|floatformat:2 }} грн</div>
                                 <div class="col col-1-4">Сумма денег оператора</div>
-                                <div class="col col-1-4">{{ total.full_total_payer_amount|floatformat:2 }} грн</div>
+                                <div class="col col-1-4">{{ total.total_firm_amount|floatformat:2 }} грн</div>
                             </div>
 
                         </td>

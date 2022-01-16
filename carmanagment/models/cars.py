@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.timezone import now
 
 from balance.models import Account
 from carmanagment.models import Investor, InvestmentCarBalance
@@ -71,6 +72,7 @@ class Car(Account):
                                         related_name='rent_price_cars')
     signal = models.CharField(max_length=6, default='', verbose_name='Позывной')
 
+
     def __str__(self):
         return f'{self.model.brand.name} {self.model.name} {self.name} [{self.signal}]'
 
@@ -79,6 +81,32 @@ class Car(Account):
         verbose_name_plural = 'Авто'
 
 
+class CarSummaryStatistics(models.Model):
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='statistics')
+    stat_date = models.DateField(verbose_name='Дата', default=now())
+    stat_interval = models.PositiveIntegerField(verbose_name='Интервал', default=86400)
+    gps_mileage = models.FloatField(verbose_name='Пробег по трекеру', default=0)
+    taxi_mileage = models.FloatField(verbose_name='Пробег по оператору такси', default=0)
+    taxi_trip_count = models.PositiveIntegerField(verbose_name='Кол-во поездок в такси', default=0)
+    branding_amount = models.FloatField(verbose_name='Доход за брендирование', default=0)
+    taxi_amount = models.FloatField(verbose_name='Доход от таксопарка', default=0)
+    rent_amount = models.FloatField(verbose_name='Доход от аренды', default=0)
+    expense = models.FloatField(verbose_name='Расходы', default=0)
+    operate = models.FloatField(verbose_name='Операционные затраты', default=0)
+    investor_amount = models.FloatField(verbose_name='Прибыль инвестора', default=0)
+    driver_amount = models.FloatField(verbose_name='Зарплата водителя', default=0)
+
+    @property
+    def firm_amount(self):
+        return self.taxi_amount - self.driver_amount - self.investor_amount
+
+    class Meta:
+        unique_together = (('car', 'stat_date'),)
+        verbose_name = 'Статистика по Авто'
+        verbose_name_plural = 'Статистика по Авто'
+
+
 class CarMileage(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='mileage')
+    stat_date = models.DateField(verbose_name='Дата', default=now())
     mileage_at_start = models.PositiveIntegerField(verbose_name='')

@@ -5,4 +5,5 @@ from .insurance import CarInsurance
 from .other import UserProfile
 from .rent_price import RentPrice
 from .rent import CarSchedule, DriversSchedule
-from .taxi import TaxiTrip, WialonTrip, CarsInOperator, TaxiOperator, TripStatistics
+from .taxi import TaxiTrip, CarsInOperator, TaxiOperator, TripStatistics
+from .wialon import WialonTrip, WialonDayStat

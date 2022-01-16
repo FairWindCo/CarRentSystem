@@ -1,0 +1,55 @@
+<div class="table-responsive">
+    <table class="table mb-0">
+        <tbody class="thead-dark">
+        <tr>
+            <th>Доход инвестора</th>
+            <td>{{ total.total_investor|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <th>Доход фирмы от такси</th>
+            <td>{{ total.total_firm|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <th>Количество поездок в такси</th>
+            <td>{{ total.total_trip_count }}</td>
+        </tr>
+        <tr>
+            <th>Пробег в такси</th>
+            <td>{{ total.total_taxi_millage|floatformat:2 }} км</td>
+        </tr>
+        <tr>
+            <th>Пробег по GPS</th>
+            <td>{{ total.total_gps_millage|floatformat:2 }} км</td>
+        </tr>
+        <tr>
+            <th>Зарплата водителя</th>
+            <td>{{ total.total_driver|floatformat:2 }} грн</td>
+        </tr>
+        <tr>
+            <th>Зарплаты на обслуживание</th>
+            <td>{{ total.total_operate|floatformat:2 }} грн</td>
+        </tr>
+        <tr>
+            <th>Сумма в такси</th>
+            <td>{{ total.total_taxi_amount|floatformat:2 }} грн</td>
+        </tr>
+        <tr>
+            <th>Сумма за аренду</th>
+            <td>{{ total.total_rent_amount|floatformat:2 }} грн</td>
+        </tr>
+
+        <tr>
+            <th>Сумма за брендирование</th>
+            <td>{{ total.total_branding|floatformat:2 }} грн</td>
+        </tr>
+        <tr>
+            <th>Затраты</th>
+            <td>-{{ total.total_expanse|floatformat:2 }} грн</td>
+        </tr>
+        <tr>
+            <th>Результат по машине
+            <td>{{ total.summary|floatformat:2 }} грн</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -7,9 +7,15 @@ from carmanagment.models import RentPrice
 
 ExpensePage.register(admin_model=CarExpenseBase)
 OtherExpensePage.register(admin_model=OtherExpenseBase)
+# подключение авто
 CarAddPage.register(admin_model=CarAddPageAdmin)
+# ручное добавление поездки
 TaxiTripPage.register(admin_model=TaxiTripPageAdmin)
+# перевод суммы прибыли на счет инвестора (со списанием в пользу фирмы ее части)
 CarRentPage.register()
+# Запись денег за брендирование
+BrandingAddPage.register(admin_model=BrandingAddAdmin)
+
 MoveCashPage.register()
 InsertCashPage.register()
 # EmptyModel.register(admin_model=ListAdmin)
