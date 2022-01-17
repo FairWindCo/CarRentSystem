@@ -41,11 +41,22 @@ class CarScheduleBase(models.Model):
                 raise ValidationError('Эта машина уже запланирована')
 
     @classmethod
-    def check_date_in_interval(cls, car: Car, date_time: datetime) -> bool:
+    def queryset_for_date(cls, car: Car, date_time: datetime):
         queryset = cls.objects.filter(car=car).filter(
             start_time__lte=date_time, end_time__gte=date_time
         )
-        return queryset.exists()
+        return queryset
+
+    @classmethod
+    def check_date_in_interval(cls, car: Car, date_time: datetime) -> bool:
+        return cls.queryset_for_date(car, date_time).exists()
+
+    @classmethod
+    def object_date_in_interval(cls, car: Car, date_time: datetime):
+        try:
+            return cls.queryset_for_date(car, date_time).first()
+        except cls.DoesNotExist:
+            return None
 
     def interval(self):
         return self.end_time - self.start_time
@@ -105,14 +116,22 @@ class CarSchedule(CarScheduleBase):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Арендатор', blank=True, null=True)
     price = models.ForeignKey(RentPrice, on_delete=models.CASCADE, verbose_name='тариф', related_name='scheduled_price')
 
+    @classmethod
+    def queryset_for_date(cls, car: Car, date_time: datetime):
+        queryset = cls.objects.filter(car=car).filter(
+            Q(start_time__lte=date_time, end_time__gte=date_time, end_rent__isnull=True) |
+            Q(start_time__lte=date_time, end_rent__gte=date_time, end_rent__isnull=False)
+        )
+        return queryset
+
     @property
-    def rent_interval(self):
+    def plan_rent_interval(self):
         return self.price.calculate_time_interval(self.start_time - self.end_time, self.price.minimal())
 
     @property
     def rent_price(self):
         if self.amount > 0:
-            return round(self.amount / self.rent_interval, 2)
+            return round(self.amount / self.plan_rent_interval, 2)
         else:
             return round(self.price.price, 2)
 

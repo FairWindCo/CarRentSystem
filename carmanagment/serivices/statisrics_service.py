@@ -3,7 +3,7 @@ import datetime
 from django.db import IntegrityError
 from django.utils import timezone
 
-from carmanagment.models import Car, Expenses, TaxiTrip, TripStatistics, WialonDayStat
+from carmanagment.models import Car, Expenses, TaxiTrip, TripStatistics, WialonDayStat, CarSchedule
 from carmanagment.models.cars import CarSummaryStatistics
 from carmanagment.models.taxi import BrandingAmount
 
@@ -113,6 +113,9 @@ class Statistics:
             car_summary.gps_mileage = wialon.mileage
         except WialonDayStat.DoesNotExist:
             pass
+        rent = CarSchedule.object_date_in_interval(car=car, date_time=statistics_date)
+        if rent:
+            car_summary.rent_amount = rent.price
         car_summary.save()
 
     @staticmethod
