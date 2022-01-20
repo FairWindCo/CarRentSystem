@@ -4,13 +4,13 @@ from django.core.validators import MinValueValidator
 from balance.models import CashBox
 from carmanagment.models import Car
 from carmanagment.models.taxi import BrandingAmount
-from django_helpers.admin import CustomModelPage
+from django_helpers.admin import CustomModelPage, CustomPageModelAdmin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib import admin
 
 
-class BrandingAddAdmin(admin.ModelAdmin):
+class BrandingAddAdmin(CustomPageModelAdmin):
     autocomplete_fields = ('car', 'cash_box')
 
 

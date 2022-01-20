@@ -8,7 +8,7 @@ class TaxiCalculator:
         return cls(millage, amount, cash,
                    car.fuel_consumption,
                    gas_price,
-                   car.additional_miilage,
+                   car.additional_millage,
                    payer.cash_profit,
                    payer.profit,
                    payer.bank_interest,
@@ -62,16 +62,21 @@ class TaxiCalculator:
         self._trip_many_without_bank = self._trip_firm_total_many - self._bank_rent
         # Деньги пришедшие фирме без стоимости топлива (компенсация топлива по проценту)
         self._real_amount = self._trip_many_without_bank - self._fuel_compensation
-        # Операционные затраты фирмы на обслуживание парка
-        self._operating_costs = self._trip_many_without_bank * firm_profit
+        # # Операционные затраты фирмы на обслуживание парка
+        # self._operating_costs = self._trip_many_without_bank * firm_profit
         # Зарплата водителя
         self._driver_money = self._real_amount * driver_profit
+        # Операционные затраты фирмы на обслуживание парка
+        self._operating_costs = (self._real_amount - self._driver_money) * firm_profit
+
         # Прибыль по машине (как часть прибыли инвестора и прибили фирмы)
-        self._car_amount = self._real_amount - self._driver_money - self._operating_costs
+        self._car_amount = self._real_amount - self._driver_money
+
+        self._clean_car_amount = self._car_amount - self._operating_costs
         # Прибыль инвестора
-        self._investor_profit = self._car_amount * investor_profit
+        self._investor_profit = self._clean_car_amount * investor_profit
         # прибыль фирмы
-        self._firm_profit = self._car_amount - self._investor_profit
+        self._firm_profit = self._clean_car_amount - self._investor_profit
         # Общая сумма денег которые необходимо отдать оператору такси
         self._total_payer_amount = self._payer_interest + self._bank_rent
         # деньги который поступили - процент уклона - процент банка - наличные
@@ -90,7 +95,6 @@ class TaxiCalculator:
                 self.bank_rent + self.payer_interest
         if (m_sum - amount) > 1:
             raise ValueError(f'Не верный расчет {m_sum} != {amount}')
-
 
     @property
     # Прибыль по машине (как часть прибыли инвестора и прибили фирмы)

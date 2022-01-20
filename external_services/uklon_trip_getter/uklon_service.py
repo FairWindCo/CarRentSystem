@@ -10,7 +10,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
+from wialon_reports.WialonReporter import date_to_int_timestamp, date_to_correct_time
+
 LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
+
 
 class UklonTaxiService:
     base_url = 'https://partner.uklon.com.ua/'
@@ -195,9 +198,11 @@ class UklonTaxiService:
         res = self._send_api_request(endpoint=f'driver/orders/{ride_id}',
                                      method='GET', debug=False, api=self.api)
         print(res)
-        if res['fee_type'] == 'mixed':
-            return res['cost'], res['cash_cost']
-        return res['cost'], 0
+        if res:
+            if res['fee_type'] == 'mixed':
+                return res['cost'], res['cash_cost'], True
+            return res['cost'], 0, True
+        return 0, 0, False
 
     def get_rides(self, from_time=None, to_time=None, driver_id: str = None, vehicle_id: str = None, page: int = 1,
                   size: int = 50):
@@ -218,17 +223,20 @@ class UklonTaxiService:
                                      method='GET', debug=False, api=self.api, params=params)
         return res
 
-    def get_day_rides(self, day=None, vehicle_id: str = None, limit=None, cache_path = None):
+    def get_day_rides(self, day=None, vehicle_id: str = None, limit=None, cache_path=None):
         if day is None:
             day = datetime.now(LOCAL_TIMEZONE).date()
         if isinstance(day, datetime):
             day = day.date()
         file_path = None
-        start_time = int(time.mktime(day.timetuple()))
-        end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
+        # start_time = int(time.mktime(day.timetuple()))
+        # end_time = int(time.mktime((day + timedelta(days=1)).timetuple()))
+        start_time = date_to_correct_time(day)
+        end_time = date_to_correct_time(day + timedelta(days=1))
         # print(day.date(), start_time, end_time)
         if cache_path is not None:
-            file_path = os.path.join(cache_path, f"uklon_{vehicle_id}_{day.strftime('%d-%m-%y')}.dat")
+            name_id = vehicle_id if vehicle_id else ''
+            file_path = os.path.join(cache_path, f"uklon_{name_id}_{day.strftime('%d-%m-%y')}.dat")
             # print(file_path)
             if os.path.exists(file_path) and os.path.isfile(file_path):
                 with open(file_path, "rb") as file:
@@ -247,9 +255,16 @@ class UklonTaxiService:
                         if end_time >= trip['pickup_time'] >= start_time:
                             if trip['status'] == 'completed':
                                 if trip['payments']['fee_type'] == 'mixed':
-                                    additional_many = self.get_ride_info(trip['uid'])
-                                    trip['cash_many_info'] = additional_many[1]
-                                    trip['pay_many_info'] = additional_many[0]
+                                    cash, credit_cash, info_result = self.get_ride_info(trip['uid'])
+                                    if not info_result:
+                                        cash, credit_cash, info_result = self.get_ride_info(trip['uid'])
+                                    if info_result:
+                                        trip['cash_many_info'] = cash
+                                        trip['pay_many_info'] = credit_cash
+                                    else:
+                                        print(start_time, end_time, trip['distance'], trip['cost'], datetime.fromtimestamp(trip['pickup_time']))
+                                        trip['pay_many_info'] = trip['cost']
+                                        trip['cash_many_info'] = 0
                                 else:
                                     trip['cash_many_info'] = trip['cost'] if trip['payments'][
                                                                                  'fee_type'] == 'cash' else 0
@@ -265,8 +280,8 @@ class UklonTaxiService:
             else:
                 break
         if response and cache_path is not None:
-            if not os.path.exists('../UKLON'):
-                os.mkdir('../UKLON')
+            if not os.path.exists(f'{cache_path}'):
+                os.mkdir(f'{cache_path}')
             with open(file_path, "wb") as file:
                 pickle.dump(response, file)
         return response

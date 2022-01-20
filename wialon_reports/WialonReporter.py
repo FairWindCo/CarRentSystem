@@ -1,4 +1,6 @@
 import datetime
+import os
+import pickle
 from typing import Iterable
 
 from wialon import Wialon, WialonError, flags
@@ -144,8 +146,28 @@ class WialonReporter:
             }
         return None
 
+    def get_report_sub_lists_cached(self, resource_id: int, report_id: int, report_object: int, start_date: datetime,
+                                    end_date: datetime, table, convertors=None, tzinfo=LOCAL_TIMEZONE, cache_path=None):
+        file_path = None
+        if cache_path is not None:
+            file_path = os.path.join(cache_path,
+                                     f"wialon_{resource_id}{report_id}{report_object}_\
+{start_date.strftime('%d-%m-%y')}-{end_date.strftime('%d-%m-%y')}.dat")
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                with open(file_path, "rb") as file:
+                    return pickle.load(file)
+        result = self.get_report_sub_lists(resource_id, report_id, report_object, start_date,
+                                           end_date, table, convertors=convertors, tzinfo=tzinfo)
+        if result and cache_path is not None and file_path:
+            if not os.path.exists(f'{cache_path}'):
+                os.mkdir(f'{cache_path}')
+            with open(file_path, "wb") as file:
+                pickle.dump(result, file)
+        return result
+
     def get_report_sub_lists(self, resource_id: int, report_id: int, report_object: int, start_date: datetime,
                              end_date: datetime, table, convertors=None, tzinfo=LOCAL_TIMEZONE):
+
         empty = {
             'summary': {},
             'tables': []
@@ -313,6 +335,10 @@ def date_to_int_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE):
     epoch = datetime.datetime(1970, 1, 1, tzinfo=tzinfo)
     integer_timestamp = (dt.astimezone(datetime.timezone.utc) - epoch) // datetime.timedelta(seconds=1)
     return integer_timestamp
+
+
+def date_to_correct_time(day: datetime.date, tzinfo=LOCAL_TIMEZONE):
+    return date_to_int_timestamp(datetime.datetime.combine(day, datetime.datetime.min.time()), tzinfo)
 
 
 def construct_delta_time(delta_time: str):

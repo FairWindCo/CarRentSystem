@@ -12,7 +12,7 @@ class GlobalMainMenu(MainMenuView):
             'group': 'anon'
         },
         'Балансы': {
-            'icon': 'grid-fill',
+            'icon': 'basket-fill',
             'submenu': {
                 'Машин': {
                     'view': 'cars',
@@ -36,8 +36,17 @@ class GlobalMainMenu(MainMenuView):
             }
         },
         'Поездки': {
-            'view': 'all_trips',
             'icon': 'map',
+            'submenu': {
+                'Такси': {
+                    'icon': 'smartwatch',
+                    'view': 'all_trips',
+                },
+                'GPS': {
+                    'icon': 'broadcast',
+                    'view': 'all_wialon_trips',
+                },
+            }
         },
         'Затраты': {
             'view': 'all_expenses',
@@ -59,13 +68,20 @@ class GlobalMainMenu(MainMenuView):
             },
         },
         'Статистика': {
+            'icon': 'calendar2-date-fill',
             'submenu': {
-                'Статистика': {
+                'Статистика Такси': {
+                    'icon': 'smartwatch',
                     'view': 'trip_stat',
+                },
+                'Статистика GPS': {
+                    'icon': 'broadcast',
+                    'view': 'all_wialon_stat',
                 },
             }
         },
         'Отчеты': {
+            'icon': 'receipt',
             'submenu': {
                 'Отчет по авто': {
                     'view': 'car_report',

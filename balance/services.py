@@ -9,12 +9,18 @@ from balance.models import Account, AccountTransaction, AccountStatement, Transa
 
 
 class Balance:
+    # ЗАТРАТЫ
     EXPENSE = Transaction.TransactionType.EXPENSE
     RECEIPT = Transaction.TransactionType.RECEIPT
+    # ПЕРЕВОД СРЕДСТВ
     TRANSFER = Transaction.TransactionType.TRANSFER
+    # ВНОС СРЕДСТВ
     DEPOSIT = Transaction.TransactionType.DEPOSIT
+    # ВЫПЛАТА
     WITHDRAWAL = Transaction.TransactionType.WITHDRAWAL
+    # ИНВЕСТИЦИЯ
     INVESTMENT = Transaction.TransactionType.INVESTMENT
+    # СТРАХОВКА
     INSURANCE = Transaction.TransactionType.INSURANCE
 
     @staticmethod

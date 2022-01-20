@@ -1,4 +1,6 @@
 import datetime
+
+from wialon_reports.WialonReporter import date_to_correct_time
 from .uklon_service import LOCAL_TIMEZONE
 
 
@@ -28,9 +30,9 @@ def get_uklon_taxi_trip(fuel_prices,
                         taxi.save()
                 except CarsInOperator.DoesNotExist:
                     pass
-
             stat_date = last_day_rides - datetime.timedelta(days=day_count)
             processed_rides = 0
+            skip_rides = 0
             total_rides = 0
             for i in range(day_count):
                 rides = uklon.get_day_rides(stat_date, cache_path=cache_path)
@@ -46,13 +48,16 @@ def get_uklon_taxi_trip(fuel_prices,
                             cash = ride['cash_many_info']
                             gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
                             start_time = datetime.datetime.fromtimestamp(ride['pickup_time']).astimezone(LOCAL_TIMEZONE)
-                            TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
-                                                             ride['cost'], gas_price, cash, '', None)
-                            processed_rides += 1
+                            res = TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
+                                                                   ride['cost'], gas_price, cash, '', None)
+                            if res:
+                                processed_rides += 1
+                            else:
+                                skip_rides += 1
                         except CarsInOperator.DoesNotExist:
                             continue
                 total_rides += len(rides)
                 stat_date += datetime.timedelta(days=1)
             uklon.logout()
-            return processed_rides, total_rides
+            return processed_rides, total_rides, skip_rides
     return 0, 0

@@ -1,6 +1,6 @@
 from vue_utils.views import FilterListView
 
-from carmanagment.models import TaxiTrip
+from carmanagment.models import TaxiTrip, WialonTrip, WialonDayStat
 from carmanagment.views.carview import ByCarView
 from carmanagment.views.global_menu import GlobalMainMenu
 from django_helpers.django_request_processor import UniversalFilterListView
@@ -59,4 +59,38 @@ class ViewCarTrips(UniversalFilterListView, ByCarView, GlobalMainMenu):
     def get_queryset(self):
         if self.current_car:
             self.queryset = TaxiTrip.objects.filter(car=self.current_car).all()
+        return super().get_queryset()
+
+
+class ViewCarWialons(UniversalFilterListView, ByCarView, GlobalMainMenu):
+    model = WialonTrip
+    template_name = 'carmanagment/cars_wialon_list.html'
+    paginate_by = 20
+    ordering = ('-start',)
+    filtering = (
+        ('car__name',),
+        ('start__gte', 'start_interval'),
+        ('end__lte', 'end_interval'),
+    )
+
+    def get_queryset(self):
+        if self.current_car:
+            self.queryset = WialonTrip.objects.filter(car=self.current_car).all()
+        return super().get_queryset()
+
+
+class ViewCarWialonsStat(UniversalFilterListView, ByCarView, GlobalMainMenu):
+    model = WialonDayStat
+    template_name = 'carmanagment/cars_wialon_stat_list.html'
+    paginate_by = 20
+    ordering = ('-stat_date',)
+    filtering = (
+        ('car__name',),
+        ('stat_date__gte', 'start_interval'),
+        ('stat_date__lte', 'end_interval'),
+    )
+
+    def get_queryset(self):
+        if self.current_car:
+            self.queryset = WialonDayStat.objects.filter(car=self.current_car, stat_interval=86400).all()
         return super().get_queryset()

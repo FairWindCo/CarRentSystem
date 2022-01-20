@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0"><object model="balance.account" pk="1"><field name="name" type="CharField">Korea-Style</field><field name="last_period_balance" rel="ManyToOneRel" to="balance.accountstatement"><None></None></field><field name="currency" type="PositiveSmallIntegerField">0</field></object><object model="balance.account" pk="2"><field name="name" type="CharField">

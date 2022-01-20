@@ -1,12 +1,16 @@
 import datetime
 
 
+def current_date(timezone=datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo):
+    return datetime.datetime.now(timezone).date()
+
 
 def parse_args(title):
     import argparse
 
     parser = argparse.ArgumentParser(description=title)
-    parser.add_argument('--start', type=str, default=(datetime.date.today() - datetime.timedelta(days=1)).__str__(),
+    parser.add_argument('--start', type=str,
+                        default=(current_date() - datetime.timedelta(days=1)).__str__(),
                         required=False)
     parser.add_argument('--days', type=int, default=7, required=False)
     parser.add_argument('--path', type=str, default=None, required=False)

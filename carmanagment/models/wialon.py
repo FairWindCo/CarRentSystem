@@ -1,3 +1,4 @@
+import datetime
 from datetime import timedelta
 
 from django.db import models, IntegrityError
@@ -74,6 +75,14 @@ class WialonDayStat(models.Model):
     park_time = models.PositiveIntegerField(verbose_name='Время стоянки', default=0)
     avg_speed = models.PositiveIntegerField(verbose_name='Средняя скорость', default=0)
     max_speed = models.PositiveIntegerField(verbose_name='Максимальная скорость', default=0)
+
+    @property
+    def parking_time(self):
+        return datetime.timedelta(seconds=self.park_time)
+
+    @property
+    def driving_time(self):
+        return datetime.timedelta(seconds=self.drive_time)
 
     @classmethod
     def construct_from_dict(cls, stat, car):

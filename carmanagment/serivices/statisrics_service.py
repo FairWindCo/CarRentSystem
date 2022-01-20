@@ -3,14 +3,10 @@ import datetime
 from django.db import IntegrityError
 from django.utils import timezone
 
-from carmanagment.models import Car, Expenses, TaxiTrip, TripStatistics, WialonDayStat, CarSchedule
+from carmanagment.models import Car, Expenses, TaxiTrip, TripStatistics, WialonDayStat, CarSchedule, ExpensesTypes
 from carmanagment.models.cars import CarSummaryStatistics
 from carmanagment.models.taxi import BrandingAmount
-
-
-def get_sum(dict_obj, name):
-    value = dict_obj.get(name, None)
-    return value if value is not None else 0
+from carmanagment.utils import get_sum
 
 
 class Statistics:
@@ -53,7 +49,7 @@ class Statistics:
                                        car_in_rent=rent_car
                                        )
             trip_stat.save()
-        except IntegrityError as e:
+        except IntegrityError as _:
             trip_stat = TripStatistics.objects.get(car=car, stat_date=statistics_start_date.date(),
                                                    car_in_rent=rent_car)
 
@@ -68,11 +64,8 @@ class Statistics:
         trip_stat.payer_amount = get_sum(trip_sum, 'payer_amount__sum')
         trip_stat.operating_services = get_sum(trip_sum, 'operating_services__sum')
         trip_stat.bank_amount = get_sum(trip_sum, 'bank_amount__sum')
-        if trip_stat.firm_amount < 0:
-            print(trip_stat)
         trip_stat.save()
         return trip_stat
-
 
     @staticmethod
     def create_car_summary_statistics(trip_stat):
@@ -84,10 +77,32 @@ class Statistics:
                                                           Statistics.LOCAL_TIMEZONE)
         statistics_end_date = statistics_start_date + datetime.timedelta(days=1)
 
-        expenses_sum = Expenses.objects.filter(account=car,
-                                               date_mark__lte=statistics_end_date,
-                                               date_mark__gte=statistics_start_date).aggregate(Sum('amount'))
+        # expenses_sum = Expenses.objects.filter(account=car,
+        #                                        date_mark__lte=statistics_end_date,
+        #                                        date_mark__gte=statistics_start_date).aggregate(Sum('amount'))
+        #
+        # capital_sum = Expenses.objects.filter(account=car,
+        #                                       expenseType=ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE,
+        #                                       date_mark__lte=statistics_end_date,
+        #                                       date_mark__gte=statistics_start_date).aggregate(Sum('amount'))
 
+        expenses_sum = Expenses.objects.values('expenseType'). \
+            annotate(amount=Sum('amount'), franchise=Sum('franchise')). \
+            filter(account=car,
+                   date_mark__lte=statistics_end_date,
+                   date_mark__gte=statistics_start_date)
+        try:
+            expense = get_sum(expenses_sum.get(expenseType=ExpensesTypes.ExpensesTypesClassify.CAR_EXPENSE),
+                              'amount')
+        except Expenses.DoesNotExist:
+            expense = 0
+        try:
+            capital = expenses_sum.get(expenseType=ExpensesTypes.ExpensesTypesClassify.CAPITAL_CAR_EXPENSE)
+            capital_expense = get_sum(capital, 'amount')
+            franchise = get_sum(capital, 'franchise')
+        except Expenses.DoesNotExist:
+            capital_expense = 0
+            franchise = 0
         try:
             car_summary = CarSummaryStatistics(car=car, stat_date=statistics_date, stat_interval=86400)
             car_summary.save()
@@ -99,7 +114,8 @@ class Statistics:
         car_summary.investor_amount = trip_stat.investor_amount
         car_summary.driver_amount = trip_stat.driver_amount
         car_summary.taxi_mileage = trip_stat.mileage
-        car_summary.expense = get_sum(expenses_sum, 'amount__sum')
+        car_summary.expense = expense + franchise
+        car_summary.capital_expense = capital_expense
         car_summary.operate = trip_stat.operating_services
         try:
             branding = BrandingAmount.objects.get(car=car, stat_date=statistics_date)

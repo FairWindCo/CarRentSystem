@@ -101,6 +101,8 @@ CONSTANCE_CONFIG = {
     'FIRM': (None, 'Акаунт фирмы', 'investor_select'),
     'CASH': (None, 'Касса по умолчанию', 'cashbox_select'),
     'MIN_RENT': (3, 'Количество дней минимальной аренды', int),
+    'REPORT_INTERVAL': (7, 'Количество дней минимальной аренды', int),
+    'PAID_REPORT_BEFORE': (1, 'Количество дней минимальной аренды', int),
 }
 
 MIDDLEWARE = [

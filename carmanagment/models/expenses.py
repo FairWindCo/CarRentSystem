@@ -27,7 +27,8 @@ class ExpensesTypes(models.Model):
 
 class Expenses(models.Model):
     date_mark = models.DateTimeField(auto_now_add=True, auto_created=True)
-    amount = models.FloatField()
+    amount = models.FloatField(verbose_name='')
+    franchise = models.FloatField(verbose_name='Франшиза', default=0)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='account_expenses')
     counterpart = models.ForeignKey(Counterpart, on_delete=models.CASCADE, related_name='counterpart_expenses')
     description = models.TextField()
