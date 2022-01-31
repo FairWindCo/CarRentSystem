@@ -1,6 +1,7 @@
+from django.db import models
+
 from car_management.models import Car
 from .taxi_operator import TaxiOperator
-from django.db import models
 
 
 class CarsInOperator(models.Model):
@@ -11,12 +12,13 @@ class CarsInOperator(models.Model):
     car_uid = models.CharField(max_length=255, blank=True, null=True, verbose_name='Идентификатор машины')
 
     def __str__(self):
-        return f'{self.operator.name} {self.car.name}'
+        return f'{self.operator.name} {self.car.name} {self.signal}'
 
     class Meta:
         verbose_name = 'Машины в таксопарках'
         verbose_name_plural = 'Машины в таксопарках'
         unique_together = (("operator", "signal"), ("operator", "car_uid"))
+        ordering = ("car__name", "signal", "operator")
 
     @classmethod
     def find_car_by_uid(cls, operator: TaxiOperator, uid: str):

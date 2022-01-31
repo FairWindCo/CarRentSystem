@@ -16,7 +16,7 @@ class Investor(Account):
 class Driver(Account):
     default_terms = models.ForeignKey(RentTerms, on_delete=models.CASCADE, verbose_name='Условия по умолчанию',
                                       blank=True, null=True, related_name='drivers_terms')
-    phone = models.CharField(max_length=15, default='Телефон', null=True, blank=True)
+    phone = models.CharField(max_length=15, default='', null=True, blank=True, verbose_name='Телефон')
 
     class Meta:
         verbose_name = 'Водитель'

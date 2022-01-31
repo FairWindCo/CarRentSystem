@@ -131,7 +131,7 @@ class RentPrice(models.Model):
                 super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return f'{self.name} действует: {self.replaced_by_new is None}'
+        return f'{self.name} ({"Активен" if self.replaced_by_new is None else "Заменен"})'
 
     class Meta:
         verbose_name = 'Тариф аренды'
@@ -247,7 +247,7 @@ class RentTerms(models.Model):
                 super().save(force_insert, force_update, using, update_fields)
 
     def __str__(self):
-        return f'{self.name} действует: {self.replaced_by_new is None}'
+        return f'{self.name} ({"Активен" if self.replaced_by_new is None else "Заменен"})'
 
     class Meta:
         verbose_name = 'Условия аренды'

@@ -1,0 +1,1366 @@
+[
+  {
+    "model": "balance.account",
+    "pk": 1,
+    "fields": {
+      "name": "Касса б\\н Уклон",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 2,
+    "fields": {
+      "name": "Касса нал Слава",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 3,
+    "fields": {
+      "name": "Касса нал Рома",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 4,
+    "fields": {
+      "name": "Korea-Style",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 5,
+    "fields": {
+      "name": "Гайдай Юлия (Олег)",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 6,
+    "fields": {
+      "name": "Радченко Михаил",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 7,
+    "fields": {
+      "name": "Бойко Лариса",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 8,
+    "fields": {
+      "name": "Гаркавий Олександр",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 9,
+    "fields": {
+      "name": "Колесник Игорь",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 10,
+    "fields": {
+      "name": "Виктор Нестерчук (102)",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 11,
+    "fields": {
+      "name": "Эдгар 104",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 12,
+    "fields": {
+      "name": "Владимир 105",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 13,
+    "fields": {
+      "name": "Александр 113",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 14,
+    "fields": {
+      "name": "Олег 113",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 15,
+    "fields": {
+      "name": "УКЛОН",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 16,
+    "fields": {
+      "name": "BH0175OM",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 17,
+    "fields": {
+      "name": "BH0175OM",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 18,
+    "fields": {
+      "name": "КА9188СТ",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 19,
+    "fields": {
+      "name": "КА9188СТ",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 20,
+    "fields": {
+      "name": "KA6163CI",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 21,
+    "fields": {
+      "name": "KA6163CI",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 22,
+    "fields": {
+      "name": "KA9189CT",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 23,
+    "fields": {
+      "name": "KA9189CT",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 24,
+    "fields": {
+      "name": "KA1149CT",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 25,
+    "fields": {
+      "name": "KA1149CT",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 26,
+    "fields": {
+      "name": "KA1396CT",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 27,
+    "fields": {
+      "name": "KA1396CT",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 28,
+    "fields": {
+      "name": "KA9785EH",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 29,
+    "fields": {
+      "name": "KA9785EH",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 30,
+    "fields": {
+      "name": "KA7164EP",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 31,
+    "fields": {
+      "name": "KA7164EP",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 32,
+    "fields": {
+      "name": "KA7168EP",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 33,
+    "fields": {
+      "name": "KA7168EP",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 34,
+    "fields": {
+      "name": "KA1763EI",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 35,
+    "fields": {
+      "name": "KA1763EI",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 36,
+    "fields": {
+      "name": "KA7166EP",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 37,
+    "fields": {
+      "name": "KA7166EP",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 38,
+    "fields": {
+      "name": "KA1761EI",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 39,
+    "fields": {
+      "name": "KA1761EI",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 40,
+    "fields": {
+      "name": "KA8307ET",
+      "last_period_balance": null,
+      "currency": 1
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 41,
+    "fields": {
+      "name": "KA8307ET",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 42,
+    "fields": {
+      "name": "Володимир Пантикин (104)",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.account",
+    "pk": 43,
+    "fields": {
+      "name": "Шевченко Олег Николаевич (106)",
+      "last_period_balance": null,
+      "currency": 0
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 1,
+    "fields": {
+      "transactionTime": "2022-01-31T18:52:01.743Z",
+      "transactionType": 4,
+      "comment": "Включение авто BH0175OM 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 2,
+    "fields": {
+      "transactionTime": "2022-01-31T19:12:45.620Z",
+      "transactionType": 4,
+      "comment": "Включение авто КА9188СТ 8500$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 3,
+    "fields": {
+      "transactionTime": "2022-01-31T20:26:34.378Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA6163CI 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 4,
+    "fields": {
+      "transactionTime": "2022-01-31T20:27:20.157Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA9189CT 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 5,
+    "fields": {
+      "transactionTime": "2022-01-31T20:27:51.630Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA1149CT 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 6,
+    "fields": {
+      "transactionTime": "2022-01-31T20:28:35.230Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA1396CT 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 7,
+    "fields": {
+      "transactionTime": "2022-01-31T20:29:31.706Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA9785EH 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 8,
+    "fields": {
+      "transactionTime": "2022-01-31T20:30:41.703Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA7164EP 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 9,
+    "fields": {
+      "transactionTime": "2022-01-31T20:31:27.612Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA7168EP 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 10,
+    "fields": {
+      "transactionTime": "2022-01-31T20:32:11.795Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA1763EI 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 11,
+    "fields": {
+      "transactionTime": "2022-01-31T20:33:30.263Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA7166EP 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 12,
+    "fields": {
+      "transactionTime": "2022-01-31T20:34:11.273Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA1761EI 8000$"
+    }
+  },
+  {
+    "model": "balance.transaction",
+    "pk": 13,
+    "fields": {
+      "transactionTime": "2022-01-31T20:38:12.634Z",
+      "transactionType": 4,
+      "comment": "Включение авто KA8307ET 8000$"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 1,
+    "fields": {
+      "transaction": 1,
+      "account": 16,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 2,
+    "fields": {
+      "transaction": 2,
+      "account": 18,
+      "amount": -850000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 3,
+    "fields": {
+      "transaction": 3,
+      "account": 20,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 4,
+    "fields": {
+      "transaction": 4,
+      "account": 22,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 5,
+    "fields": {
+      "transaction": 5,
+      "account": 24,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 6,
+    "fields": {
+      "transaction": 6,
+      "account": 26,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 7,
+    "fields": {
+      "transaction": 7,
+      "account": 28,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 8,
+    "fields": {
+      "transaction": 8,
+      "account": 30,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 9,
+    "fields": {
+      "transaction": 9,
+      "account": 32,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 10,
+    "fields": {
+      "transaction": 10,
+      "account": 34,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 11,
+    "fields": {
+      "transaction": 11,
+      "account": 36,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 12,
+    "fields": {
+      "transaction": 12,
+      "account": 38,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.accounttransaction",
+    "pk": 13,
+    "fields": {
+      "transaction": 13,
+      "account": 40,
+      "amount": -800000,
+      "comment": "Инвестиция"
+    }
+  },
+  {
+    "model": "balance.cashbox",
+    "pk": 1,
+    "fields": {}
+  },
+  {
+    "model": "balance.cashbox",
+    "pk": 3,
+    "fields": {}
+  },
+  {
+    "model": "balance.cashbox",
+    "pk": 2,
+    "fields": {}
+  },
+  {
+    "model": "car_management.rentprice",
+    "pk": 1,
+    "fields": {
+      "name": "Аренда машины за 600сутки",
+      "type_class": 2,
+      "price": 600.0,
+      "min_time": 3,
+      "safe_time": 7,
+      "replaced_by_new": null,
+      "can_break_rent": true,
+      "trip_many_paid": false
+    }
+  },
+  {
+    "model": "car_management.rentterms",
+    "pk": 1,
+    "fields": {
+      "name": "Водитель 50 на 50 с компенсацией топлива",
+      "profit": 50.0,
+      "fuel_compensation": 100.0,
+      "additional_millage": 4,
+      "min_trips": 300,
+      "max_millage": 2000,
+      "plan_amount": 2500.0,
+      "trips_control": true,
+      "millage_control": true,
+      "amount_control": true,
+      "type_class": 2,
+      "control_interval": 7,
+      "control_interval_paid_distance": 1,
+      "replaced_by_new": null
+    }
+  },
+  {
+    "model": "car_management.investor",
+    "pk": 4,
+    "fields": {
+      "profit": 80.0,
+      "operating_costs_percent": 10.0
+    }
+  },
+  {
+    "model": "car_management.investor",
+    "pk": 7,
+    "fields": {
+      "profit": 80.0,
+      "operating_costs_percent": 10.0
+    }
+  },
+  {
+    "model": "car_management.investor",
+    "pk": 5,
+    "fields": {
+      "profit": 90.0,
+      "operating_costs_percent": 10.0
+    }
+  },
+  {
+    "model": "car_management.investor",
+    "pk": 6,
+    "fields": {
+      "profit": 80.0,
+      "operating_costs_percent": 10.0
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 13,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 10,
+    "fields": {
+      "default_terms": 1,
+      "phone": "0932073321"
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 12,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 42,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 8,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 9,
+    "fields": {
+      "default_terms": 1,
+      "phone": "Телефон"
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 14,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 43,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.driver",
+    "pk": 11,
+    "fields": {
+      "default_terms": 1,
+      "phone": null
+    }
+  },
+  {
+    "model": "car_management.counterpart",
+    "pk": 15,
+    "fields": {}
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 16,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 24,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 26,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 38,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 34,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 20,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 30,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 36,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 32,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 40,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 22,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 28,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.investmentcarbalance",
+    "pk": 18,
+    "fields": {
+      "create_date": "2022-01-31"
+    }
+  },
+  {
+    "model": "car_management.carbrand",
+    "pk": 1,
+    "fields": {
+      "name": "KIA"
+    }
+  },
+  {
+    "model": "car_management.carbrand",
+    "pk": 2,
+    "fields": {
+      "name": "HYNDAI"
+    }
+  },
+  {
+    "model": "car_management.carbrand",
+    "pk": 3,
+    "fields": {
+      "name": "CHEVROLET"
+    }
+  },
+  {
+    "model": "car_management.carmodel",
+    "pk": 1,
+    "fields": {
+      "name": "K5 LPI",
+      "brand": 1,
+      "type_class": 4
+    }
+  },
+  {
+    "model": "car_management.carmodel",
+    "pk": 2,
+    "fields": {
+      "name": "Sonata LPI",
+      "brand": 2,
+      "type_class": 4
+    }
+  },
+  {
+    "model": "car_management.carmodel",
+    "pk": 3,
+    "fields": {
+      "name": "Sonata YF LPI",
+      "brand": 2,
+      "type_class": 4
+    }
+  },
+  {
+    "model": "car_management.carmodel",
+    "pk": 4,
+    "fields": {
+      "name": "SPARK",
+      "brand": 3,
+      "type_class": 4
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 17,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 4,
+      "investment": 16,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "102"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 25,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 1,
+      "car_investor": 4,
+      "investment": 24,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "106"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 27,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 1,
+      "car_investor": 4,
+      "investment": 26,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "107"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 39,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 5,
+      "investment": 38,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "117"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 35,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 7,
+      "investment": 34,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "115"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 21,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 4,
+      "investment": 20,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "104"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 31,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 7,
+      "investment": 30,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "113"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 37,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 7,
+      "investment": 36,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "116"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 33,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 4,
+      "investment": 32,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "114"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 41,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 4,
+      "car_investor": 4,
+      "investment": 40,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 14.0,
+      "rent_price_plan": null,
+      "signal": "109"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 23,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 1,
+      "car_investor": 4,
+      "investment": 22,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "105"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 29,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 6,
+      "investment": 28,
+      "year": 2013,
+      "mileage_at_start": 200000,
+      "control_mileage": 200000,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "112"
+    }
+  },
+  {
+    "model": "car_management.car",
+    "pk": 19,
+    "fields": {
+      "date_start": "2022-01-31",
+      "model": 2,
+      "car_investor": 4,
+      "investment": 18,
+      "year": 2013,
+      "mileage_at_start": 250307,
+      "control_mileage": 250307,
+      "last_TO_date": null,
+      "wialon_id": null,
+      "fuel_consumption": 15.0,
+      "rent_price_plan": null,
+      "signal": "103"
+    }
+  },
+  {
+    "model": "car_rent.taxioperator",
+    "pk": 15,
+    "fields": {
+      "cash_profit": 17.0,
+      "profit": 17.0,
+      "bank_interest": 2.5,
+      "cash_box": 1
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 1,
+    "fields": {
+      "car": 17,
+      "operator": 15,
+      "signal": "219048",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 2,
+    "fields": {
+      "car": 17,
+      "operator": 15,
+      "signal": "257217",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 3,
+    "fields": {
+      "car": 25,
+      "operator": 15,
+      "signal": "216888",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 4,
+    "fields": {
+      "car": 27,
+      "operator": 15,
+      "signal": "219063",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 5,
+    "fields": {
+      "car": 39,
+      "operator": 15,
+      "signal": "267138",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 6,
+    "fields": {
+      "car": 35,
+      "operator": 15,
+      "signal": "271227",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 7,
+    "fields": {
+      "car": 21,
+      "operator": 15,
+      "signal": "219060",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 8,
+    "fields": {
+      "car": 21,
+      "operator": 15,
+      "signal": "257225",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 9,
+    "fields": {
+      "car": 31,
+      "operator": 15,
+      "signal": "267341",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 10,
+    "fields": {
+      "car": 31,
+      "operator": 15,
+      "signal": "274511",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 11,
+    "fields": {
+      "car": 37,
+      "operator": 15,
+      "signal": "266846",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 12,
+    "fields": {
+      "car": 23,
+      "operator": 15,
+      "signal": "219054",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 13,
+    "fields": {
+      "car": 23,
+      "operator": 15,
+      "signal": "257229",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 14,
+    "fields": {
+      "car": 29,
+      "operator": 15,
+      "signal": "294100",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 15,
+    "fields": {
+      "car": 19,
+      "operator": 15,
+      "signal": "219057",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 16,
+    "fields": {
+      "car": 19,
+      "operator": 15,
+      "signal": "257223",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 17,
+    "fields": {
+      "car": 29,
+      "operator": 15,
+      "signal": "266896",
+      "car_uid": null
+    }
+  },
+  {
+    "model": "car_rent.carsinoperator",
+    "pk": 18,
+    "fields": {
+      "car": 33,
+      "operator": 15,
+      "signal": "272111",
+      "car_uid": null
+    }
+  }
+]

@@ -1,29 +1,24 @@
 import math
 from datetime import timedelta
 
-from django import forms
 from django.contrib.admin import ModelAdmin, widgets
-from django.contrib.admin.widgets import AutocompleteSelect
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Model, Q
-from django.forms import fields, Form, EmailInput, ModelChoiceField, DateInput, SelectDateWidget, Media, Select, \
-    NumberInput, CheckboxInput, ModelMultipleChoiceField, SelectMultiple, CheckboxSelectMultiple, HiddenInput
-from django.http import HttpResponseRedirect
-from django.template.response import TemplateResponse
-from django.urls import reverse
+from django.forms import fields, Form, ModelChoiceField, Select, \
+    NumberInput, CheckboxInput, ModelMultipleChoiceField, CheckboxSelectMultiple
 from django.utils.timezone import now
-from formtools.wizard.views import SessionWizardView
 from django.utils.translation import gettext_lazy as _
+from formtools.wizard.views import SessionWizardView
+
 from balance.models import CashBox
 from balance.services import Balance
+from car_management.models import Car, Driver, TimeType, RentTerms
 from car_rent.models import CarSchedule, CarsInOperator
-from django_helpers.admin.ajax_select import AutocompleteSelectProxy, AutocompleteSelectMultipleProxy
+from django_helpers.admin import CustomModelPage, CustomPageModelAdmin
+from django_helpers.admin.ajax_select import AutocompleteSelectProxy
 from django_helpers.admin.custom_ import CustomFormForAdminSite
 from django_helpers.admin.custom_admin_page import CustomizeAdmin
-from django_helpers.admin import CustomModelPage, CustomPageModelAdmin
-from car_management.models import Car, Driver, TimeType
-from django_helpers.admin.utility_classes import MyCl
 
 
 class OperatorsForm(Form):
@@ -139,23 +134,33 @@ class CombyneWizard(SessionWizardView):
         car = form_list[0].cleaned_data['car']
         start_date = form_list[0].cleaned_data['start_date']
         end_date = form_list[0].cleaned_data['end_date']
+        driver = form_list[0].cleaned_data['driver']
 
-        price = form_list[1].cleaned_data['price']
-        deposit_price = form_list[1].cleaned_data['deposit_price']
-        paid_deposit_price = form_list[1].cleaned_data['paid_deposit_price']
-        rent_cashbox = form_list[1].cleaned_data['rent_cashbox']
-        deposit_cashbox = form_list[1].cleaned_data['deposit_cashbox']
-        driver = form_list[1].cleaned_data['driver']
+        rent_term = RentTerms.from_dict_compare_create(driver.default_terms, form_list[1].cleaned_data, '_auto')
+
+        price = form_list[2].cleaned_data['price']
+        deposit_price = form_list[2].cleaned_data['deposit_price']
+        paid_deposit_price = form_list[2].cleaned_data['paid_deposit_price']
+
+        rent_cashbox = form_list[2].cleaned_data['rent_cashbox']
+        deposit_cashbox = form_list[2].cleaned_data['deposit_cashbox']
+
+        taxi_in_operators = form_list[3].cleaned_data['taxi_in_operators']
+
         amount = math.trunc(price * 100)
         deposit = math.trunc(paid_deposit_price * 100)
+
         cash_box_deposit = deposit_cashbox if deposit_cashbox is not None else rent_cashbox
         with transaction.atomic():
             car_scheduler = CarSchedule(car=car, start_time=start_date, end_time=end_date,
+                                        term=rent_term,
                                         paid_deposit=round(paid_deposit_price, 2),
                                         deposit=round(deposit_price, 2),
                                         amount=round(price, 2),
-                                        driver=driver, price=car.rent_price_plan
+                                        driver=driver,
                                         )
+            car_scheduler.save()
+            car_scheduler.taxi_operators.set(taxi_in_operators)
             car_scheduler.save()
             Balance.form_transaction(Balance.DEPOSIT, [
                 (None, rent_cashbox, amount, f'Деньги за аренду {car.name}'),

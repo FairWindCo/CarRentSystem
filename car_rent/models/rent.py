@@ -1,12 +1,13 @@
 from math import trunc
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, F
+from django.utils.datetime_safe import datetime
 from django.utils.timezone import now
 
 from car_management.models import Car, Driver, RentPrice, RentTerms
-from django.utils.datetime_safe import datetime
-
+from . import TaxiOperator
 from .car_in_operators import CarsInOperator
 
 
@@ -78,10 +79,12 @@ class CarScheduleBase(models.Model):
 class CarSchedule(CarScheduleBase):
     end_rent = models.DateTimeField(verbose_name='Аренда завершена', default=None, null=True, blank=True)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Арендатор', blank=True, null=True)
-    price = models.ForeignKey(RentPrice, on_delete=models.CASCADE, verbose_name='тариф', related_name='scheduled_price')
-    term = models.ForeignKey(RentTerms, on_delete=models.CASCADE, verbose_name='условия',
+    term = models.ForeignKey(RentTerms, on_delete=models.CASCADE, verbose_name='условия аренды',
                              related_name='scheduled_terms')
+    price = models.ForeignKey(RentPrice, on_delete=models.CASCADE, verbose_name='тариф аренды',
+                              related_name='scheduled_terms')
     taxi_operators = models.ManyToManyField(CarsInOperator, verbose_name='операторы такси')
+    deposit = models.FloatField(verbose_name='Требуемый залог', default=0.0)
     paid_deposit = models.FloatField(verbose_name='Оплаченный залог', default=0.0)
     amount = models.FloatField(verbose_name='Оплаченная сумма за аренду', default=0.0)
     work_in_taxi = models.BooleanField(verbose_name='Работает в нашем такси', default=False)
@@ -91,10 +94,15 @@ class CarSchedule(CarScheduleBase):
 
     @classmethod
     def queryset_for_date(cls, car: Car, date_time: datetime):
-        queryset = cls.objects.filter(car=car).filter(
+        queryset = cls.queryset_date_filter(date_time).filter(car=car)
+        return queryset
+
+    @classmethod
+    def queryset_date_filter(cls, date_time: datetime):
+        queryset = cls.objects.filter(
             Q(start_time__lte=date_time, end_time__gte=date_time, end_rent__isnull=True) |
             Q(start_time__lte=date_time, end_rent__gte=date_time, end_rent__isnull=False)
-        )
+        ).order_by('-start_time', '-end_time')
         return queryset
 
     @property
@@ -135,6 +143,15 @@ class CarSchedule(CarScheduleBase):
         else:
             return 0, 0
 
+    @classmethod
+    def find_schedule_info(cls, uid: str, date_time: datetime, operator: TaxiOperator):
+        try:
+            data = cls.queryset_date_filter(date_time).filter(taxi_operators__operator=operator,
+                                                              taxi_operators__operator__car_uid=uid).first()
+            return data.car, data.driver
+        except cls.DoesNotExist:
+            return None, None
+
     @property
     def return_many(self):
         return trunc(self.current_return_many() * 100)
@@ -146,7 +163,7 @@ class CarSchedule(CarScheduleBase):
     def __str__(self):
         start_date_formatted = self.start_time.strftime('%d.%m.%y %H:%M:%S') if self.start_time else '--'
         end_date_formatted = self.end_time.strftime('%d.%m.%y %H:%M:%S') if self.end_time else '--'
-        return f'{self.car.name} {self.price.price} от {start_date_formatted} до {end_date_formatted} ' \
+        return f'{self.car.name} {self.amount} от {start_date_formatted} до {end_date_formatted} ' \
                f'{self.current_return_many()} {self.paid_deposit}'
 
     class Meta:
