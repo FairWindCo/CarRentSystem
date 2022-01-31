@@ -1,7 +1,7 @@
 from ajax_select.fields import AutoCompleteSelectMultipleField, AutoCompleteSelectField
 from django import forms
 
-from carmanagment.models import Investor, Car, CarModel
+from car_management.models import Investor, Car, CarModel
 
 
 class NewCarForm(forms.ModelForm):

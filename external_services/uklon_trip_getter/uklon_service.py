@@ -1,5 +1,6 @@
 import os
 import pickle
+import re
 import time
 from datetime import datetime, timedelta, timezone
 
@@ -223,6 +224,26 @@ class UklonTaxiService:
                                      method='GET', debug=False, api=self.api, params=params)
         return res
 
+    def get_summary_day_rides(self, day=None, vehicle_id: str = '', driver_id='', cache_path=None):
+        if day is None:
+            day = datetime.now(LOCAL_TIMEZONE).date()
+        if isinstance(day, datetime):
+            day = day.date()
+        end_time = day + timedelta(days=1)
+        if cache_path is not None:
+            name_id = vehicle_id if vehicle_id else ''
+            file_path = os.path.join(cache_path, f"sum_uklon_{name_id}_{day.strftime('%d-%m-%y')}.dat")
+            if os.path.exists(file_path) and os.path.isfile(file_path):
+                with open(file_path, "rb") as file:
+                    return pickle.load(file)
+        response = self.get_uklon_summary_report(day, end_time, vichicleid=vehicle_id, driverid=driver_id)
+        if response and cache_path is not None:
+            if not os.path.exists(f'{cache_path}'):
+                os.mkdir(f'{cache_path}')
+            with open(file_path, "wb") as file:
+                pickle.dump(response, file)
+        return response
+
     def get_day_rides(self, day=None, vehicle_id: str = None, limit=None, cache_path=None):
         if day is None:
             day = datetime.now(LOCAL_TIMEZONE).date()
@@ -262,7 +283,8 @@ class UklonTaxiService:
                                         trip['cash_many_info'] = cash
                                         trip['pay_many_info'] = credit_cash
                                     else:
-                                        print(start_time, end_time, trip['distance'], trip['cost'], datetime.fromtimestamp(trip['pickup_time']))
+                                        print(start_time, end_time, trip['distance'], trip['cost'],
+                                              datetime.fromtimestamp(trip['pickup_time']))
                                         trip['pay_many_info'] = trip['cost']
                                         trip['cash_many_info'] = 0
                                 else:
@@ -310,6 +332,50 @@ class UklonTaxiService:
                 'year': car_driver['vehicle']['year'],
             }
 
+    def get_uklon_summary_report(self, start_date, end_date=None, driverid='', vichicleid=''):
+        # https://partner.uklon.com.ua/partner/finances/search?StartDate=1642370400&EndDate=1642802400&driverid=&vehicleid=
+        # /partner/finances/search?page=1&pageSize=20&startDate=1642975200&endDate=1642975200
+        # https://partner.uklon.com.ua/partner/finances/search?StartDate=1642370400&EndDate=1642543200&driverid=&vehicleid=14ae597c-cc46-495e-852e-1972cb822249
+        # base_url/
+        start_time = date_to_correct_time(start_date, use_correction=False)
+        if end_date is None:
+            end_time = date_to_correct_time(start_date + timedelta(days=1), use_correction=False)
+        else:
+            end_time = date_to_correct_time(end_date, use_correction=False)
+        print(start_time, end_time)
+        url = f'{self.base_url}partner/finances/search?StartDate={start_time}&EndDate={end_time}&driverid={driverid}&vehicleid={vichicleid}'
+        res, info, result_text = self._send_request(url, 'GET', return_json=False)
+        result = []
+        if res:
+            try:
+                start = result_text.index('<tbody>') + 7
+                end = result_text.index('</tbody>', start)
+                lines = result_text[start:end].split('</tr>')
+
+                data_parser = re.compile(r'<td>\s*([0-9.]*|[A-Z]{2}[0-9]{4}[A-Z]{2})\s*</td>')
+                for line in lines:
+                    clear_line: str = line.strip().replace('\r\n', '')
+                    if clear_line:
+                        driverid = clear_line[19:][:36]
+                        data = data_parser.findall(clear_line)
+                        if data and len(data) > 8:
+                            result.append({
+                                'driver_id': driverid.replace('-', ''),
+                                'code_name': data[0],
+                                'car_plate': data[1],
+                                'trip_count': int(data[2]),
+                                'millage': float(data[3]),
+                                'credit_cash': float(data[4]),
+                                'cash': float(data[5]),
+                                'total': float(data[6]),
+                                'uklon': float(data[7]),
+                                'result': float(data[8]),
+                            })
+            except Exception as _:
+                pass
+
+        return result
+
     def get_partner_drivers_and_cars(self):
         res = self._send_api_request(endpoint=f'fleets/{self.uid}/driver-accounts',
                                      method='GET', api=self.api)
@@ -355,16 +421,18 @@ if __name__ == '__main__':
     #
     # for ride in rides:
     #     print(datetime.fromtimestamp(ride['pickup_time']))
-    current_date = datetime.now() - timedelta(days=2)
-    start_day = current_date - timedelta(days=9)
-
-    while start_day < current_date:
-        rides = uklon.get_day_rides(start_day)
-
-        for ride in rides:
-            print(datetime.fromtimestamp(ride['pickup_time']))
-
-        start_day += timedelta(days=1)
+    # current_date = datetime.now() - timedelta(days=2)
+    # start_day = current_date - timedelta(days=9)
+    sum_report = uklon.get_uklon_summary_report(datetime.now().date() - timedelta(days=1))
+    print(sum_report)
+    #
+    # while start_day < current_date:
+    #     rides = uklon.get_day_rides(start_day)
+    #
+    #     for ride in rides:
+    #         print(datetime.fromtimestamp(ride['pickup_time']))
+    #
+    #     start_day += timedelta(days=1)
 
     print(uklon.logout())
 

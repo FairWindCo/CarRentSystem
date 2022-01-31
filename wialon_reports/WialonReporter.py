@@ -186,6 +186,7 @@ class WialonReporter:
                                                         reportObjectId=report_object,
                                                         reportObjectSecId=0, interval=interval)
             if 'reportResult' not in report:
+                print('EMPTY REPORT ERROR')
                 return empty
             report = report['reportResult']
             if 'stats' in report and report['stats']:
@@ -207,9 +208,11 @@ class WialonReporter:
                 else:
                     return empty
             else:
+                print('WIALON NO TABLE')
                 return empty
         except WialonError as e:
             self.last_error = e
+            print('WIALON ERROR')
             return empty
 
     def __del__(self):
@@ -331,14 +334,17 @@ def date_to_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE):
     return timestamp
 
 
-def date_to_int_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE):
-    epoch = datetime.datetime(1970, 1, 1, tzinfo=tzinfo)
+def date_to_int_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE, use_correction=True):
+    if use_correction:
+        epoch = datetime.datetime(1970, 1, 1, tzinfo=tzinfo)
+    else:
+        epoch = datetime.datetime(1970, 1, 1, tzinfo=UTC_TIMEZONE)
     integer_timestamp = (dt.astimezone(datetime.timezone.utc) - epoch) // datetime.timedelta(seconds=1)
     return integer_timestamp
 
 
-def date_to_correct_time(day: datetime.date, tzinfo=LOCAL_TIMEZONE):
-    return date_to_int_timestamp(datetime.datetime.combine(day, datetime.datetime.min.time()), tzinfo)
+def date_to_correct_time(day: datetime.date, tzinfo=LOCAL_TIMEZONE, use_correction=True):
+    return date_to_int_timestamp(datetime.datetime.combine(day, datetime.datetime.min.time()), tzinfo, use_correction)
 
 
 def construct_delta_time(delta_time: str):

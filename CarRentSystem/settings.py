@@ -47,8 +47,10 @@ INSTALLED_APPS = [
     'constance.backends.database',
     'ajax_select',
     'balance',
-    'carmanagment',
-    'carrent',
+    'car_management',
+    'car_rent',
+    'trips',
+    'trip_stat',
     'vue_utils',
     'admin_wizard',
     'formtools',
@@ -65,7 +67,7 @@ def list_account():
 
 
 def list_investors():
-    from carmanagment.models import Investor
+    from car_management.models import Investor
     return Investor.objects.all()
 
 

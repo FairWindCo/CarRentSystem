@@ -6,7 +6,7 @@ from django_common.django_native_execute import execute_code_in_django
 
 def fresh_statistics_on_range(start_date: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
                               days_count=7):
-    from carmanagment.serivices.statisrics_service import Statistics
+    from trip_stat.services.statisrics_service import Statistics
 
     # Statistics.create_statistics((datetime.datetime.now().date() - datetime.timedelta(days=1)))
     # # Statistics.create_statistics(datetime.datetime.strptime('16.10.2021', '%d.%m.%Y'))

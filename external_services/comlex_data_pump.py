@@ -28,6 +28,7 @@ def uklon_data_pump(pamp_start_date: datetime.date = datetime.date.today() - dat
         print(f'import {proccessed} trips, skip {skip} from {total}')
         if proccessed > 0:
             fresh_statistics_on_range(pamp_start_date, days_count)
+            pass
     get_wialon_trip(last_day=pamp_start_date, day_count=days_count, show_info=False, cache_path=cache_path)
 
 

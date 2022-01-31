@@ -20,7 +20,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
-from carmanagment import urls
+from car_management import urls as car_urls
+from car_rent import urls as rent_urls
+from trips import urls as trips_urls
+from trip_stat import urls as trip_stat_urls
 
 admin.autodiscover()
 
@@ -28,5 +31,8 @@ urlpatterns = [
                   # place it at whatever base url you like
                   url(r'^ajax_select/', include(ajax_select_urls)),
                   path('admin/', admin.site.urls),
-                  url('', include(urls)),
+                  url('', include(car_urls)),
+                  url('', include(rent_urls)),
+                  url('', include(trips_urls)),
+                  url('', include(trip_stat_urls)),
               ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

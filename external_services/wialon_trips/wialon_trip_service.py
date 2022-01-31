@@ -9,8 +9,8 @@ def get_wialon_trip(
         last_day: datetime.date = datetime.date.today() - datetime.timedelta(days=1),
         day_count=1, report_id=112198, show_info=False, cache_path=None):
     from CarRentSystem import settings
-    from carmanagment.models import Car
-    from carmanagment.models import WialonDayStat, WialonTrip
+    from car_management.models import Car
+    from car_management.models import WialonDayStat, WialonTrip
     wialon_api_key = settings.WIALON_KEY
     wialon = WialonReporter(wialon_api_key)
     if show_info:
