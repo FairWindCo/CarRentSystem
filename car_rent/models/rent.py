@@ -1,3 +1,4 @@
+from datetime import timedelta
 from math import trunc
 
 from django.core.exceptions import ValidationError
@@ -6,7 +7,7 @@ from django.db.models import Q, F
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import now
 
-from car_management.models import Car, Driver, RentPrice, RentTerms
+from car_management.models import Car, Driver, RentTerms, TimeType
 from . import TaxiOperator
 from .car_in_operators import CarsInOperator
 
@@ -81,16 +82,16 @@ class CarSchedule(CarScheduleBase):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, verbose_name='Арендатор', blank=True, null=True)
     term = models.ForeignKey(RentTerms, on_delete=models.CASCADE, verbose_name='условия аренды',
                              related_name='scheduled_terms')
-    price = models.ForeignKey(RentPrice, on_delete=models.CASCADE, verbose_name='тариф аренды',
-                              related_name='scheduled_terms')
     taxi_operators = models.ManyToManyField(CarsInOperator, verbose_name='операторы такси')
     deposit = models.FloatField(verbose_name='Требуемый залог', default=0.0)
     paid_deposit = models.FloatField(verbose_name='Оплаченный залог', default=0.0)
     amount = models.FloatField(verbose_name='Оплаченная сумма за аренду', default=0.0)
     work_in_taxi = models.BooleanField(verbose_name='Работает в нашем такси', default=False)
+    min_time = models.PositiveIntegerField(verbose_name='Минимальный срок аренды', default=0)
     can_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
     trip_many_paid = models.BooleanField(verbose_name='Проведение оплат по поездкам', default=False)
     auto_renew = models.BooleanField(verbose_name='Автоматически обновлять план аренды', default=False)
+
 
     @classmethod
     def queryset_for_date(cls, car: Car, date_time: datetime):
@@ -105,28 +106,56 @@ class CarSchedule(CarScheduleBase):
         ).order_by('-start_time', '-end_time')
         return queryset
 
+    def calculate_time_interval(self, delta: timedelta, min_time):
+        time = delta if delta > min_time else min_time
+        return self.time_interval(time)
+
+    def time_interval(self, delta: timedelta):
+        if self.term.type_class == TimeType.DAYS:
+            days = delta.days
+            if delta.seconds > 0:
+                days += 1
+            return days
+        else:
+            hours = 24 * delta.days + int(delta.seconds / 3600)
+            minutes = delta.seconds % 3600
+            if minutes > 0:
+                hours += 1
+            return hours
+
+    def minimal(self):
+        if self.term.type_class == TimeType.DAYS:
+            return timedelta(days=self.min_time)
+        else:
+            return timedelta(seconds=self.min_time * 3600)
+
     @property
     def plan_rent_interval(self):
-        return self.price.calculate_time_interval(self.start_time - self.end_time, self.price.minimal())
+        return self.calculate_time_interval(self.start_time - self.end_time, self.minimal())
 
     @property
     def rent_price(self):
         if self.amount > 0:
             return round(self.amount / self.plan_rent_interval, 2)
         else:
-            return round(self.price.price, 2)
+            return round(self.amount, 2)
 
     def rent_interval(self):
-        return self.price.calculate_time_interval(self.end_time - self.start_time, self.price.minimal())
+        return self.calculate_time_interval(self.end_time - self.start_time, self.minimal())
 
     def current_return_many(self, end_date: datetime = now()):
+        if not self.can_break_rent:
+            return 0
+        if not self.work_in_taxi:
+            return 0
+
         if self.end_rent is None:
             if self.amount <= 0:
-                return round(self.price.get_return_price(self.start_time, self.end_time, end_date), 2)
+                return 0
             else:
-                minimal = self.price.minimal()
-                plan = self.price.calculate_time_interval(self.end_time - self.start_time, minimal)
-                fact = self.price.calculate_time_interval(end_date - self.start_time, minimal)
+                minimal = self.minimal()
+                plan = self.calculate_time_interval(self.end_time - self.start_time, minimal)
+                fact = self.calculate_time_interval(end_date - self.start_time, minimal)
                 interval = plan - fact
                 print(interval)
                 return round(self.rent_price * interval, 2)

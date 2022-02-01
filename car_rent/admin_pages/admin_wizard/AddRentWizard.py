@@ -67,10 +67,25 @@ class CashForm(Form):
     paid_deposit_price = fields.FloatField(label='Оплата залога', widget=NumberInput(), initial=4200, required=True)
     rent_cashbox = ModelChoiceField(label='Касса за аренду', queryset=CashBox.objects.all(), widget=Select)
     deposit_cashbox = ModelChoiceField(label='Депозит', queryset=CashBox.objects.all(), widget=Select, required=True)
+    can_break_rent = fields.BooleanField(label='Разрешен досочный возврат', initial=True, widget=CheckboxInput(),
+                                         required=False)
+    trip_many_paid = fields.BooleanField(label='Проведение оплат по поездкам', initial=False, widget=CheckboxInput(),
+                                         required=False)
+    min_time = fields.IntegerField(label='Минимальный срок аренды', initial=0)
 
     def __init__(self, *args, **kwargs):
-        # print('init CashForm', args, kwargs)
+        print('init CashForm', args, kwargs)
         super().__init__(*args, **kwargs)
+        if 'initial' in kwargs:
+            taxi = kwargs['initial'].get('in_taxi', False)
+            if taxi:
+                self.fields['price'].required = False
+                self.fields['price'].initial = 0
+                self.fields['price'].disabled = True
+
+                self.fields['rent_cashbox'].required = False
+                self.fields['rent_cashbox'].initial = None
+                self.fields['rent_cashbox'].disabled = True
 
 
 class CarSelectForm(CustomFormForAdminSite):
@@ -142,6 +157,12 @@ class CombyneWizard(SessionWizardView):
         deposit_price = form_list[2].cleaned_data['deposit_price']
         paid_deposit_price = form_list[2].cleaned_data['paid_deposit_price']
 
+        work_in_taxi = form_list[0].cleaned_data.get('work_in_taxi', False)
+        min_time = form_list[2].cleaned_data.get('min_time', 0)
+
+        trip_many_paid = form_list[2].cleaned_data.get('trip_many_paid', False)
+        auto_renew = form_list[2].cleaned_data.get('auto_renew', False)
+
         rent_cashbox = form_list[2].cleaned_data['rent_cashbox']
         deposit_cashbox = form_list[2].cleaned_data['deposit_cashbox']
 
@@ -158,15 +179,25 @@ class CombyneWizard(SessionWizardView):
                                         deposit=round(deposit_price, 2),
                                         amount=round(price, 2),
                                         driver=driver,
+                                        auto_renew=auto_renew,
+                                        work_in_taxi=work_in_taxi,
+                                        min_time=min_time,
+                                        trip_many_paid=trip_many_paid,
                                         )
             car_scheduler.save()
             car_scheduler.taxi_operators.set(taxi_in_operators)
             car_scheduler.save()
-            Balance.form_transaction(Balance.DEPOSIT, [
-                (None, rent_cashbox, amount, f'Деньги за аренду {car.name}'),
+
+            operations = [
                 (None, cash_box_deposit, deposit, f'Залог за аренду {car.name}'),
-                (None, car, amount, f'Деньги за аренду {car.name}'),
-            ], 'Аренда автомобиля')
+            ]
+            if amount > 0 and rent_cashbox:
+                operations.extend(
+                    [(None, rent_cashbox, amount, f'Деньги за аренду {car.name}'),
+                     (None, car, amount, f'Деньги за аренду {car.name}'),
+                     ]
+                )
+            Balance.form_transaction(Balance.DEPOSIT, operations, 'Аренда автомобиля')
 
     def get_form(self, step=None, data=None, files=None):
         return super().get_form(step, data, files)
@@ -180,11 +211,17 @@ class CombyneWizard(SessionWizardView):
         return context
 
     def get_form_initial(self, step):
-        if step == '1':
+        int_step = int(step)
+        if int_step >= 1:
             cleaned = self.get_cleaned_data_for_step('0')
-            delta = cleaned['end_date'] - cleaned['start_date']
+            in_taxi = cleaned.get('work_in_taxi', False)
+            if 'end_date' in cleaned and cleaned['end_date']:
+                delta = cleaned['end_date'] - cleaned['start_date']
+            else:
+                delta = 0
             car = cleaned['car']
             driver = cleaned['driver']
+
             self.initial_dict['3'] = {
                 'car_in_rents': car.id,
             }
@@ -196,19 +233,13 @@ class CombyneWizard(SessionWizardView):
                     'price': car.rent_price_plan.get_price(delta),
                     'deposit_price': deposit,
                     'paid_deposit_price': deposit,
+                    'in_taxi': in_taxi
                 }
-        elif step == '2':
-            cleaned = self.get_cleaned_data_for_step('0')
-            car = cleaned['car']
-            delta = cleaned['end_date'] - cleaned['start_date']
-            if car.rent_price_plan:
-                deposit = car.rent_price_plan.get_deposit(delta)
+            else:
                 self.initial_dict['2'] = {
-                    'price': car.rent_price_plan.get_price(delta),
-                    'deposit_price': deposit,
-                    'paid_deposit_price': deposit,
+                    'in_taxi': in_taxi
                 }
-        elif step == '3':
+        if int_step >= 3:
             cleaned = self.get_cleaned_data_for_step('0')
             car = cleaned['car']
             self.initial_dict['3'] = {

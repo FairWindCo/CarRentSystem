@@ -17,6 +17,7 @@ class RentPrice(models.Model):
     replaced_by_new = models.ForeignKey('RentPrice', on_delete=models.CASCADE, blank=True, null=True)
     can_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
     trip_many_paid = models.BooleanField(verbose_name='Проведение оплат по поездкам', default=False)
+    work_in_taxi = models.BooleanField(verbose_name='Работа в такси', default=False)
 
     def to_dict_m(self):
         return {
@@ -98,12 +99,16 @@ class RentPrice(models.Model):
     def get_return_price(self, start_time, plan_end_time, fact_end_time):
         if not self.can_break_rent:
             return False, 0
+        if not self.work_in_taxi:
+            return True, 0
         minimal = self.minimal()
         plan_delta = self.calculate_time_interval(plan_end_time - start_time, minimal)
         fact_delta = self.calculate_time_interval(fact_end_time - start_time, minimal)
         return (plan_delta - fact_delta) * self.price
 
     def get_deposit(self, delta: timedelta):
+        if not delta or delta == 0:
+            return self.price * self.safe_time
         return self.calculate_price(self.price, delta, self.get_safe_time())
 
     def clean(self):
