@@ -34,4 +34,4 @@ def uklon_data_pump(pamp_start_date: datetime.date = datetime.date.today() - dat
 
 if __name__ == '__main__':
     start_date, days, path = parse_args('Get car data from Uklon')
-    execute_code_in_django(lambda: uklon_data_pump(start_date=start_date, days_count=days, cache_path=path))
+    execute_code_in_django(lambda: uklon_data_pump(pamp_start_date=start_date, days_count=days, cache_path=path))

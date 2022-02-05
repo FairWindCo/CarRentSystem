@@ -1,6 +1,5 @@
 import datetime
 
-from wialon_reports.WialonReporter import date_to_correct_time
 from .uklon_service import LOCAL_TIMEZONE
 
 
@@ -10,13 +9,16 @@ def get_uklon_taxi_trip(fuel_prices,
                         cache_path=None,
                         use_silenuim=False,
                         summary_paid=True, create_summary=True):
+    from car_rent.models import CarSchedule
     from CarRentSystem import settings
-    from car_management.models import CarsInOperator
     from external_services.uklon_trip_getter.uklon_service import UklonTaxiService
     from car_management.models import get_fuel_price_for_type
-    from car_management.models import TaxiTrip, TripStatistics
+    from car_rent.models import CarsInOperator, TaxiOperator
+    from trips.models.taxi import TaxiTrip, TripStatistics
+
     user_name = settings.UKLON_USER
     user_pass = settings.UKLON_PASS
+    operator = TaxiOperator.objects.get(name='УКЛОН')
 
     # print(user_name, user_pass)
     uklon = UklonTaxiService(user_name, user_pass)
@@ -25,7 +27,7 @@ def get_uklon_taxi_trip(fuel_prices,
             uklon.get_partner_drivers_and_cars()
             for signal, driver in uklon.drivers.items():
                 try:
-                    taxi = CarsInOperator.objects.get(signal=signal)
+                    taxi = CarsInOperator.objects.get(signal=signal, operator=operator)
                     if not taxi.car_uid:
                         taxi.car_uid = driver['uid']
                         taxi.save()
@@ -38,19 +40,22 @@ def get_uklon_taxi_trip(fuel_prices,
             for i in range(day_count):
                 print('STAT DAY', stat_date)
                 rides = uklon.get_day_rides(stat_date, cache_path=cache_path)
-                uklon_cars = CarsInOperator.objects
                 for ride in rides:
                     if ride['status'] == 'completed':
                         uklon_car_id = ride['driver_id']
                         try:
-                            taxi_car_driver = uklon_cars.get(car_uid=uklon_car_id)
+                            start_time = datetime.datetime.fromtimestamp(ride['pickup_time']).astimezone(LOCAL_TIMEZONE)
+                            # taxi_car_driver = uklon_cars.get(car_uid=uklon_car_id)
+                            taxi_car_driver = CarSchedule.find_schedule_info(uklon_car_id, start_time, operator)
+                            if taxi_car_driver is None:
+                                continue
                             car = taxi_car_driver.car
                             driver = taxi_car_driver.driver
-                            operator = taxi_car_driver.operator
+                            terms = taxi_car_driver.term
                             cash = ride['cash_many_info']
                             gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
-                            start_time = datetime.datetime.fromtimestamp(ride['pickup_time']).astimezone(LOCAL_TIMEZONE)
-                            res = TaxiTrip.manual_create_taxi_trip(car, driver, start_time, operator, ride['distance'],
+
+                            res = TaxiTrip.manual_create_taxi_trip(terms, car, driver, start_time, operator, ride['distance'],
                                                                    ride['cost'], gas_price, cash, '', None,
                                                                    only_statistics=summary_paid)
                             if res:
@@ -63,13 +68,16 @@ def get_uklon_taxi_trip(fuel_prices,
                     summaries = uklon.get_uklon_summary_report(stat_date)
                     for summary in summaries:
                         try:
-                            taxi_car_driver = uklon_cars.get(car_uid=summary['driver_id'])
+                            start = datetime.datetime.combine(stat_date, datetime.time.min)
+                            taxi_car_driver = CarSchedule.find_schedule_info(summary['driver_id'], start, operator)
+                            if taxi_car_driver is None:
+                                continue
                             car = taxi_car_driver.car
                             driver = taxi_car_driver.driver
-                            operator = taxi_car_driver.operator
+                            terms = taxi_car_driver.term
                             gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
                             print(summary['trip_count'], summary['car_plate'], stat_date)
-                            TripStatistics.manual_create_summary_paid(car, driver, stat_date, operator,
+                            TripStatistics.manual_create_summary_paid(car, driver, stat_date, operator, terms,
                                                                       summary['millage'],
                                                                       summary['total'],
                                                                       gas_price,

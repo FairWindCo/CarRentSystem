@@ -157,7 +157,7 @@ class CarSchedule(CarScheduleBase):
                 plan = self.calculate_time_interval(self.end_time - self.start_time, minimal)
                 fact = self.calculate_time_interval(end_date - self.start_time, minimal)
                 interval = plan - fact
-                print(interval)
+                # print(interval)
                 return round(self.rent_price * interval, 2)
         else:
             return 0
@@ -175,11 +175,16 @@ class CarSchedule(CarScheduleBase):
     @classmethod
     def find_schedule_info(cls, uid: str, date_time: datetime, operator: TaxiOperator):
         try:
-            data = cls.queryset_date_filter(date_time).filter(taxi_operators__operator=operator,
-                                                              taxi_operators__operator__car_uid=uid).first()
-            return data.car, data.driver
+            taxi_in_operator = CarsInOperator.objects.filter(operator=operator, car_uid=uid).first()
+            # print(taxi_in_operator, uid)
+            if taxi_in_operator:
+                data = cls.queryset_date_filter(date_time).filter(taxi_operators=taxi_in_operator).first()
+                # print(data)
+                return data
+            else:
+                return None
         except cls.DoesNotExist:
-            return None, None
+            return None
 
     @property
     def return_many(self):

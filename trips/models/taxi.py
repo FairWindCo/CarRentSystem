@@ -7,8 +7,8 @@ from django.utils.timezone import now
 
 from balance.models import CashBox, Transaction, Account
 from balance.services import Balance
-from car_management.models import Counterpart, Car, Driver
-from car_rent.calculators.taxioperatorcalculator import TaxiCalculator
+from car_management.models import Counterpart, Car, Driver, RentTerms
+from car_rent.calculators import TripCalculator
 from car_rent.models import TaxiOperator, CarSchedule
 
 
@@ -110,15 +110,17 @@ class TaxiTrip(models.Model):
                            cash_many: float = 0,
                            comment: str = '',
                            many_cash_box: CashBox = None, only_statistics=False, work_in_taxi: bool = True):
-        car, driver = CarSchedule.find_schedule_info(uid, start, payer)
-        if car and driver:
-            TaxiTrip.manual_create_taxi_trip(car, driver, start, payer, millage, total_trip_many_amount, gas_price,
+        car_in_taxi = CarSchedule.find_schedule_info(uid, start, payer)
+        if car_in_taxi:
+            TaxiTrip.manual_create_taxi_trip(car_in_taxi.term, car_in_taxi.car, car_in_taxi.driver, start, payer, millage,
+                                             total_trip_many_amount, gas_price,
                                              cash_many, comment, many_cash_box, only_statistics, work_in_taxi)
         else:
             raise TypeError('Need Driver and Car account')
 
     @staticmethod
-    def manual_create_taxi_trip(car: Car, driver: Driver, start: datetime, payer: TaxiOperator, millage: float,
+    def manual_create_taxi_trip(terms: RentTerms, car: Car, driver: Driver, start: datetime, payer: TaxiOperator,
+                                millage: float,
                                 total_trip_many_amount: float, gas_price: float, cash_many: float = 0,
                                 comment: str = '',
                                 many_cash_box: CashBox = None, only_statistics=False, work_in_taxi: bool = True):
@@ -133,10 +135,10 @@ class TaxiTrip(models.Model):
                 taxitrip = TaxiTrip(car=car, timestamp=start.replace(tzinfo=tz), driver=driver, payer=payer,
                                     mileage=millage, amount=total_trip_many_amount,
                                     many_in_cash=cash_many, is_rent=not work_in_taxi)
-                calc = TaxiCalculator.get_calculator(millage, total_trip_many_amount, cash_many,
+                calc = TripCalculator.get_calculator(millage, total_trip_many_amount, cash_many,
                                                      gas_price, car,
                                                      payer,
-                                                     driver
+                                                     terms
                                                      )
 
                 taxitrip.payer_amount = calc.payer_interest_f
@@ -183,7 +185,8 @@ class TripStatistics(models.Model):
     car_in_rent = models.BooleanField(verbose_name='Машина в аренде', default=False)
 
     @staticmethod
-    def manual_create_summary_paid(car: Car, driver: Driver, start, payer: TaxiOperator, millage: float,
+    def manual_create_summary_paid(car: Car, driver: Driver, start, payer: TaxiOperator, terms: RentTerms,
+                                   millage: float,
                                    total_trip_many_amount: float, gas_price: float, cash_many: float = 0, trip_count=0,
                                    comment: str = '',
                                    many_cash_box: CashBox = None, only_statistics=False):
@@ -198,19 +201,13 @@ class TripStatistics(models.Model):
                 start = datetime.combine(start, datetime.min)
             with transaction.atomic():
                 car_in_rent = CarSchedule.check_date_in_interval(car, start)
-                # print(car.name, car_in_rent, type(start))
-                if not car_in_rent:
-                    driver_schedule = DriversSchedule.get_driver(car, start)
-                    driver = driver_schedule if driver_schedule is not None else driver
-                    if not isinstance(driver, Driver) or driver is None:
-                        raise TypeError('Need Driver account')
 
                 sum_trip = TripStatistics(car=car, stat_date=start, trip_count=trip_count,
                                           mileage=millage, amount=total_trip_many_amount, cash=cash_many)
-                calc = TaxiCalculator.get_calculator(millage, total_trip_many_amount, cash_many,
+                calc = TripCalculator.get_calculator(millage, total_trip_many_amount, cash_many,
                                                      gas_price, car,
                                                      payer,
-                                                     driver
+                                                     terms
                                                      )
                 if not only_statistics and not car_in_rent:
                     TaxiTrip.make_paid_transaction(car, driver, payer, calc, many_cash_box, start, comment)

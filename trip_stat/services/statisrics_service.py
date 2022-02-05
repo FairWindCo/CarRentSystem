@@ -132,8 +132,8 @@ class Statistics:
         except WialonDayStat.DoesNotExist:
             pass
         rent = CarSchedule.object_date_in_interval(car=car, date_time=statistics_date)
-        if rent:
-            car_summary.rent_amount = rent.price
+        if rent and not rent.work_in_taxi:
+            car_summary.rent_amount = rent.rent_price
         car_summary.save()
 
     @staticmethod
