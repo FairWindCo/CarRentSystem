@@ -3,7 +3,7 @@
     "model": "balance.account",
     "pk": 1,
     "fields": {
-      "name": "Касса б\\н Уклон",
+      "name": "РљР°СЃСЃР° Р±\\РЅ РЈРєР»РѕРЅ",
       "last_period_balance": null,
       "currency": 0
     }
@@ -12,7 +12,7 @@
     "model": "balance.account",
     "pk": 2,
     "fields": {
-      "name": "Касса нал Слава",
+      "name": "РљР°СЃСЃР° РЅР°Р» РЎР»Р°РІР°",
       "last_period_balance": null,
       "currency": 0
     }
@@ -21,7 +21,7 @@
     "model": "balance.account",
     "pk": 3,
     "fields": {
-      "name": "Касса нал Рома",
+      "name": "РљР°СЃСЃР° РЅР°Р» Р РѕРјР°",
       "last_period_balance": null,
       "currency": 0
     }
@@ -39,7 +39,7 @@
     "model": "balance.account",
     "pk": 5,
     "fields": {
-      "name": "Гайдай Юлия (Олег)",
+      "name": "Р“Р°Р№РґР°Р№ Р®Р»РёСЏ (РћР»РµРі)",
       "last_period_balance": null,
       "currency": 0
     }
@@ -48,7 +48,7 @@
     "model": "balance.account",
     "pk": 6,
     "fields": {
-      "name": "Радченко Михаил",
+      "name": "Р Р°РґС‡РµРЅРєРѕ РњРёС…Р°РёР»",
       "last_period_balance": null,
       "currency": 0
     }
@@ -57,7 +57,7 @@
     "model": "balance.account",
     "pk": 7,
     "fields": {
-      "name": "Бойко Лариса",
+      "name": "Р‘РѕР№РєРѕ Р›Р°СЂРёСЃР°",
       "last_period_balance": null,
       "currency": 0
     }
@@ -66,7 +66,7 @@
     "model": "balance.account",
     "pk": 8,
     "fields": {
-      "name": "Гаркавий Олександр",
+      "name": "Р“Р°СЂРєР°РІРёР№ РћР»РµРєСЃР°РЅРґСЂ",
       "last_period_balance": null,
       "currency": 0
     }
@@ -75,7 +75,7 @@
     "model": "balance.account",
     "pk": 9,
     "fields": {
-      "name": "Колесник Игорь",
+      "name": "РљРѕР»РµСЃРЅРёРє РРіРѕСЂСЊ",
       "last_period_balance": null,
       "currency": 0
     }
@@ -84,7 +84,7 @@
     "model": "balance.account",
     "pk": 10,
     "fields": {
-      "name": "Виктор Нестерчук (102)",
+      "name": "Р’РёРєС‚РѕСЂ РќРµСЃС‚РµСЂС‡СѓРє (102)",
       "last_period_balance": null,
       "currency": 0
     }
@@ -93,7 +93,7 @@
     "model": "balance.account",
     "pk": 11,
     "fields": {
-      "name": "Эдгар 104",
+      "name": "Р­РґРіР°СЂ 104",
       "last_period_balance": null,
       "currency": 0
     }
@@ -102,7 +102,7 @@
     "model": "balance.account",
     "pk": 12,
     "fields": {
-      "name": "Владимир 105",
+      "name": "Р’Р»Р°РґРёРјРёСЂ 105",
       "last_period_balance": null,
       "currency": 0
     }
@@ -111,7 +111,7 @@
     "model": "balance.account",
     "pk": 13,
     "fields": {
-      "name": "Александр 113",
+      "name": "РђР»РµРєСЃР°РЅРґСЂ 113",
       "last_period_balance": null,
       "currency": 0
     }
@@ -120,7 +120,7 @@
     "model": "balance.account",
     "pk": 14,
     "fields": {
-      "name": "Олег 113",
+      "name": "РћР»РµРі 113",
       "last_period_balance": null,
       "currency": 0
     }
@@ -129,7 +129,7 @@
     "model": "balance.account",
     "pk": 15,
     "fields": {
-      "name": "УКЛОН",
+      "name": "РЈРљР›РћРќ",
       "last_period_balance": null,
       "currency": 0
     }
@@ -156,7 +156,7 @@
     "model": "balance.account",
     "pk": 18,
     "fields": {
-      "name": "КА9188СТ",
+      "name": "РљРђ9188РЎРў",
       "last_period_balance": null,
       "currency": 1
     }
@@ -165,7 +165,7 @@
     "model": "balance.account",
     "pk": 19,
     "fields": {
-      "name": "КА9188СТ",
+      "name": "РљРђ9188РЎРў",
       "last_period_balance": null,
       "currency": 0
     }
@@ -372,7 +372,7 @@
     "model": "balance.account",
     "pk": 42,
     "fields": {
-      "name": "Володимир Пантикин (104)",
+      "name": "Р’РѕР»РѕРґРёРјРёСЂ РџР°РЅС‚РёРєРёРЅ (104)",
       "last_period_balance": null,
       "currency": 0
     }
@@ -381,7 +381,7 @@
     "model": "balance.account",
     "pk": 43,
     "fields": {
-      "name": "Шевченко Олег Николаевич (106)",
+      "name": "РЁРµРІС‡РµРЅРєРѕ РћР»РµРі РќРёРєРѕР»Р°РµРІРёС‡ (106)",
       "last_period_balance": null,
       "currency": 0
     }
@@ -392,7 +392,7 @@
     "fields": {
       "transactionTime": "2022-01-31T18:52:01.743Z",
       "transactionType": 4,
-      "comment": "Включение авто BH0175OM 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ BH0175OM 8000$"
     }
   },
   {
@@ -401,7 +401,7 @@
     "fields": {
       "transactionTime": "2022-01-31T19:12:45.620Z",
       "transactionType": 4,
-      "comment": "Включение авто КА9188СТ 8500$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ РљРђ9188РЎРў 8500$"
     }
   },
   {
@@ -410,7 +410,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:26:34.378Z",
       "transactionType": 4,
-      "comment": "Включение авто KA6163CI 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA6163CI 8000$"
     }
   },
   {
@@ -419,7 +419,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:27:20.157Z",
       "transactionType": 4,
-      "comment": "Включение авто KA9189CT 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA9189CT 8000$"
     }
   },
   {
@@ -428,7 +428,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:27:51.630Z",
       "transactionType": 4,
-      "comment": "Включение авто KA1149CT 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA1149CT 8000$"
     }
   },
   {
@@ -437,7 +437,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:28:35.230Z",
       "transactionType": 4,
-      "comment": "Включение авто KA1396CT 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA1396CT 8000$"
     }
   },
   {
@@ -446,7 +446,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:29:31.706Z",
       "transactionType": 4,
-      "comment": "Включение авто KA9785EH 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA9785EH 8000$"
     }
   },
   {
@@ -455,7 +455,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:30:41.703Z",
       "transactionType": 4,
-      "comment": "Включение авто KA7164EP 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA7164EP 8000$"
     }
   },
   {
@@ -464,7 +464,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:31:27.612Z",
       "transactionType": 4,
-      "comment": "Включение авто KA7168EP 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA7168EP 8000$"
     }
   },
   {
@@ -473,7 +473,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:32:11.795Z",
       "transactionType": 4,
-      "comment": "Включение авто KA1763EI 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA1763EI 8000$"
     }
   },
   {
@@ -482,7 +482,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:33:30.263Z",
       "transactionType": 4,
-      "comment": "Включение авто KA7166EP 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA7166EP 8000$"
     }
   },
   {
@@ -491,7 +491,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:34:11.273Z",
       "transactionType": 4,
-      "comment": "Включение авто KA1761EI 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA1761EI 8000$"
     }
   },
   {
@@ -500,7 +500,7 @@
     "fields": {
       "transactionTime": "2022-01-31T20:38:12.634Z",
       "transactionType": 4,
-      "comment": "Включение авто KA8307ET 8000$"
+      "comment": "Р’РєР»СЋС‡РµРЅРёРµ Р°РІС‚Рѕ KA8307ET 8000$"
     }
   },
   {
@@ -510,7 +510,7 @@
       "transaction": 1,
       "account": 16,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -520,7 +520,7 @@
       "transaction": 2,
       "account": 18,
       "amount": -850000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -530,7 +530,7 @@
       "transaction": 3,
       "account": 20,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -540,7 +540,7 @@
       "transaction": 4,
       "account": 22,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -550,7 +550,7 @@
       "transaction": 5,
       "account": 24,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -560,7 +560,7 @@
       "transaction": 6,
       "account": 26,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -570,7 +570,7 @@
       "transaction": 7,
       "account": 28,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -580,7 +580,7 @@
       "transaction": 8,
       "account": 30,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -590,7 +590,7 @@
       "transaction": 9,
       "account": 32,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -600,7 +600,7 @@
       "transaction": 10,
       "account": 34,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -610,7 +610,7 @@
       "transaction": 11,
       "account": 36,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -620,7 +620,7 @@
       "transaction": 12,
       "account": 38,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -630,7 +630,7 @@
       "transaction": 13,
       "account": 40,
       "amount": -800000,
-      "comment": "Инвестиция"
+      "comment": "РРЅРІРµСЃС‚РёС†РёСЏ"
     }
   },
   {
@@ -652,7 +652,7 @@
     "model": "car_management.rentprice",
     "pk": 1,
     "fields": {
-      "name": "Аренда машины за 600сутки",
+      "name": "РђСЂРµРЅРґР° РјР°С€РёРЅС‹ Р·Р° 600СЃСѓС‚РєРё",
       "type_class": 2,
       "price": 600.0,
       "min_time": 3,
@@ -666,7 +666,7 @@
     "model": "car_management.rentterms",
     "pk": 1,
     "fields": {
-      "name": "Водитель 50 на 50 с компенсацией топлива",
+      "name": "Р’РѕРґРёС‚РµР»СЊ 50 РЅР° 50 СЃ РєРѕРјРїРµРЅСЃР°С†РёРµР№ С‚РѕРїР»РёРІР°",
       "profit": 50.0,
       "fuel_compensation": 100.0,
       "additional_millage": 4,
@@ -759,7 +759,7 @@
     "pk": 9,
     "fields": {
       "default_terms": 1,
-      "phone": "Телефон"
+      "phone": "РўРµР»РµС„РѕРЅ"
     }
   },
   {
