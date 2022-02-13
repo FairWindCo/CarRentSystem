@@ -1,3 +1,6 @@
+from car_rent.calculators.utils import float_round
+
+
 class DriverCalc:
     def __init__(self, earnings: float,
                  fuel_cost: float,
@@ -39,12 +42,12 @@ class DriverCalc:
     @property
     # ЗП водителя в формате для транзакции
     def driver_salary_many(self):
-        return round(self._driver_salary * 100)
+        return float_round(self._driver_salary * 100)
 
     @property
     # ЗП водителя
     def driver_salary(self):
-        return round(self._driver_salary, 2)
+        return float_round(self._driver_salary, 2)
 
     @property
     # инвестиционный доход в формате для транзакции

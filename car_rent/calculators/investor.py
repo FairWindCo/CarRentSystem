@@ -1,3 +1,8 @@
+import math
+
+from .utils import float_round
+
+
 class InvestorCalc:
     def __init__(self, investment_income: float,
                  investor_profit: float = 50,
@@ -38,19 +43,19 @@ class InvestorCalc:
     @property
     # прибыль инвестора в формате для транзакции
     def investor_profit_many(self):
-        return round(self._investor_profit * 100)
+        return float_round(self._investor_profit * 100)
 
     @property
     # прибыль инвестора
     def investor_profit(self):
-        return round(self._investor_profit, 2)
+        return float_round(self._investor_profit, 2)
 
     @property
     # прибыль фирмы в формате для транзакции
     def firm_profit_many(self):
-        return round(self._firm_profit * 100)
+        return float_round(self._firm_profit * 100, 0, math.ceil)
 
     @property
     # прибыль фирмы
     def firm_profit(self):
-        return round(self._firm_profit, 2)
+        return float_round(self._firm_profit, 2, round)

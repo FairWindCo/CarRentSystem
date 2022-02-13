@@ -22,7 +22,6 @@ class TripCalculator:
                    terms.fuel_compensation,
                    )
 
-
     def __init__(self,
                  millage: float, amount: float, cash: float,
                  fuel_consumption: float = 15,
@@ -48,23 +47,39 @@ class TripCalculator:
         self.driver_calc = DriverCalc(self.operator_calc.earnings_clean, self.fuel_calc.fuel_cost, driver_profit,
                                       assistance_profit,
                                       use_ful_car_assistance)
-        self.investor_calc = InvestorCalc(self.driver_calc.investment_income, investor_profit, assistance_profit,
+        self.investor_calc = InvestorCalc(self.driver_calc.investment_clean, investor_profit, assistance_profit,
                                           use_ful_car_assistance)
 
         self._driver_many = self.fuel_calc.fuel_compensation + self.driver_calc.driver_salary
         self._driver_balance_correction = self._driver_many - cash
+        _sum = round(self.aggregator_losses + self._driver_many + self.assistance + \
+               self.investor_calc.firm_profit + self.investor_calc.investor_profit, 2)
+        if self._amount != _sum:
+            raise ValueError(f'Сумма всех платежей не сходится {self._amount}<>{_sum}')
 
     @property
     def cash(self):
         return self._cash
 
     @property
+    def cash_many(self):
+        return round(self._cash * 100, 2)
+
+    @property
     def amount(self):
         return self._amount
 
     @property
+    def amount_many(self):
+        return round(self._amount * 100, 2)
+
+    @property
     def credit_cash(self):
         return self._credit
+
+    @property
+    def credit_cash_many(self):
+        return round(self._credit * 100, 2)
 
     @property
     # пробег с дополнительным учетом
@@ -235,3 +250,13 @@ class TripCalculator:
     # коррекция баланса водителя в формате для транзакции
     def driver_correction_many(self):
         return self._driver_balance_correction * 100
+
+    @property
+    # Комиссия агрегатора
+    def taxi_aggregator_corrections(self):
+        return self.operator_calc.taxi_aggregator_corrections
+
+    @property
+    # Комиссия агрегатора в виде для транзакций
+    def taxi_aggregator_corrections_many(self):
+        return self.operator_calc.taxi_aggregator_corrections_many

@@ -1,14 +1,14 @@
 from audit_log.models import CreatingUserField
-from constance import config
 from django.db import models, transaction, IntegrityError
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import now
 
 from balance.models import CashBox, Transaction, Account
-from balance.services import Balance
-from car_management.models import Counterpart, Car, Driver, RentTerms
+from car_management.models import Counterpart, Car, Driver, RentTerms, get_fuel_price_for_type
+from car_management.models.rent_price import StatisticsType
 from car_rent.calculators import TripCalculator
+from car_rent.calculators.transactions import make_transactions_for_trip, TransactionType
 from car_rent.models import TaxiOperator, CarSchedule
 
 
@@ -60,70 +60,48 @@ class TaxiTrip(models.Model):
         unique_together = (('car', 'timestamp'),)
 
     @staticmethod
-    def make_paid_transaction(car: Car, driver: Driver, payer: TaxiOperator, calc, many_cash_box, start, comment):
-        firm_account = config.FIRM
-        if firm_account is None:
-            raise ValueError('Need Set Firm account in Config')
-
-        operations = [
-            (None, payer, calc.total_trip_many_int, 'Платеж от клиента'),
-            (payer, None, calc.payer_interest_int, 'Комисия оператора такси'),
-            (payer, car, calc.trip_many_without_bank_int, 'Платеж от оператора'),
-            (car, driver, calc.fuel_compensation_int, 'Компенсация топлива'),
-            (car, firm_account, calc.operating_costs_int, 'Операционные затраты'),
-            (car, driver, calc.driver_money_int, 'Зарплата водителя'),
-        ]
-        if calc.cash > 0:
-            operations.append((driver, None, calc.cash_int, 'Вывод наличных'))
-        if calc.bank_rent > 0:
-            operations.append((payer, None, calc.bank_rent_int, 'Комисия банка'))
-        else:
-            operations.append(
-                (None, payer, abs(calc.bank_rent_int), 'возврат комисии банка за комисию оператора'))
-        if many_cash_box:
-            operations.append((None, driver, calc.cash_int, 'Внос денег в кассу'))
-            operations.append((None, many_cash_box, calc.cash_int, 'Пополнение кассы'))
-        if payer.cash_box:
-            payer_balance_cache = calc.credit_cart_many_int
-            if calc.bank_rent > 0:
-                operations.append(
-                    (None, payer.cash_box, payer_balance_cache,
-                     f'Пополнение кассы {payer.cash_box.name} за '
-                     f'поездку {start} {car.name} {driver.name}'))
-            else:
-                operations.append(
-                    (payer.cash_box, None, payer_balance_cache,
-                     f'Снятие с кассы {payer.cash_box.name} за '
-                     f'поездку {start} {car.name} {driver.name}'))
-        # print(operations)
-        # print(fuel_trip, taxitrip.fuel, driver_money)
-        transaction_record = Balance.form_transaction(Balance.DEPOSIT, operations, comment if comment
-        else f'Поездка {start} {car.name} {driver.name}')
-        return transaction_record
+    def make_paid_transaction(car: Car, driver: Driver, payer: TaxiOperator, calc, many_cash_box, start, comment,
+                              transaction_saving=TransactionType.SIMPLE_TRANSACTION):
+        return make_transactions_for_trip(car, driver, payer, calc, many_cash_box, start, comment, transaction_saving)
 
     @staticmethod
-    def manual_create_trip(start: datetime, payer: TaxiOperator,
-                           uid: str,
-                           millage: float,
-                           total_trip_many_amount: float,
-                           gas_price: float,
-                           cash_many: float = 0,
-                           comment: str = '',
-                           many_cash_box: CashBox = None, only_statistics=False, work_in_taxi: bool = True):
+    def auto_create_trip(start: datetime, payer: TaxiOperator,
+                         uid: str,
+                         millage: float,
+                         total_trip_many_amount: float,
+                         fuel_prices,
+                         cash_many: float = 0,
+                         ):
         car_in_taxi = CarSchedule.find_schedule_info(uid, start, payer)
         if car_in_taxi:
-            TaxiTrip.manual_create_taxi_trip(car_in_taxi.term, car_in_taxi.car, car_in_taxi.driver, start, payer, millage,
-                                             total_trip_many_amount, gas_price,
-                                             cash_many, comment, many_cash_box, only_statistics, work_in_taxi)
+            stat_type = car_in_taxi.statistics_type
+            if stat_type == StatisticsType.DONT_WORK:
+                return None
+            if stat_type == StatisticsType.TRIP_PAID_DAY:
+                paid_type = car_in_taxi.paid_type
+            else:
+                paid_type = TransactionType.NO_TRANSACTION
+
+            driver = car_in_taxi.driver
+            terms = car_in_taxi.term
+            car = car_in_taxi.car
+            gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
+            in_taxi = car_in_taxi.work_in_taxi
+            return TaxiTrip.manual_create_taxi_trip(terms, car, driver, start, payer,
+                                                    millage,
+                                                    total_trip_many_amount, gas_price,
+                                                    cash_many, '', payer.cash_box, paid_type, in_taxi)
         else:
-            raise TypeError('Need Driver and Car account')
+            return None
 
     @staticmethod
     def manual_create_taxi_trip(terms: RentTerms, car: Car, driver: Driver, start: datetime, payer: TaxiOperator,
                                 millage: float,
                                 total_trip_many_amount: float, gas_price: float, cash_many: float = 0,
                                 comment: str = '',
-                                many_cash_box: CashBox = None, only_statistics=False, work_in_taxi: bool = True):
+                                many_cash_box: CashBox = None,
+                                transaction_type: TransactionType = TransactionType.NO_TRANSACTION,
+                                work_in_taxi: bool = True):
         if not isinstance(car, Car) or car is None:
             raise TypeError('Need car account')
         if not isinstance(payer, Counterpart) or payer is None:
@@ -136,27 +114,26 @@ class TaxiTrip(models.Model):
                                     mileage=millage, amount=total_trip_many_amount,
                                     many_in_cash=cash_many, is_rent=not work_in_taxi)
                 calc = TripCalculator.get_calculator(millage, total_trip_many_amount, cash_many,
-                                                     gas_price, car,
+                                                     gas_price,
+                                                     car,
                                                      payer,
                                                      terms
                                                      )
 
-                taxitrip.payer_amount = calc.payer_interest_f
-                taxitrip.driver_amount = calc.driver_money_f
-                taxitrip.investor_rent = calc.investor_profit_f
-                if not only_statistics:
-                    if work_in_taxi:
-                        transaction_record = TaxiTrip.make_paid_transaction(car, driver, payer, calc, many_cash_box,
-                                                                            start, comment)
-                    else:
-                        transaction_record = None
-                        taxitrip.is_rent = True
+                taxitrip.payer_amount = calc.taxi_aggregator_rent
+                taxitrip.driver_amount = calc.driver_salary
+                taxitrip.investor_rent = calc.investor_profit
+
+                if work_in_taxi:
+                    transaction_record = TaxiTrip.make_paid_transaction(car, driver, payer, calc, many_cash_box,
+                                                                        start, comment, transaction_type)
+                    taxitrip.is_rent = False
                 else:
                     transaction_record = None
-                    taxitrip.is_rent = False
-                taxitrip.fuel = calc.fuel_price_f
-                taxitrip.bank_amount = calc.bank_rent_f
-                taxitrip.operating_services = calc.operating_costs_f
+                    taxitrip.is_rent = True
+                taxitrip.fuel = calc.fuel_cost
+                taxitrip.bank_amount = calc.bank_rent
+                taxitrip.operating_services = calc.assistance
                 taxitrip.transaction = transaction_record
                 taxitrip.save()
                 # print('OK')
@@ -168,7 +145,7 @@ class TaxiTrip(models.Model):
 
 class TripStatistics(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    stat_date = models.DateField(verbose_name='Дата', default=now())
+    stat_date = models.DateField(verbose_name='Дата', default=now)
     # 5 полей про поезду
     trip_count = models.PositiveIntegerField(verbose_name='Кол-во поездок', default=0)
     mileage = models.FloatField(verbose_name='Пробег за поездки', default=0)
@@ -185,11 +162,45 @@ class TripStatistics(models.Model):
     car_in_rent = models.BooleanField(verbose_name='Машина в аренде', default=False)
 
     @staticmethod
+    def auto_create_trip(start, payer: TaxiOperator,
+                         uid: str,
+                         trip_count: int,
+                         millage: float,
+                         total_trip_many_amount: float,
+                         fuel_prices,
+                         cash_many: float = 0,
+                         ):
+        car_in_taxi = CarSchedule.find_schedule_info(uid, start, payer)
+        if car_in_taxi:
+            stat_type = car_in_taxi.statistics_type
+            if stat_type == StatisticsType.DONT_WORK:
+                return None
+            if stat_type == StatisticsType.TRIP_DAY_PAID:
+                paid_type = car_in_taxi.paid_type
+            else:
+                paid_type = TransactionType.NO_TRANSACTION
+
+            driver = car_in_taxi.driver
+            terms = car_in_taxi.term
+            car = car_in_taxi.car
+
+            gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
+            in_taxi = car_in_taxi.work_in_taxi
+
+            return TripStatistics.manual_create_summary_paid(car, driver, start, payer, terms, millage,
+                                                             total_trip_many_amount, gas_price, cash_many,
+                                                             trip_count, '', payer.cash_box, in_taxi, paid_type
+                                                             )
+
+        return False
+
+    @staticmethod
     def manual_create_summary_paid(car: Car, driver: Driver, start, payer: TaxiOperator, terms: RentTerms,
                                    millage: float,
                                    total_trip_many_amount: float, gas_price: float, cash_many: float = 0, trip_count=0,
                                    comment: str = '',
-                                   many_cash_box: CashBox = None, only_statistics=False):
+                                   many_cash_box: CashBox = None, car_in_taxi: bool = True,
+                                   transaction_type: TransactionType = TransactionType.NO_TRANSACTION, ):
         if not isinstance(car, Car) or car is None:
             raise TypeError('Need car account')
         if not isinstance(payer, Counterpart) or payer is None:
@@ -200,23 +211,23 @@ class TripStatistics(models.Model):
             else:
                 start = datetime.combine(start, datetime.min)
             with transaction.atomic():
-                car_in_rent = CarSchedule.check_date_in_interval(car, start)
-
                 sum_trip = TripStatistics(car=car, stat_date=start, trip_count=trip_count,
                                           mileage=millage, amount=total_trip_many_amount, cash=cash_many)
                 calc = TripCalculator.get_calculator(millage, total_trip_many_amount, cash_many,
-                                                     gas_price, car,
+                                                     gas_price,
+                                                     car,
                                                      payer,
                                                      terms
                                                      )
-                if not only_statistics and not car_in_rent:
-                    TaxiTrip.make_paid_transaction(car, driver, payer, calc, many_cash_box, start, comment)
-                sum_trip.payer_amount = calc.payer_interest_f
-                sum_trip.driver_amount = calc.driver_money_f
-                sum_trip.bank_amount = calc.bank_rent_f
-                sum_trip.investor_amount = calc.investor_profit_f
-                sum_trip.fuel = calc.fuel_price_f
-                sum_trip.operating_services = calc.operating_costs_f
+                if car_in_taxi:
+                    TaxiTrip.make_paid_transaction(car, driver, payer, calc, many_cash_box, start, comment,
+                                                   transaction_type)
+                sum_trip.payer_amount = calc.taxi_aggregator_rent
+                sum_trip.driver_amount = calc.driver_salary
+                sum_trip.bank_amount = calc.bank_rent
+                sum_trip.investor_amount = calc.investor_profit
+                sum_trip.fuel = calc.fuel_cost
+                sum_trip.operating_services = calc.assistance
                 sum_trip.save()
                 return True
         except IntegrityError:

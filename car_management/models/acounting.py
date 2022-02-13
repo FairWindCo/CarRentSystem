@@ -7,6 +7,10 @@ from .rent_price import RentTerms
 class Investor(Account):
     profit = models.FloatField(default=50, verbose_name='Коифициент распределения прибыли')
     operating_costs_percent = models.FloatField(verbose_name='Процент на операционные затраты', default=5.0)
+    limit_to_manager_confirm = models.FloatField(default=10000,
+                                                 verbose_name='Сумма от которой требуется подверждение менеджера')
+    limit_to_investor_confirm = models.FloatField(default=-1,
+                                                 verbose_name='Сумма от которой требуется подверждение менеджера')
 
     class Meta:
         verbose_name = 'Инвестор'

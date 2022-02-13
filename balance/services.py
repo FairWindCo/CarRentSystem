@@ -39,13 +39,13 @@ class Balance:
                     if operation[0] is not None:
                         operation_left = AccountTransaction(transaction=transaction_obj,
                                                             account=operation[0],
-                                                            amount=-operation[2],
+                                                            amount=-abs(operation[2]),
                                                             comment=operation_comment)
                         operation_left.save()
                     if operation[1] is not None:
                         operation_right = AccountTransaction(transaction=transaction_obj,
                                                              account=operation[1],
-                                                             amount=operation[2],
+                                                             amount=abs(operation[2]),
                                                              comment=operation_comment)
                         operation_right.save()
                 return transaction_obj

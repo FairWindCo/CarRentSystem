@@ -37,7 +37,7 @@ class CarInRentPage(CustomModelPage):
     app_label = 'car_rent'
     title = 'Сдача машины в аренду'  # set page title
     car = models.ForeignKey(Car, on_delete=models.CASCADE, verbose_name='Модель')
-    start_time = models.DateTimeField(verbose_name='Дата и время начала аренды', default=now())
+    start_time = models.DateTimeField(verbose_name='Дата и время начала аренды', default=now)
     end_time = models.DateTimeField(verbose_name='Дата и время завершения аренды',
                                     default=(now() + timedelta(days=config.MIN_RENT)))
     amount = models.FloatField(verbose_name='Сумма', validators=[

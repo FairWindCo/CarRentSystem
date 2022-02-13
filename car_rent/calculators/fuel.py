@@ -35,7 +35,7 @@ class FuelCalculator:
 
     @property
     def fuel_compensation_money(self):
-        return math.ceil(self._fuel_compensation * 100)
+        return round(self._fuel_compensation * 100)
 
     @property
     def fuel_rest(self):
@@ -43,4 +43,4 @@ class FuelCalculator:
 
     @property
     def fuel_rest_money(self):
-        return math.ceil(self._fuel_price - self.fuel_compensation * 100)
+        return round(self._fuel_price - self.fuel_compensation * 100)

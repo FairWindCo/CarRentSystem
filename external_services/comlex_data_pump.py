@@ -24,8 +24,8 @@ def uklon_data_pump(pamp_start_date: datetime.date = datetime.date.today() - dat
         for name, value in fuel_data.items():
             field_name = f'fuel_{name}'.upper()
             _set_constance_value(field_name, value)
-        proccessed, total, skip = get_uklon_taxi_trip(fuel_data, pamp_start_date, days_count, cache_path=cache_path)
-        print(f'import {proccessed} trips, skip {skip} from {total}')
+        proccessed, total = get_uklon_taxi_trip(fuel_data, pamp_start_date, days_count, cache_path=cache_path)
+        print(f'import {proccessed} trips, from {total}')
         if proccessed > 0:
             fresh_statistics_on_range(pamp_start_date, days_count)
             pass

@@ -8,7 +8,7 @@ from car_management.models import Car
 
 class BrandingAmount(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    stat_date = models.DateField(verbose_name='Дата', default=now())
+    stat_date = models.DateField(verbose_name='Дата', default=now)
     amount = models.FloatField(verbose_name='Доход от брендирования', default=0)
     operate = models.FloatField(verbose_name='Операционные затраты', default=14)
     investor_amount = models.FloatField(verbose_name='Прибыль инвестора', default=14)

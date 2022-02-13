@@ -80,5 +80,5 @@ class Car(Account):
 
 class CarMileage(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='mileage')
-    stat_date = models.DateField(verbose_name='Дата', default=now())
+    stat_date = models.DateField(verbose_name='Дата', default=now)
     mileage_at_start = models.PositiveIntegerField(verbose_name='')

@@ -1,18 +1,22 @@
 from datetime import timedelta
 
 from django import forms
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.utils.timezone import now
 from django.views.generic import ListView
 
 from car_management.models import Car, Expenses
-from trip_stat.models.statistics import CarSummaryStatistics
 from car_management.views.global_menu import GlobalMainMenu
 from django_helpers.django_request_processor import UniversalFilterListView
+from trip_stat.models.statistics import CarSummaryStatistics
 from trips.models.taxi import TripStatistics
 
 
-class ByCarView(ListView):
+class ByCarView(LoginRequiredMixin, ListView):
+    login_url = '/admin/login/'
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, *kwargs)
         self.current_car = None
@@ -36,6 +40,7 @@ class ByCarView(ListView):
 
 class ViewCarStatistic(UniversalFilterListView, ByCarView, GlobalMainMenu):
     model = TripStatistics
+    login_url = '/admin/login/'
     template_name = 'carmanagment/cars_stat_list.html'
     paginate_by = 20
     ordering = ('-stat_date',)
@@ -133,11 +138,12 @@ def form_day_usage_report(start_date, end_date, car, rent=False):
         'cash': cash
     }, 'object_list': cars_trips_stat}
 
+
 class InformationDict:
     def __init__(self, *names):
         self._dict = {}
         for name in names:
-            self._dict[name]=0
+            self._dict[name] = 0
 
     def update_value(self, name, value):
         old_value = self._dict.get(name, 0)
@@ -149,6 +155,7 @@ class InformationDict:
     @property
     def information(self):
         return self._dict
+
 
 def summary_report(form):
     if hasattr(form, 'cleaned_data'):
@@ -200,6 +207,7 @@ def form_summary_report(start_date, end_date, car):
     return info.information
 
 
+@login_required
 def car_usage_report(request):
     context = GlobalMainMenu.form_menu_context(request)
     expenses = []

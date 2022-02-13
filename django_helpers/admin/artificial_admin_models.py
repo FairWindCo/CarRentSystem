@@ -1,7 +1,6 @@
 from typing import Optional
 
 from django.contrib import admin, messages
-from django.contrib.admin import register
 from django.contrib.admin.decorators import register
 from django.db import models
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -133,6 +132,7 @@ class CustomModelPage(models.Model):
     class Meta:
         abstract = True
         managed = False
+        # proxy = True
 
     @classmethod
     def __init_subclass__(cls) -> None:

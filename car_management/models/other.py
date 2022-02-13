@@ -1,28 +1,22 @@
-import math
-
-from audit_log.models import CreatingUserField
-from constance import config
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models, transaction, IntegrityError
-# Create your models here.
-from django.db.models import Q, F
-from django.utils import timezone
-from django.utils.datetime_safe import datetime
+from django.db import models
 
-from balance.models import Account, Transaction, CashBox
-from balance.services import Balance
+from balance.models import Account
+
+
+# Create your models here.
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     account = models.OneToOneField(Account, on_delete=models.CASCADE)
+    can_confirm_as_manager = models.BooleanField(default=False, verbose_name='Может подтверждать как менеджер')
+    can_confirm_as_investor = models.BooleanField(default=False, verbose_name='Может подтверждать как инвестор')
 
     class Meta:
         unique_together = (('user', 'account'),)
         verbose_name = 'Профиль пользователя'
-        verbose_name_plural = 'Провили пользователя'
+        verbose_name_plural = 'Профили пользователя'
 
     def __str__(self):
         return f'{self.user.username} {self.account.name}'

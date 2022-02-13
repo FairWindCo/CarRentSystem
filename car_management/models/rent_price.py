@@ -5,6 +5,20 @@ from django.db import models
 from car_management.models import TimeType
 
 
+class StatisticsType(models.IntegerChoices):
+    DONT_WORK = 0, 'Не вести статистику, машина отключена'
+    TRIP_STAT = 1, 'Только статистика по поездкам'
+    DAY_STAT = 2, 'Только статистика по дням'
+    TRIP_DAY_PAID = 10, 'Статистика по поездкам и оплата по дням'
+    TRIP_PAID_DAY = 20, 'Оплата по поездкам и статистика по дням'
+
+
+class TransactionType(models.IntegerChoices):
+    NO_TRANSACTION = 0, "Не заводить транзакции по поездкам"
+    FULL_TRANSACTION = 1, "Детальное расписание операций"
+    SIMPLE_TRANSACTION = 3, "Только корректировки баланса"
+
+
 class RentPrice(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название тарифа')
     type_class = models.PositiveSmallIntegerField(choices=TimeType.choices,
@@ -17,6 +31,10 @@ class RentPrice(models.Model):
     replaced_by_new = models.ForeignKey('RentPrice', on_delete=models.CASCADE, blank=True, null=True)
     can_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
     trip_many_paid = models.BooleanField(verbose_name='Проведение оплат по поездкам', default=False)
+    statistics_type = models.PositiveIntegerField(choices=StatisticsType.choices, default=StatisticsType.TRIP_DAY_PAID,
+                                                  verbose_name='Тип собираемой статистики')
+    paid_type = models.PositiveIntegerField(choices=TransactionType.choices, default=TransactionType.NO_TRANSACTION,
+                                            verbose_name='Тип проводимых платежей')
     work_in_taxi = models.BooleanField(verbose_name='Работа в такси', default=False)
 
     def to_dict_m(self):

@@ -1,3 +1,5 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from car_management.models import Expenses, Car
 from trips.views.carview import ByCarView
 from car_management.views.global_menu import GlobalMainMenu

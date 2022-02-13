@@ -22,6 +22,7 @@ class WialonReporter:
             self.wialon_api.avl_evts()
 
         except WialonError as e:
+            print(e)
             self.wialon_api = None
             self.last_error = e
 
@@ -61,6 +62,7 @@ class WialonReporter:
             if 'totalItemsCount' in units and units['totalItemsCount'] > 0:
                 return [(obj['nm'], obj['id']) for obj in units['items']]
         except WialonError as e:
+            print(e)
             self.last_error = e
         return []
 

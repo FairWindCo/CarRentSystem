@@ -10,7 +10,7 @@ from car_management.models import Car, Driver
 
 class WialonTrip(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    start = models.DateTimeField(verbose_name='Дата начала поездки', default=now())
+    start = models.DateTimeField(verbose_name='Дата начала поездки', default=now)
     end = models.DateTimeField(blank=True, null=True, verbose_name='Дата завершения поездки')
     mileage = models.FloatField(verbose_name='Пробег по трекеру', default=0)
     fuel = models.PositiveIntegerField(verbose_name='Раход по трекеру', default=0)
@@ -64,7 +64,7 @@ class WialonTrip(models.Model):
 
 class WialonDayStat(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE)
-    stat_date = models.DateField(verbose_name='Дата', default=now())
+    stat_date = models.DateField(verbose_name='Дата', default=now)
     stat_interval = models.PositiveIntegerField(verbose_name='Интервал', default=0)
     mileage = models.FloatField(verbose_name='Пробег по трекеру', default=0)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, null=True, blank=True,

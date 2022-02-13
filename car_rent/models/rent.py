@@ -8,7 +8,8 @@ from django.utils.datetime_safe import datetime
 from django.utils.timezone import now
 
 from car_management.models import Car, Driver, RentTerms, TimeType
-from . import TaxiOperator
+from car_management.models.rent_price import TransactionType, StatisticsType
+from .taxi_operator import TaxiOperator
 from .car_in_operators import CarsInOperator
 
 
@@ -23,7 +24,7 @@ class CarScheduleBase(models.Model):
         if self.end_time and self.end_time <= self.start_time:
             raise ValidationError('Start date need be less then End date')
         if self.end_time:
-            if self.__class__.objects.filter(car=self.car).filter(
+            if self.__class__.objects.filter(car=self.car).filter(~Q(pk=self.pk)).filter(
                     Q(start_time__lte=self.start_time, end_time__gte=self.start_time) |
                     Q(start_time__lte=self.end_time, end_time__gte=self.end_time) |
                     Q(start_time__lte=self.start_time, end_time__isnull=True) |
@@ -89,7 +90,11 @@ class CarSchedule(CarScheduleBase):
     work_in_taxi = models.BooleanField(verbose_name='Работает в нашем такси', default=False)
     min_time = models.PositiveIntegerField(verbose_name='Минимальный срок аренды', default=0)
     can_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
-    trip_many_paid = models.BooleanField(verbose_name='Проведение оплат по поездкам', default=False)
+    statistics_type = models.PositiveIntegerField(choices=StatisticsType.choices, default=StatisticsType.TRIP_DAY_PAID,
+                                                  verbose_name='Тип собираемой статистики')
+    paid_type = models.PositiveIntegerField(choices=TransactionType.choices, default=TransactionType.NO_TRANSACTION,
+                                            verbose_name='Тип проводимых платежей')
+
     auto_renew = models.BooleanField(verbose_name='Автоматически обновлять план аренды', default=False)
 
 

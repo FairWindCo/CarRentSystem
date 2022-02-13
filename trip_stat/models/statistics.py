@@ -12,7 +12,7 @@ from car_management.utils import get_sum
 
 class CarSummaryStatistics(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='statistics')
-    stat_date = models.DateField(verbose_name='Дата', default=now())
+    stat_date = models.DateField(verbose_name='Дата', default=now)
     stat_interval = models.PositiveIntegerField(verbose_name='Интервал', default=86400)
     gps_mileage = models.FloatField(verbose_name='Пробег по трекеру', default=0)
     taxi_mileage = models.FloatField(verbose_name='Пробег по оператору такси', default=0)

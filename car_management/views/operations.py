@@ -1,10 +1,13 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from balance.models import AccountTransaction, Transaction
 from car_management.views.global_menu import GlobalMainMenu
 from django_helpers.django_request_processor import UniversalFilterListView
 
 
-class OperationsView(UniversalFilterListView, GlobalMainMenu):
+class OperationsView(LoginRequiredMixin, UniversalFilterListView, GlobalMainMenu):
     model = AccountTransaction
+    login_url = '/admin/login/'
     template_name = 'carmanagment/operation_list.html'
     paginate_by = 20
     filtering = (
@@ -14,8 +17,9 @@ class OperationsView(UniversalFilterListView, GlobalMainMenu):
     )
 
 
-class TransactionView(UniversalFilterListView, GlobalMainMenu):
+class TransactionView(LoginRequiredMixin, UniversalFilterListView, GlobalMainMenu):
     model = Transaction
+    login_url = '/admin/login/'
     template_name = 'carmanagment/transaction_list.html'
     paginate_by = 20
     filtering = (

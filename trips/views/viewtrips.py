@@ -1,13 +1,15 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from vue_utils.views import FilterListView
 
+from car_management.views.global_menu import GlobalMainMenu
+from django_helpers.django_request_processor import UniversalFilterListView
 from trips.models.taxi import TaxiTrip
 from trips.models.wialon import WialonTrip, WialonDayStat
 from trips.views.carview import ByCarView
-from car_management.views.global_menu import GlobalMainMenu
-from django_helpers.django_request_processor import UniversalFilterListView
 
 
-class ViewTrips(FilterListView):
+class ViewTrips(LoginRequiredMixin, FilterListView):
+    login_url = '/admin/login/'
     model = TaxiTrip
     template_name = 'carmanagment/trip_list.html'
     paginate_by = 20
@@ -18,7 +20,8 @@ class ViewTrips(FilterListView):
     )
 
 
-class ViewTripsNew(UniversalFilterListView, GlobalMainMenu):
+class ViewTripsNew(LoginRequiredMixin, UniversalFilterListView, GlobalMainMenu):
+    login_url = '/admin/login/'
     model = TaxiTrip
     template_name = 'carmanagment/trip_list.html'
     paginate_by = 20
@@ -34,7 +37,8 @@ class ViewTripsNew(UniversalFilterListView, GlobalMainMenu):
     )
 
 
-class ViewTripsNew2(UniversalFilterListView, GlobalMainMenu):
+class ViewTripsNew2(LoginRequiredMixin, UniversalFilterListView, GlobalMainMenu):
+    login_url = '/admin/login/'
     model = TaxiTrip
     template_name = 'carmanagment/trip_list.html'
     use_custom_paging = False

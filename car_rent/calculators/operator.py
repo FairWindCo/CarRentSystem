@@ -1,3 +1,9 @@
+import cmath
+import math
+
+from .utils import float_round
+
+
 class OperatorCalc:
     def __init__(self, amount: float, cash: float,
                  operator_cash_profit: float = 17,
@@ -27,7 +33,18 @@ class OperatorCalc:
             # если денег на счете нет, то считаем процент как бы для компенсации, того, что эти деньги не взяли
             self._bank_rent = -self._payer_interest * self.bank_profit_multiplier if use_bank_compensation else 0
         # ВАЖНО! отнять от всей суммы уже округленные значения, так как сумма будет фигурировать в расчетах далее
-        self._trip_rent = amount - self.taxi_aggregator_rent - self.bank_rent - self.trip_tax
+        self._trip_rent = amount - self.aggregator_losses
+        self._taxi_aggregator_corrections = self.aggregator_losses - self._credit_cart_cash
+
+    @property
+    # Комиссия агрегатора
+    def taxi_aggregator_corrections(self):
+        return round(self._taxi_aggregator_corrections, 2)
+
+    @property
+    # Комиссия агрегатора в виде для транзакций
+    def taxi_aggregator_corrections_many(self):
+        return round(self._taxi_aggregator_corrections * 100)
 
     @property
     # Комиссия агрегатора
@@ -72,7 +89,7 @@ class OperatorCalc:
     @property
     # Общая сумма денег которые необходимо отдать оператору такси
     def aggregator_losses(self):
-        return round(self._payer_interest + self._bank_rent + self._tax, 2)
+        return float_round(self._payer_interest + self._bank_rent + self._tax, 2, math.ceil)
 
     @property
     # Заработок

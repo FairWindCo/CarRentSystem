@@ -1,11 +1,13 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-from trip_stat.services.statisrics_service import Statistics
 from car_management.views.global_menu import GlobalMainMenu
+from trip_stat.services.statisrics_service import Statistics
 
 
+@login_required
 def dashboard(request):
     import random
 

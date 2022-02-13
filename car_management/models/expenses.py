@@ -1,4 +1,4 @@
-from audit_log.models import CreatingUserField
+from audit_log.models import CreatingUserField, LastUserField
 from django.db import models
 
 from balance.models import Account, Transaction
@@ -26,6 +26,7 @@ class ExpensesTypes(models.Model):
 
 
 class Expenses(models.Model):
+    is_template = models.BooleanField(verbose_name='Черновик', default=True)
     date_mark = models.DateTimeField(auto_now_add=True, auto_created=True)
     amount = models.FloatField(verbose_name='')
     franchise = models.FloatField(verbose_name='Франшиза', default=0)
@@ -35,6 +36,8 @@ class Expenses(models.Model):
     expenseType = models.ForeignKey(ExpensesTypes, on_delete=models.CASCADE)
     transaction = models.OneToOneField(Transaction, on_delete=models.CASCADE, related_name='expense')
     created_by = CreatingUserField(related_name="created_expenses")
+    paid_by = LastUserField(related_name="paid_expenses")
+    paid_date_mark = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def __str__(self):
         return f'FROM:{self.account.name} TO:{self.counterpart.name} ' \

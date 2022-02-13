@@ -14,6 +14,7 @@ from formtools.wizard.views import SessionWizardView
 from balance.models import CashBox
 from balance.services import Balance
 from car_management.models import Car, Driver, TimeType, RentTerms
+from car_management.models.rent_price import StatisticsType, TransactionType
 from car_rent.models import CarSchedule, CarsInOperator
 from django_helpers.admin import CustomModelPage, CustomPageModelAdmin
 from django_helpers.admin.ajax_select import AutocompleteSelectProxy
@@ -69,8 +70,11 @@ class CashForm(Form):
     deposit_cashbox = ModelChoiceField(label='Депозит', queryset=CashBox.objects.all(), widget=Select, required=True)
     can_break_rent = fields.BooleanField(label='Разрешен досочный возврат', initial=True, widget=CheckboxInput(),
                                          required=False)
-    trip_many_paid = fields.BooleanField(label='Проведение оплат по поездкам', initial=False, widget=CheckboxInput(),
-                                         required=False)
+    statistics_type = fields.ChoiceField(choices=StatisticsType.choices, initial=StatisticsType.TRIP_DAY_PAID,
+                                         label='Тип собираемой статистики')
+    paid_type = fields.ChoiceField(choices=TransactionType.choices, initial=TransactionType.NO_TRANSACTION,
+                                   label='Тип проводимых платежей')
+
     min_time = fields.IntegerField(label='Минимальный срок аренды', initial=0)
 
     def __init__(self, *args, **kwargs):
@@ -78,6 +82,10 @@ class CashForm(Form):
         super().__init__(*args, **kwargs)
         if 'initial' in kwargs:
             taxi = kwargs['initial'].get('in_taxi', False)
+            statistics_type = kwargs['initial'].get('statistics_type', None)
+            paid_type = kwargs['initial'].get('paid_type', None)
+            self.fields['statistics_type'].initial = statistics_type
+            self.fields['paid_type'].initial = paid_type
             if taxi:
                 self.fields['price'].required = False
                 self.fields['price'].initial = 0
@@ -182,7 +190,8 @@ class CombyneWizard(SessionWizardView):
                                         auto_renew=auto_renew,
                                         work_in_taxi=work_in_taxi,
                                         min_time=min_time,
-                                        trip_many_paid=trip_many_paid,
+                                        statistics_type=form_list[2].cleaned_data['statistics_type'],
+                                        paid_type=form_list[2].cleaned_data['paid_type'],
                                         )
             car_scheduler.save()
             car_scheduler.taxi_operators.set(taxi_in_operators)
@@ -233,7 +242,9 @@ class CombyneWizard(SessionWizardView):
                     'price': car.rent_price_plan.get_price(delta),
                     'deposit_price': deposit,
                     'paid_deposit_price': deposit,
-                    'in_taxi': in_taxi
+                    'in_taxi': in_taxi,
+                    'statistics_type': car.rent_price_plan.statistics_type,
+                    'paid_type': car.rent_price_plan.paid_type,
                 }
             else:
                 self.initial_dict['2'] = {
@@ -265,7 +276,14 @@ class CarRentAdmin(CustomizeAdmin):
     list_filter = ('car__name',)
 
     def has_change_permission(self, request, obj=None):
-        return False
+        return True
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return 'car', 'start_time', 'end_time', 'driver', 'end_rent', \
+                   'taxi_operators', 'deposit', 'paid_deposit', 'amount', 'min_time', 'can_break_rent'
+        else:
+            return []
 
     def get_queryset(self, request):
         return CarSchedule.objects.all()
