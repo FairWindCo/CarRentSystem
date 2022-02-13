@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from django.db import transaction
 from django.db.models import Sum
@@ -26,7 +26,7 @@ class Balance:
     @staticmethod
     # Create one transaction with list of account operation (from_account, to_account, amount)
     def form_transaction(transaction_type: Transaction.TransactionType,
-                         operations: List[tuple[Optional[Account], Optional[Account], int, Optional[str]]],
+                         operations: List[Tuple[Optional[Account], Optional[Account], int, Optional[str]]],
                          comment: Optional[str] = None) -> Optional[Transaction]:
         if operations:
             with transaction.atomic():
