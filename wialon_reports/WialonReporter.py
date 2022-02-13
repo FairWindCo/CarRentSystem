@@ -150,6 +150,7 @@ class WialonReporter:
 
     def get_report_sub_lists_cached(self, resource_id: int, report_id: int, report_object: int, start_date: datetime,
                                     end_date: datetime, table, convertors=None, tzinfo=LOCAL_TIMEZONE, cache_path=None):
+
         file_path = None
         if cache_path is not None:
             file_path = os.path.join(cache_path,
@@ -336,7 +337,7 @@ def date_to_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE):
     return timestamp
 
 
-def date_to_int_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE, use_correction=True):
+def date_to_int_timestamp(dt: datetime.datetime, tzinfo=LOCAL_TIMEZONE, use_correction=False):
     if use_correction:
         epoch = datetime.datetime(1970, 1, 1, tzinfo=tzinfo)
     else:

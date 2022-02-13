@@ -11,7 +11,10 @@ environ.Env.read_env()  # reading .env file
 if __name__ == '__main__':
     api_key = env.str('WIALON_KEY')
     wialon = WialonReporter(api_key)
-    print(wialon.get_monitoring_objects())
+
+    wialon_obj_list = wialon.get_monitoring_objects()
+    for wialon_obj in wialon_obj_list:
+        print(wialon_obj)
 
     print(wialon.get_reports_list())
 

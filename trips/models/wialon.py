@@ -5,7 +5,12 @@ from django.db import models, IntegrityError
 from django.utils.timezone import now
 
 from car_management.models import Car, Driver
-#from car_management.serivices.driver_search import get_car_current_driver
+# from car_management.serivices.driver_search import get_car_current_driver
+from car_rent.models import CarSchedule
+
+
+def get_car_current_driver(car: Car, trip_date: datetime) -> Driver:
+    return CarSchedule.find_driver(trip_date, car)
 
 
 class WialonTrip(models.Model):
@@ -57,6 +62,7 @@ class WialonTrip(models.Model):
                     trip.max_speed = data_dict['max_speed']
                     trip.avg_speed = data_dict['avg_speed']
                     trip.save()
+
     class Meta:
         verbose_name = 'GPS поездки'
         unique_together = (('car', 'start'),)

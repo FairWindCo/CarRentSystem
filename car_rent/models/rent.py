@@ -9,8 +9,8 @@ from django.utils.timezone import now
 
 from car_management.models import Car, Driver, RentTerms, TimeType
 from car_management.models.rent_price import TransactionType, StatisticsType
-from .taxi_operator import TaxiOperator
 from .car_in_operators import CarsInOperator
+from .taxi_operator import TaxiOperator
 
 
 class CarScheduleBase(models.Model):
@@ -96,7 +96,6 @@ class CarSchedule(CarScheduleBase):
                                             verbose_name='Тип проводимых платежей')
 
     auto_renew = models.BooleanField(verbose_name='Автоматически обновлять план аренды', default=False)
-
 
     @classmethod
     def queryset_for_date(cls, car: Car, date_time: datetime):
@@ -186,6 +185,18 @@ class CarSchedule(CarScheduleBase):
                 data = cls.queryset_date_filter(date_time).filter(taxi_operators=taxi_in_operator).first()
                 # print(data)
                 return data
+            else:
+                return None
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
+    def find_driver(cls, date_time: datetime, car: Car):
+        try:
+            data = cls.queryset_date_filter(date_time).filter(car=car).first()
+            # print(taxi_in_operator, uid)
+            if data:
+                return data.driver
             else:
                 return None
         except cls.DoesNotExist:
