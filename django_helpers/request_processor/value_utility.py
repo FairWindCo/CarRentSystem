@@ -268,7 +268,7 @@ class ValueAccessor:
 
 class ComplexValueAccessor(ValueAccessor):
 
-    def __init__(self, path_to_field: list[str], default_value: Any = None,
+    def __init__(self, path_to_field: List[str], default_value: Any = None,
                  convertor: Union[str, Callable] = 'any',
                  can_execute_callable: bool = True,
                  can_execute_method: bool = True, ignore_hidden: bool = False,
