@@ -4,7 +4,7 @@ from datetime import datetime, date, time, timedelta
 from inspect import ismethod
 from json import JSONDecodeError
 
-from typing import Union, Callable, Any, Optional
+from typing import Union, Callable, Any, Optional, List
 
 if sys.version_info < (3, 7, 0):
     from collections import Sequence
@@ -168,7 +168,7 @@ def simplify_value(obj: Any, class_field_name: str = None) -> Optional[Union[dic
 
 class ValueAccessor:
     def __init__(self,
-                 path_to_field: list[str],
+                 path_to_field: List[str],
                  default_value: Any = None,
                  can_execute_callable: bool = True,
                  can_execute_method: bool = True,
