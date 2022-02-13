@@ -109,7 +109,7 @@ class Balance:
 
     @staticmethod
     # return balance, totalCredit, totalDebit
-    def get_current_balance_totally(account: Account, on_date=None) -> tuple[int, int, int]:
+    def get_current_balance_totally(account: Account, on_date=None) -> Tuple[int, int, int]:
         balance = 0
         total_credit = 0
         total_debit = 0
