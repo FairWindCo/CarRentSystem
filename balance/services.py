@@ -71,7 +71,7 @@ class Balance:
     @staticmethod
     # return last statement balance for account on date
     def get_statement_balance(account: Account, on_date: date) -> \
-            tuple[int, Optional[date], Optional[AccountStatement]]:
+            Tuple[int, Optional[date], Optional[AccountStatement]]:
         if on_date is None:
             on_date = now().date()
         else:
