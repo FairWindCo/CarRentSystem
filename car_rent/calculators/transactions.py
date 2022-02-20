@@ -2,7 +2,7 @@ from constance import config
 
 from balance.services import Balance
 from car_management.models import Car, Driver
-from car_management.models.rent_price import TransactionType
+from car_management.models.rent_price import PaidType
 from car_rent.calculators import TripCalculator
 from car_rent.models import TaxiOperator
 from constance import config
@@ -101,10 +101,10 @@ def make_operations_for_transaction_simple(car: Car, driver: Driver, payer: Taxi
 
 
 def make_transactions_for_trip(car: Car, driver: Driver, payer: TaxiOperator, calc: TripCalculator, many_cash_box,
-                               start, comment, transaction_saving: TransactionType):
-    if transaction_saving == TransactionType.NO_TRANSACTION:
+                               start, comment, transaction_saving: PaidType):
+    if transaction_saving == PaidType.NO_TRANSACTION:
         return None
-    elif transaction_saving == TransactionType.FULL_TRANSACTION:
+    elif transaction_saving == PaidType.FULL_TRANSACTION:
         operations = make_operations_for_transaction_full(car, driver, payer, calc, many_cash_box, start)
     else:
         operations = make_operations_for_transaction_simple(car, driver, payer, calc, many_cash_box, start)

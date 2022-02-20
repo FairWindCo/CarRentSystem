@@ -1,5 +1,6 @@
 import datetime
 
+
 from .uklon_service import LOCAL_TIMEZONE
 
 
@@ -31,6 +32,7 @@ def get_uklon_taxi_trip(fuel_prices,
     from car_management.models import get_fuel_price_for_type
     from car_rent.models import CarsInOperator, TaxiOperator
     from trips.models.taxi import TripStatistics
+    from trip_stat.services.statisrics_service import Statistics
 
     user_name = settings.UKLON_USER
     user_pass = settings.UKLON_PASS
@@ -63,27 +65,17 @@ def get_uklon_taxi_trip(fuel_prices,
                     for summary in summaries:
                         try:
                             start = datetime.datetime.combine(stat_date, datetime.time.min)
-                            taxi_car_driver = CarSchedule.find_schedule_info(summary['driver_id'], start, operator)
-                            if taxi_car_driver is None:
-                                continue
-                            car = taxi_car_driver.car
-                            driver = taxi_car_driver.driver
-                            terms = taxi_car_driver.term
-                            gas_price = get_fuel_price_for_type(car.model.type_class, fuel_prices)
-                            print(summary['trip_count'], summary['car_plate'], stat_date)
-                            TripStatistics.manual_create_summary_paid(car, driver, stat_date, operator, terms,
-                                                                      summary['millage'],
-                                                                      summary['total'],
-                                                                      gas_price,
-                                                                      summary['cash'],
-                                                                      summary['trip_count'],
-                                                                      comment=f'Доход от машины {car.name} за {stat_date}',
-                                                                      many_cash_box=None,
-                                                                      car_in_taxi=taxi_car_driver.work_in_taxi,
-                                                                      transaction_type=taxi_car_driver.paid_type
-                                                                      )
+                            TripStatistics.auto_create_trip(start, operator, summary['driver_id'],
+                                                            summary['trip_count'],
+                                                            summary['millage'],
+                                                            summary['total'],
+                                                            fuel_prices,
+                                                            summary['cash']
+                                                            )
                         except CarsInOperator.DoesNotExist:
                             pass
+
+                Statistics.create_statistics(stat_date)
                 total_rides += len(rides)
                 stat_date += datetime.timedelta(days=1)
             uklon.logout()

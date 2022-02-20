@@ -42,7 +42,7 @@ class CarSummaryStatistics(models.Model):
         return result
 
     @classmethod
-    def build_summary_report(cls, car, report_date=now(), interval=7, need_paid=False):
+    def build_summary_report(cls, car, report_date=now(), interval=7, paid_interval=0, need_paid=False):
         if report_date is None:
             report_date = now()
         report_date = (report_date.date() if isinstance(report_date, datetime.datetime) else report_date)
@@ -94,7 +94,7 @@ class CarSummaryStatistics(models.Model):
         try:
             return cls.objects.filter(car=car, stat_date__gte=report_date,
                                       stat_interval__lte=86400,
-                                      plan_for_paid=True).order_by('stat_date').first()
+                                      plan_for_paid=True).order_by('-stat_date').first()
         except cls.DoesNotExist:
             return None
 

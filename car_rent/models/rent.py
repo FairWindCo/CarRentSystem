@@ -7,8 +7,9 @@ from django.db.models import Q, F
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import now
 
+from balance.services import Balance
 from car_management.models import Car, Driver, RentTerms, TimeType
-from car_management.models.rent_price import TransactionType, StatisticsType
+from car_management.models.rent_price import PaidType, StatisticsType
 from .car_in_operators import CarsInOperator
 from .taxi_operator import TaxiOperator
 
@@ -90,9 +91,10 @@ class CarSchedule(CarScheduleBase):
     work_in_taxi = models.BooleanField(verbose_name='Работает в нашем такси', default=False)
     min_time = models.PositiveIntegerField(verbose_name='Минимальный срок аренды', default=0)
     can_break_rent = models.BooleanField(verbose_name='Разрешен досочный возврат', default=True)
-    statistics_type = models.PositiveIntegerField(choices=StatisticsType.choices, default=StatisticsType.TRIP_DAY_PAID,
+    statistics_type = models.PositiveIntegerField(choices=StatisticsType.choices,
+                                                  default=StatisticsType.TRIP_STAT_DAY_PAID,
                                                   verbose_name='Тип собираемой статистики')
-    paid_type = models.PositiveIntegerField(choices=TransactionType.choices, default=TransactionType.NO_TRANSACTION,
+    paid_type = models.PositiveIntegerField(choices=PaidType.choices, default=PaidType.NO_TRANSACTION,
                                             verbose_name='Тип проводимых платежей')
 
     auto_renew = models.BooleanField(verbose_name='Автоматически обновлять план аренды', default=False)
@@ -110,6 +112,27 @@ class CarSchedule(CarScheduleBase):
         ).order_by('-start_time', '-end_time')
         return queryset
 
+    @classmethod
+    def renew(cls, date_time: datetime):
+        date_renew = date_time.date()
+        start_renew_date = datetime.combine(date_renew, datetime.min)
+        end_renew_date = datetime.combine(date_renew, datetime.max)
+        schedule = cls.objects.filter(
+            Q(end_time__gte=start_renew_date, end_time__lte=end_renew_date, end_rent__isnull=True, auto_renew=True)
+        ).all()
+        for item in schedule:
+            item.re_new()
+
+    def re_new(self):
+        delta_time = self.end_time - self.start_time
+        price = self.amount
+        if self.driver:
+            Balance.form_transaction(Balance.DEPOSIT, [
+                (self.driver, self.car, round(price * 100), 'RENT')
+            ])
+        self.end_time = self.end_time + delta_time
+        self.save()
+
     def calculate_time_interval(self, delta: timedelta, min_time):
         time = delta if delta > min_time else min_time
         return self.time_interval(time)
@@ -126,6 +149,16 @@ class CarSchedule(CarScheduleBase):
             if minutes > 0:
                 hours += 1
             return hours
+
+    def get_report_interval(self):
+        if self.term.type_class == TimeType.DAYS:
+            return self.term.control_interval
+        elif self.term.type_class == TimeType.WEEK:
+            return self.term.control_interval * 7
+        elif self.term.type_class == TimeType.MONTH:
+            return self.term.control_interval * 30
+        else:
+            return 0
 
     def minimal(self):
         if self.term.type_class == TimeType.DAYS:

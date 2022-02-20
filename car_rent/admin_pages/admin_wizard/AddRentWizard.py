@@ -14,7 +14,7 @@ from formtools.wizard.views import SessionWizardView
 from balance.models import CashBox
 from balance.services import Balance
 from car_management.models import Car, Driver, TimeType, RentTerms
-from car_management.models.rent_price import StatisticsType, TransactionType
+from car_management.models.rent_price import StatisticsType, PaidType
 from car_rent.models import CarSchedule, CarsInOperator
 from django_helpers.admin import CustomModelPage, CustomPageModelAdmin
 from django_helpers.admin.ajax_select import AutocompleteSelectProxy
@@ -70,9 +70,9 @@ class CashForm(Form):
     deposit_cashbox = ModelChoiceField(label='Депозит', queryset=CashBox.objects.all(), widget=Select, required=True)
     can_break_rent = fields.BooleanField(label='Разрешен досочный возврат', initial=True, widget=CheckboxInput(),
                                          required=False)
-    statistics_type = fields.ChoiceField(choices=StatisticsType.choices, initial=StatisticsType.TRIP_DAY_PAID,
+    statistics_type = fields.ChoiceField(choices=StatisticsType.choices, initial=StatisticsType.TRIP_STAT_DAY_PAID,
                                          label='Тип собираемой статистики')
-    paid_type = fields.ChoiceField(choices=TransactionType.choices, initial=TransactionType.NO_TRANSACTION,
+    paid_type = fields.ChoiceField(choices=PaidType.choices, initial=PaidType.NO_TRANSACTION,
                                    label='Тип проводимых платежей')
 
     min_time = fields.IntegerField(label='Минимальный срок аренды', initial=0)
