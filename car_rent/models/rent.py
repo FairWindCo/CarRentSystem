@@ -114,7 +114,12 @@ class CarSchedule(CarScheduleBase):
 
     @classmethod
     def renew(cls, date_time: datetime):
-        date_renew = date_time.date()
+        if date_time is None:
+            date_time = now()
+        if isinstance(date_time, datetime):
+            date_renew = date_time.date()
+        else:
+            date_renew = date_time
         start_renew_date = datetime.combine(date_renew, datetime.min)
         end_renew_date = datetime.combine(date_renew, datetime.max)
         schedule = cls.objects.filter(

@@ -1,4 +1,5 @@
 import datetime
+import statistics
 
 from django.db import IntegrityError
 from django.utils import timezone
@@ -117,7 +118,7 @@ class Statistics:
         car_summary.investor_amount = trip_stat.investor_amount
         car_summary.driver_amount = trip_stat.driver_amount
         car_summary.taxi_mileage = trip_stat.mileage
-        car_summary.expense = expense + franchise
+        car_summary.expense = expense  # + franchise - франшизу заплатит только инвестор
         car_summary.capital_expense = capital_expense
         car_summary.operate = trip_stat.operating_services
         try:
@@ -141,7 +142,6 @@ class Statistics:
     def create_statistics(statistics_date: datetime.date = None):
         if statistics_date is None:
             statistics_date = timezone.now()
-
         cars = Car.objects.all()
 
         for car in cars:
@@ -155,6 +155,7 @@ class Statistics:
                 Statistics.create_car_summary_statistics(rent_trip)
 
         CarSchedule.renew(statistics_date)
+        Statistics.precess_day_statistics(statistics_date)
 
     @staticmethod
     def get_last_statistics():
@@ -163,19 +164,26 @@ class Statistics:
 
     @staticmethod
     def precess_day_statistics(statistics_date: datetime.date = None):
-        # TODO Разработать просчет интервальной статистики и отработку платежей
         stat_time = datetime.datetime.combine(statistics_date, datetime.time.min, Statistics.LOCAL_TIMEZONE)
         cars = Car.objects.all()
 
         for car in cars:
-            CarSummaryStatistics.get_last_report_for_paid(car, statistics_date)
-
-            trip_stat = TripStatistics.objects.get(car=car, stat_date=stat_time, car_in_rent=False)
-
+            last_report = CarSummaryStatistics.get_last_interval_report(car, statistics_date)
             rentinfo = CarSchedule.object_date_in_interval(car, stat_time)
-            control_interval = rentinfo.term.control_interval
-            interval_type = rentinfo.term.get_report_interval()
-            paid_distance = rentinfo.term.control_interval_paid_distance
-            if interval_type > 0:
-                CarSummaryStatistics.build_summary_report(car, statistics_date, control_interval,
-                                                          paid_interval=paid_distance, need_paid=True)
+            if rentinfo:
+                control_interval = rentinfo.term.get_report_interval()
+                paid_distance = rentinfo.term.control_interval_paid_distance
+                if control_interval > 0:
+                    if last_report is None:
+                        last_report_date = rentinfo.start_time.date() + datetime.timedelta(days=control_interval)
+                    else:
+                        last_report_date = last_report.stat_date
+
+                    if last_report_date <= statistics_date:
+                        new_control_interval = (statistics_date - last_report_date).days
+
+                        CarSummaryStatistics.build_summary_report(car, statistics_date, new_control_interval,
+                                                                  paid_interval=paid_distance, need_paid=True)
+                    else:
+                        # report will be created in future
+                        pass

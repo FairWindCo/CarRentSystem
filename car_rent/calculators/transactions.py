@@ -5,12 +5,6 @@ from car_management.models import Car, Driver
 from car_management.models.rent_price import PaidType
 from car_rent.calculators import TripCalculator
 from car_rent.models import TaxiOperator
-from constance import config
-
-from balance.services import Balance
-from car_management.models import Car, Driver
-from car_rent.calculators import TripCalculator
-from car_rent.models import TaxiOperator
 
 
 def make_operations_for_transaction_full(car: Car, driver: Driver, payer: TaxiOperator, calc: TripCalculator,
@@ -73,17 +67,6 @@ def make_operations_for_transaction_simple(car: Car, driver: Driver, payer: Taxi
             operations.append((many_cash_box, driver, driver_corrections, 'Вывод наличных'))
         else:
             operations.append((None, driver, driver_corrections, 'Вывод наличных'))
-
-    if calc.cash > 0:
-        operations.append((driver, None, calc.cash_many, 'Вывод наличных'))
-    if calc.bank_rent > 0:
-        operations.append((payer, None, calc.bank_rent_many, 'Комисия банка'))
-    else:
-        operations.append(
-            (None, payer, abs(calc.bank_rent_many), 'возврат комисии банка за комисию оператора'))
-    if many_cash_box:
-        operations.append((None, driver, calc.cash_many, 'Внос денег в кассу'))
-        operations.append((None, many_cash_box, calc.cash_many, 'Пополнение кассы'))
 
     if payer.cash_box:
         payer_balance_cache = calc.taxi_aggregator_corrections_many

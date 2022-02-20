@@ -1,12 +1,13 @@
 import datetime
 
+from constance import config
 from django.core.exceptions import ValidationError
-from django.utils.timezone import now
 from django.db import models
 from django.db.models import Q, F, Sum
+from django.utils.timezone import now
+
 from balance.services import Balance
 from car_management.models.cars import Car
-from constance import config
 from car_management.utils import get_sum
 
 
@@ -99,6 +100,18 @@ class CarSummaryStatistics(models.Model):
             return None
 
     @classmethod
+    def get_last_interval_report(cls, car, on_date=now()):
+        if on_date is None:
+            on_date = now()
+        report_date = (on_date.date() if isinstance(on_date, datetime.datetime) else on_date)
+        try:
+            return cls.objects.filter(car=car, stat_date__gte=report_date,
+                                      stat_interval__lte=86400,
+                                      ).order_by('-stat_date').first()
+        except cls.DoesNotExist:
+            return None
+
+    @classmethod
     def get_not_paid_report_before_date(cls, car, on_date=now()):
         if on_date is None:
             on_date = now()
@@ -110,6 +123,34 @@ class CarSummaryStatistics(models.Model):
         except cls.DoesNotExist:
             return []
 
+    def paid_report(self):
+        firm_account = config.FIRM
+        if firm_account is None:
+            raise ValueError('Need Set Firm account in Config')
+        car = self.car
+        operations = [
+            (car, car.car_investor, round(self.investor_amount * 100), f'Прибыль инвестора за машину {car.name}'),
+            (car, firm_account, round(self.firm_amount * 100), f'Прибыль компании за машину {car.name}'),
+        ]
+        if self.expense - self.capital_expense > 0:
+            expense = round((self.expense - self.capital_expense) * 100)
+            investor_part = round(expense * car.car_investor.profit)
+            firm_part = expense - investor_part
+            operations.append((car.car_investor, car, investor_part,
+                               f'Часть затрат инвестора за машину {car.name}'), )
+            operations.append((firm_account, car, firm_part,
+                               f'Часть затрат фирмы за машину {car.name}'), )
+
+        result = Balance.form_transaction(
+            Balance.WITHDRAWAL,
+            operations,
+            f'Вывод прибыли за отчет {self.stat_date}'
+        )
+
+        if result:
+            self.report_paid = self.stat_date
+            self.save()
+
     @classmethod
     def form_paid_operations(cls, car, on_date=now()):
         firm_account = config.FIRM
@@ -118,27 +159,7 @@ class CarSummaryStatistics(models.Model):
         reports_for_paid = cls.get_not_paid_report_before_date(car, on_date)
 
         for report in reports_for_paid:
-            operations = [
-                (car, car.car_investor, round(report.investor_amount * 100), f'Прибыль инвестора за машину {car.name}'),
-                (car, car.firm_account, round(report.firm_amount * 100), f'Прибыль компании за машину {car.name}'),
-            ]
-            if report.expense - report.capital_expense > 0:
-                expense = round((report.expense - report.capital_expense) * 100)
-                investor_part = round(expense * car.car_investor.profit)
-                firm_part = expense - investor_part
-                operations.append((car.car_investor, car, investor_part,
-                                   f'Часть затрат инвестора за машину {car.name}'), )
-                operations.append((firm_account, car, firm_part,
-                                   f'Часть затрат фирмы за машину {car.name}'), )
-
-            result = Balance.form_transaction(
-                Balance.WITHDRAWAL,
-                operations,
-                f'Вывод прибыли за отчет {report.stat_date}'
-            )
-            if result:
-                report.report_paid = on_date
-                report.save()
+            report.paid_report()
 
     @property
     def firm_amount(self):
